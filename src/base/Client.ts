@@ -1,7 +1,7 @@
-import { Node } from '@stencila/schema';
-import { Interface, Method, Capabilities } from './Executor';
-import Request from './Request';
-import Response from './Response';
+import { Node } from '@stencila/schema'
+import { Interface, Method, Capabilities } from './Executor'
+import Request from './Request'
+import Response from './Response'
 
 /**
  * A base client class which acts as a proxy to a remote `Executor`.
@@ -10,52 +10,51 @@ import Response from './Response';
  * Those methods send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
 export default abstract class Client implements Interface {
-
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: {[key: number]: (response: Request) => void } = {}
+  private requests: { [key: number]: (response: Request) => void } = {}
 
   /**
    * Call the remote `Executor`'s `capabilities` method
    */
-  async capabilities (): Promise<Capabilities> {
+  async capabilities(): Promise<Capabilities> {
     return this.call<Capabilities>(Method.capabilities)
   }
 
   /**
    * Call the remote `Executor`'s `decode` method
    */
-  async decode (content: string, format: string = 'json'): Promise<Node> {
-    return this.call<string>(Method.decode, {content, format})
+  async decode(content: string, format: string = 'json'): Promise<Node> {
+    return this.call<string>(Method.decode, { content, format })
   }
 
   /**
    * Call the remote `Executor`'s `encode` method
    */
-  async encode (node: Node, format: string = 'json'): Promise<string> {
-    return this.call<string>(Method.encode, {node, format})
+  async encode(node: Node, format: string = 'json'): Promise<string> {
+    return this.call<string>(Method.encode, { node, format })
   }
 
   /**
    * Call the remote `Executor`'s `compile` method
    */
-  async compile (node: Node): Promise<Node> {
-    return this.call<Node>(Method.compile, {node})
+  async compile(node: Node): Promise<Node> {
+    return this.call<Node>(Method.compile, { node })
   }
 
   /**
    * Call the remote `Executor`'s `build` method
    */
-  async build (node: Node): Promise<Node> {
-    return this.call<Node>(Method.build, {node})
+  async build(node: Node): Promise<Node> {
+    return this.call<Node>(Method.build, { node })
   }
 
   /**
    * Call the remote `Executor`'s `execute` method
    */
-  async execute (node: Node): Promise<Node> {
-    return this.call<Node>(Method.execute, {node})
+  async execute(node: Node): Promise<Node> {
+    return this.call<Node>(Method.execute, { node })
   }
 
   /**
@@ -64,7 +63,10 @@ export default abstract class Client implements Interface {
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  async call<Type> (method: Method, params: {[key: string]: any} = {}): Promise<Type> {
+  async call<Type>(
+    method: Method,
+    params: { [key: string]: any } = {}
+  ): Promise<Type> {
     const request = new Request(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: Response) => {
@@ -84,7 +86,7 @@ export default abstract class Client implements Interface {
    *
    * @param request The JSON-RPC request
    */
-  protected abstract send (request: Request): void
+  protected abstract send(request: Request): void
 
   /**
    * Receive a response from the server.
@@ -95,11 +97,13 @@ export default abstract class Client implements Interface {
    *
    * @param response The JSON-RPC response
    */
-  protected receive (response: string | Response): void {
-    if (typeof response === 'string') response = JSON.parse(response) as Response
+  protected receive(response: string | Response): void {
+    if (typeof response === 'string')
+      response = JSON.parse(response) as Response
     if (response.id < 0) throw new Error(`Response is missing id: ${response}`)
     const resolve = this.requests[response.id]
-    if (resolve === undefined) throw new Error(`No request found for response with id: ${response.id}`)
+    if (resolve === undefined)
+      throw new Error(`No request found for response with id: ${response.id}`)
     resolve(response)
     delete this.requests[response.id]
   }

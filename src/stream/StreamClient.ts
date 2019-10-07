@@ -1,11 +1,10 @@
-import {Readable, Writable} from 'stream'
+import { Readable, Writable } from 'stream'
 // @ts-ignore
 import * as lps from 'length-prefixed-stream'
-import Client from '../base/Client';
-import Request from '../base/Request';
+import Client from '../base/Client'
+import Request from '../base/Request'
 
 export default class StreamClient extends Client {
-
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */
@@ -17,7 +16,7 @@ export default class StreamClient extends Client {
    * @param {Writable} outgoing Outgoing stream to send JSON-RPC requests on.
    * @param {Readable} incoming Incoming stream to receive JSON-RPC responses on.
    */
-  constructor (outgoing: Writable, incoming: Readable) {
+  constructor(outgoing: Writable, incoming: Readable) {
     super()
 
     this.encoder = lps.encode()
@@ -33,7 +32,7 @@ export default class StreamClient extends Client {
 
   // Implementation of `Client` methods
 
-  send (request: Request) {
+  send(request: Request) {
     this.encoder.write(JSON.stringify(request) + '\n')
   }
 }

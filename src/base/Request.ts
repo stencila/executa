@@ -30,7 +30,7 @@ export default class Request {
    * A structured value that holds the parameter values to be used during the
    * invocation of the method.This member MAY be omitted.
    */
-  params?: {[key: string]: any} | any[]
+  params?: { [key: string]: any } | any[]
 
   /**
    * A counter for generating unique, sequential request ids.
@@ -40,7 +40,7 @@ export default class Request {
    */
   static counter: number = 0
 
-  constructor (method?: string, params?: {[key: string]: any} | any[]) {
+  constructor(method?: string, params?: { [key: string]: any } | any[]) {
     Request.counter += 1
     this.id = Request.counter
     this.method = method

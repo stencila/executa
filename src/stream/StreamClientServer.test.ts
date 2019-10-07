@@ -1,8 +1,8 @@
-import {PassThrough} from 'stream'
+import { PassThrough } from 'stream'
 import * as stencila from '@stencila/schema'
 import StreamClient from './StreamClient'
 import StreamServer from './StreamServer'
-import Executor from '../base/Executor';
+import Executor from '../base/Executor'
 
 describe('StreamClient and StreamServer', () => {
   const executor = new Executor()

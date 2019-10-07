@@ -1,5 +1,5 @@
-import StreamServer from "../stream/StreamServer";
-import Executor from "../base/Executor";
+import StreamServer from '../stream/StreamServer'
+import Executor from '../base/Executor'
 
 export default class StdioServer extends StreamServer {
   constructor(executor?: Executor) {

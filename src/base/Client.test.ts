@@ -1,6 +1,6 @@
 import Client from './Client'
-import Request from './Request';
-import Response from './Response';
+import Request from './Request'
+import Response from './Response'
 
 /**
  * Simple test client that implements the
@@ -31,24 +31,24 @@ test('client', async () => {
     }
   })
 
-  expect(await client.compile({type: 'Entity'})).toEqual({
+  expect(await client.compile({ type: 'Entity' })).toEqual({
     method: 'compile',
     params: {
-      node: {type: 'Entity'}
+      node: { type: 'Entity' }
     }
   })
 
-  expect(await client.build({type: 'Entity'})).toEqual({
+  expect(await client.build({ type: 'Entity' })).toEqual({
     method: 'build',
     params: {
-      node: {type: 'Entity'}
+      node: { type: 'Entity' }
     }
   })
 
-  expect(await client.execute({type: 'Entity'})).toEqual({
+  expect(await client.execute({ type: 'Entity' })).toEqual({
     method: 'execute',
     params: {
-      node: {type: 'Entity'}
+      node: { type: 'Entity' }
     }
   })
 })

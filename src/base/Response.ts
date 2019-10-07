@@ -32,7 +32,7 @@ export default class Response {
    */
   error?: Error
 
-  constructor (id: number = -1, result?: any, error?: Error) {
+  constructor(id: number = -1, result?: any, error?: Error) {
     this.id = id
     this.result = result
     this.error = error

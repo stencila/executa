@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "serve": "ts-node src/serve.ts --tcp=7300",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
+    "lint": "eslint 'src/**/*.{ts,js}' --fix",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "author": "",
   "license": "Apache-2.0",
