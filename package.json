@@ -8,7 +8,8 @@
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:cover": "jest --coverage"
   },
   "author": "",
   "license": "Apache-2.0",
