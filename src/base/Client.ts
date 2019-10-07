@@ -1,5 +1,5 @@
-import * as stencila from '@stencila/schema';
-import Executor, { Method, Capabilities } from './Executor';
+import { Node } from '@stencila/schema';
+import { Interface, Method, Capabilities } from './Executor';
 import Request from './Request';
 import Response from './Response';
 
@@ -9,7 +9,7 @@ import Response from './Response';
  * Implements aynchronous, proxy methods for `Executor` methods `compile`, `build`, `execute`, etc.
  * Those methods send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
-export default abstract class Client extends Executor {
+export default abstract class Client implements Interface {
 
   /**
    * A map of requests to which responses can be paired against
@@ -24,41 +24,48 @@ export default abstract class Client extends Executor {
   }
 
   /**
-   * Call the remote `Executor`'s `convert` method
+   * Call the remote `Executor`'s `decode` method
    */
-  async convert (node: string | stencila.Node, from: string = 'json', to: string = 'json'): Promise<string> {
-    return this.call<string>(Method.convert, node, from, to)
+  async decode (content: string, format: string = 'json'): Promise<Node> {
+    return this.call<string>(Method.decode, {content, format})
+  }
+
+  /**
+   * Call the remote `Executor`'s `encode` method
+   */
+  async encode (node: Node, format: string = 'json'): Promise<string> {
+    return this.call<string>(Method.encode, {node, format})
   }
 
   /**
    * Call the remote `Executor`'s `compile` method
    */
-  async compile (node: string | stencila.Node, format: string = 'json'): Promise<stencila.Node> {
-    return this.call<stencila.Node>(Method.compile, node, format)
+  async compile (node: Node): Promise<Node> {
+    return this.call<Node>(Method.compile, {node})
   }
 
   /**
    * Call the remote `Executor`'s `build` method
    */
-  async build (node: string | stencila.Node, format: string = 'json'): Promise<stencila.Node> {
-    return this.call<stencila.Node>(Method.build, node, format)
+  async build (node: Node): Promise<Node> {
+    return this.call<Node>(Method.build, {node})
   }
 
   /**
    * Call the remote `Executor`'s `execute` method
    */
-  async execute (node: string | stencila.Node, format: string = 'json'): Promise<stencila.Node> {
-    return this.call<stencila.Node>(Method.execute, node, format)
+  async execute (node: Node): Promise<Node> {
+    return this.call<Node>(Method.execute, {node})
   }
 
   /**
    * Call a method of a remote `Executor`.
    *
    * @param method The name of the method
-   * @param args Any method arguments
+   * @param params Values of parameters (i.e. arguments)
    */
-  private async call<Type> (method: Method, ...args: Array<any>): Promise<Type> {
-    const request = new Request(method, args)
+  private async call<Type> (method: Method, params: {[key: string]: any} = {}): Promise<Type> {
+    const request = new Request(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: Response) => {
         if (response.error) return reject(new Error(response.error.message))

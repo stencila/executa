@@ -4,8 +4,8 @@ import Response from './Response';
 
 /**
  * Simple test client that implements the
- * necessary `send` method to echo back the
- * called method and parameters.
+ * `send` to echo back the
+ * called method and arguments.
  */
 class TestClient extends Client {
   send(request: Request) {
@@ -20,26 +20,35 @@ test('client', async () => {
 
   expect(await client.capabilities()).toEqual({
     method: 'capabilities',
-    params: []
+    params: {}
   })
 
-  expect(await client.convert('{}')).toEqual({
-    method: 'convert',
-    params: ['{}', 'json', 'json']
+  expect(await client.decode('the content', 'the format')).toEqual({
+    method: 'decode',
+    params: {
+      content: 'the content',
+      format: 'the format'
+    }
   })
 
-  expect(await client.compile({})).toEqual({
+  expect(await client.compile({type: 'Entity'})).toEqual({
     method: 'compile',
-    params: [{}, 'json']
+    params: {
+      node: {type: 'Entity'}
+    }
   })
 
-  expect(await client.build({})).toEqual({
+  expect(await client.build({type: 'Entity'})).toEqual({
     method: 'build',
-    params: [{}, 'json']
+    params: {
+      node: {type: 'Entity'}
+    }
   })
 
-  expect(await client.execute({})).toEqual({
+  expect(await client.execute({type: 'Entity'})).toEqual({
     method: 'execute',
-    params: [{}, 'json']
+    params: {
+      node: {type: 'Entity'}
+    }
   })
 })

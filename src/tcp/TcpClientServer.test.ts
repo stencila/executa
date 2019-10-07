@@ -16,6 +16,6 @@ describe('TcpClient and TcpServer', () => {
   const client = new TcpClient()
 
   test('make a simple request', async () => {
-    expect(await client.convert('a string')).toEqual('a string')
+    expect(await client.decode('{}')).toEqual('a string')
   })
 })
