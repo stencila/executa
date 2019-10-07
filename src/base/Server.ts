@@ -58,29 +58,31 @@ export default abstract class Server {
         case 'capabilities':
           result = await this.executor.capabilities()
           break
-        case 'convert':
-          result = await this.executor.convert(
+        case 'decode':
+          result = await this.executor.decode(
+            param(request, 0, 'content'),
+            param(request, 1, 'format', false)
+          )
+          break
+        case 'encode':
+          result = await this.executor.encode(
             param(request, 0, 'node'),
-            param(request, 1, 'from', false),
-            param(request, 2, 'to', false)
+            param(request, 1, 'format', false)
           )
           break
         case 'compile':
           result = await this.executor.compile(
-            param(request, 0, 'node'),
-            param(request, 1, 'format', false)
+            param(request, 0, 'node')
           )
           break
         case 'build':
           result = await this.executor.build(
-            param(request, 0, 'node'),
-            param(request, 1, 'format', false)
+            param(request, 0, 'node')
           )
           break
         case 'execute':
           result = await this.executor.execute(
-            param(request, 0, 'node'),
-            param(request, 1, 'format', false)
+            param(request, 0, 'node')
           )
           break
         default:
