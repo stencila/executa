@@ -64,7 +64,7 @@ export default abstract class Client implements Interface {
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  private async call<Type> (method: Method, params: {[key: string]: any} = {}): Promise<Type> {
+  async call<Type> (method: Method, params: {[key: string]: any} = {}): Promise<Type> {
     const request = new Request(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: Response) => {

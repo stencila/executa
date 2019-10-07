@@ -1,4 +1,5 @@
 import {Node} from '@stencila/schema'
+import Client from './Client'
 
 /**
  * The methods of an `Executor` class.
@@ -74,12 +75,48 @@ export abstract class Interface {
   abstract async execute (node: Node): Promise<Node>
 }
 
+class Peer {
+  /**
+   * The client used to delegate to the peer.
+   */
+  public readonly client: Client
+
+  /**
+   * The capabilities of the peer.
+   */
+  private capabilities?: Capabilities
+
+  /**
+   * Ajv validation functions for each method .
+   */
+  private validators?: {[key in Method]: unknown}
+
+  constructor (client: Client) {
+    this.client = client
+    // TODO: initialise capabilities and validators
+  }
+
+  /**
+   * Test whether the peer is capable of performing the
+   * method with the parameters.
+   *
+   * @param method The method to be called
+   * @param params The parameter values of the call
+   */
+  capable (method: Method, params: {[key: string]: unknown}): boolean {
+    // TODO: Test capability using validator for the method
+    return true
+  }
+}
 
 /**
  * A base `Executor` class implementation.
  *
  * This executor class has limited capabilities itself and
- * instead, mostly delegates to other executors.
+ * instead, mostly delegates to other executors. If unable
+ * to delegate to a peer, then falls back to returning
+ * the `Node` unchanged (for `compile`, `build` etc) or
+ * attempting to use JSON as format (for `decode` and `encode`).
  */
 export default class Executor implements Interface {
 
@@ -87,10 +124,10 @@ export default class Executor implements Interface {
    * Peer executors that are delegated to depending
    * upon their capabilities and the request at hand.
    */
-  peers: Interface[]
+  private peers: Peer[]
 
-  constructor (peers: Interface[] = []) {
-    this.peers = peers
+  constructor (peers: Client[] = []) {
+    this.peers = peers.map(peer => new Peer(peer))
   }
 
   /**
@@ -142,7 +179,13 @@ export default class Executor implements Interface {
   }
 
   private async delegate<Type> (method: Method, params: {[key: string]: any}, fallback: () => Promise<Type>): Promise<Type> {
-    // TODO: match method / args to capabilities of peers
+    // Attempt to delegate to a peer
+    for (const peer of this.peers) {
+      if (peer.capable(method, params)) {
+        return peer.client.call<Type>(method, params)
+      }
+    }
+    // No peer has necessary capability so resort to fallback
     return fallback()
   }
 }
