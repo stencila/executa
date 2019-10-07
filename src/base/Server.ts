@@ -29,7 +29,9 @@ export default abstract class Server {
     request: string | Request,
     stringify: boolean = true
   ): Promise<string | Response> {
-    const response = new Response(-1)
+    let id = -1
+    let result
+    let error
 
     // Extract a parameter by name from Object or by index from Array
     function param(
@@ -37,7 +39,7 @@ export default abstract class Server {
       index: number,
       name: string,
       required: boolean = true
-    ): unknown {
+    ): any {
       if (request.params === undefined)
         throw new Error(-32600, 'Invalid request: missing "params" property')
       const value = Array.isArray(request.params)
@@ -59,12 +61,11 @@ export default abstract class Server {
       }
 
       // Response id is same as the request id
-      response.id = request.id
+      id = request.id
 
       if (request.method === undefined)
         throw new Error(-32600, 'Invalid request: missing "method" property')
 
-      let result
       switch (request.method) {
         case 'capabilities':
           result = await this.executor.capabilities()
@@ -93,9 +94,8 @@ export default abstract class Server {
         default:
           throw new Error(-32601, `Method not found: "${request.method}"`)
       }
-      response.result = result
     } catch (exc) {
-      response.error =
+      error =
         exc instanceof Error
           ? exc
           : new Error(-32603, `Internal error: ${exc.message}`, {
@@ -103,6 +103,7 @@ export default abstract class Server {
             })
     }
 
+    const response = new Response(id, result, error)
     return stringify ? JSON.stringify(response) : response
   }
 
