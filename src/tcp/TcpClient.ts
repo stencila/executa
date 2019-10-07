@@ -5,7 +5,7 @@ import { getLogger } from '@stencila/logga'
 const log = getLogger('executa:tcp:client')
 
 export default class TcpClient extends StreamClient {
-  constructor(port: number = 7300, host: string = '127.0.0.1') {
+  public constructor(port: number = 7300, host: string = '127.0.0.1') {
     var socket = new Socket()
 
     socket.connect(port, host, () => {

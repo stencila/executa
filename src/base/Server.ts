@@ -1,4 +1,3 @@
-import * as stencila from '@stencila/schema'
 import Error from './Error'
 import Executor from './Executor'
 import Request from './Request'
@@ -12,9 +11,9 @@ export default abstract class Server {
   /**
    * The executor that this server dispatches to.
    */
-  executor: Executor
+  private executor: Executor
 
-  constructor(executor?: Executor) {
+  public constructor(executor?: Executor) {
     if (executor === undefined) executor = new Executor()
     this.executor = executor
   }
@@ -26,7 +25,7 @@ export default abstract class Server {
    * @param stringify Should the response be stringified?
    * @returns A JSON-RPC response as an object or string (default)
    */
-  async receive(
+  protected async receive(
     request: string | Request,
     stringify: boolean = true
   ): Promise<string | Response> {
@@ -38,8 +37,8 @@ export default abstract class Server {
       index: number,
       name: string,
       required: boolean = true
-    ) {
-      if (!request.params)
+    ): unknown {
+      if (request.params === undefined)
         throw new Error(-32600, 'Invalid request: missing "params" property')
       const value = Array.isArray(request.params)
         ? request.params[index]
@@ -55,14 +54,14 @@ export default abstract class Server {
         try {
           request = JSON.parse(request) as Request
         } catch (err) {
-          throw new Error(-32700, 'Parse error: ' + err.message)
+          throw new Error(-32700, `Parse error: ${err.message}`)
         }
       }
 
       // Response id is same as the request id
       response.id = request.id
 
-      if (!request.method)
+      if (request.method === undefined)
         throw new Error(-32600, 'Invalid request: missing "method" property')
 
       let result
@@ -110,19 +109,19 @@ export default abstract class Server {
   /**
    * Start the server
    */
-  abstract start(): void
+  public abstract start(): void
 
   /**
    * Stop the server
    */
-  abstract stop(): void
+  public abstract stop(): void
 
   /**
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
    */
-  run() {
+  public run(): void {
     if (process !== undefined) {
-      const stop = () => this.stop()
+      const stop = (): void => this.stop()
       process.on('SIGINT', stop)
       process.on('SIGTERM', stop)
     }

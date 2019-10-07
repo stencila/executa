@@ -1,9 +1,10 @@
+/* eslint-disable */
+
 import minimist from 'minimist'
 import * as net from 'net'
 import Executa from './executa'
-
-const lps = require('length-prefixed-stream')
 import { getLogger, LogLevel, replaceHandlers } from '@stencila/logga'
+import * as lps from 'length-prefixed-stream'
 
 const log = getLogger('engine:serve')
 

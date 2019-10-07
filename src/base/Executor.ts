@@ -90,7 +90,7 @@ class Peer {
    */
   private validators?: { [key in Method]: unknown }
 
-  constructor(client: Client) {
+  public constructor(client: Client) {
     this.client = client
     // TODO: initialise capabilities and validators
   }
@@ -102,7 +102,7 @@ class Peer {
    * @param method The method to be called
    * @param params The parameter values of the call
    */
-  capable(method: Method, params: { [key: string]: unknown }): boolean {
+  public capable(method: Method, params: { [key: string]: unknown }): boolean {
     // TODO: Test capability using validator for the method
     return true
   }
@@ -124,14 +124,14 @@ export default class Executor implements Interface {
    */
   private peers: Peer[]
 
-  constructor(peers: Client[] = []) {
+  public constructor(peers: Client[] = []) {
     this.peers = peers.map(peer => new Peer(peer))
   }
 
   /**
    * Get the capabilities of the executor
    */
-  async capabilities(): Promise<Capabilities> {
+  public async capabilities(): Promise<Capabilities> {
     return {
       capabilities: true,
       decode: {
@@ -154,29 +154,29 @@ export default class Executor implements Interface {
     }
   }
 
-  async decode(content: string, format: string = 'json'): Promise<Node> {
+  public async decode(content: string, format: string = 'json'): Promise<Node> {
     if (format === 'json') return JSON.parse(content)
     return this.delegate(Method.decode, { content, format }, () =>
       this.decode(content, 'json')
     )
   }
 
-  async encode(node: Node, format: string = 'json'): Promise<string> {
+  public async encode(node: Node, format: string = 'json'): Promise<string> {
     if (format === 'json') return JSON.stringify(node)
     return this.delegate(Method.encode, { node, format }, () =>
       this.encode(node, 'json')
     )
   }
 
-  async compile(node: Node): Promise<Node> {
+  public async compile(node: Node): Promise<Node> {
     return this.delegate(Method.compile, { node }, async () => node)
   }
 
-  async build(node: Node): Promise<Node> {
+  public async build(node: Node): Promise<Node> {
     return this.delegate(Method.build, { node }, async () => node)
   }
 
-  async execute(node: Node): Promise<Node> {
+  public async execute(node: Node): Promise<Node> {
     return this.delegate(Method.execute, { node }, async () => node)
   }
 

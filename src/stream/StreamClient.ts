@@ -8,7 +8,7 @@ export default class StreamClient extends Client {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */
-  encoder: lps.Encoder
+  private encoder: lps.Encoder
 
   /**
    * Create an instance of StreamClient.
@@ -16,7 +16,7 @@ export default class StreamClient extends Client {
    * @param {Writable} outgoing Outgoing stream to send JSON-RPC requests on.
    * @param {Readable} incoming Incoming stream to receive JSON-RPC responses on.
    */
-  constructor(outgoing: Writable, incoming: Readable) {
+  public constructor(outgoing: Writable, incoming: Readable) {
     super()
 
     this.encoder = lps.encode()
@@ -32,7 +32,7 @@ export default class StreamClient extends Client {
 
   // Implementation of `Client` methods
 
-  send(request: Request) {
+  protected send(request: Request): void {
     this.encoder.write(JSON.stringify(request) + '\n')
   }
 }

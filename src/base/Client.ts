@@ -18,42 +18,42 @@ export default abstract class Client implements Interface {
   /**
    * Call the remote `Executor`'s `capabilities` method
    */
-  async capabilities(): Promise<Capabilities> {
+  public async capabilities(): Promise<Capabilities> {
     return this.call<Capabilities>(Method.capabilities)
   }
 
   /**
    * Call the remote `Executor`'s `decode` method
    */
-  async decode(content: string, format: string = 'json'): Promise<Node> {
+  public async decode(content: string, format: string = 'json'): Promise<Node> {
     return this.call<string>(Method.decode, { content, format })
   }
 
   /**
    * Call the remote `Executor`'s `encode` method
    */
-  async encode(node: Node, format: string = 'json'): Promise<string> {
+  public async encode(node: Node, format: string = 'json'): Promise<string> {
     return this.call<string>(Method.encode, { node, format })
   }
 
   /**
    * Call the remote `Executor`'s `compile` method
    */
-  async compile(node: Node): Promise<Node> {
+  public async compile(node: Node): Promise<Node> {
     return this.call<Node>(Method.compile, { node })
   }
 
   /**
    * Call the remote `Executor`'s `build` method
    */
-  async build(node: Node): Promise<Node> {
+  public async build(node: Node): Promise<Node> {
     return this.call<Node>(Method.build, { node })
   }
 
   /**
    * Call the remote `Executor`'s `execute` method
    */
-  async execute(node: Node): Promise<Node> {
+  public async execute(node: Node): Promise<Node> {
     return this.call<Node>(Method.execute, { node })
   }
 
@@ -63,14 +63,15 @@ export default abstract class Client implements Interface {
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  async call<Type>(
+  public async call<Type>(
     method: Method,
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     const request = new Request(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: Response) => {
-        if (response.error) return reject(new Error(response.error.message))
+        if (response.error !== undefined)
+          return reject(new Error(response.error.message))
         resolve(response.result)
       }
     })

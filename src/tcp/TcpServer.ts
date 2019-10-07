@@ -6,13 +6,13 @@ import { createServer, Server } from 'net'
 const log = getLogger('executa:tcp:server')
 
 export default class TcpServer extends StreamServer {
-  port: number
+  private port: number
 
-  host: string
+  private host: string
 
-  server?: Server
+  private server?: Server
 
-  constructor(
+  public constructor(
     executor?: Executor,
     port: number = 7300,
     host: string = '127.0.0.1'
@@ -22,7 +22,7 @@ export default class TcpServer extends StreamServer {
     this.host = host
   }
 
-  start(): void {
+  public start(): void {
     this.server = createServer(socket => {
       super.start(socket, socket)
     })

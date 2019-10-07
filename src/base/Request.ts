@@ -7,7 +7,7 @@ export default class Request {
   /**
    * A string specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
    */
-  jsonrpc: string = '2.0'
+  public readonly jsonrpc: string = '2.0'
 
   /**
    * An identifier established by the Client that MUST contain a string, number, or
@@ -16,7 +16,7 @@ export default class Request {
    * parts. The Server MUST reply with the same value in the Response object if included.
    * This member is used to correlate the context between the two objects.
    */
-  id: number
+  public readonly id: number
 
   /**
    * A string containing the name of the method to be invoked.
@@ -24,13 +24,13 @@ export default class Request {
    * (U+002E or ASCII 46) are reserved for rpc-internal methods and extensions and
    * MUST NOT be used for anything else.
    */
-  method?: string
+  public readonly method?: string
 
   /**
    * A structured value that holds the parameter values to be used during the
    * invocation of the method.This member MAY be omitted.
    */
-  params?: { [key: string]: any } | any[]
+  public readonly params?: { [key: string]: any } | any[]
 
   /**
    * A counter for generating unique, sequential request ids.
@@ -38,9 +38,9 @@ export default class Request {
    * Request ids don't need to be sequential but this helps with debugging.
    * Request ids don't need to be unique across clients.
    */
-  static counter: number = 0
+  private static counter: number = 0
 
-  constructor(method?: string, params?: { [key: string]: any } | any[]) {
+  public constructor(method?: string, params?: { [key: string]: any } | any[]) {
     Request.counter += 1
     this.id = Request.counter
     this.method = method

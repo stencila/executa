@@ -8,7 +8,7 @@ import Response from './Response'
  * called method and arguments.
  */
 class TestClient extends Client {
-  send(request: Request) {
+  public send(request: Request): void {
     const { id, method, params } = request
     const response = new Response(id, { method, params })
     this.receive(response)

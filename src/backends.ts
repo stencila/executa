@@ -1,5 +1,7 @@
-import * as childProcess from "child_process"
-import {getLogger} from '@stencila/logga'
+/* eslint-disable */
+
+import * as childProcess from 'child_process'
+import { getLogger } from '@stencila/logga'
 const lps = require('length-prefixed-stream')
 const { spawn } = require('child_process')
 const log = getLogger('engine:backends')
