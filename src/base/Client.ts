@@ -108,4 +108,8 @@ export default abstract class Client implements Interface {
     resolve(response)
     delete this.requests[response.id]
   }
+
+  public capable(method: string, node: object) {
+    return false
+  }
 }

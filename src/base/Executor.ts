@@ -104,7 +104,8 @@ class Peer {
    */
   public capable(method: Method, params: { [key: string]: unknown }): boolean {
     // TODO: Test capability using validator for the method
-    return true
+    return this.client.capable(method, params)
+    //return true
   }
 }
 
