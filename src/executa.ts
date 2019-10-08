@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { getLogger } from '@stencila/logga'
 import {
   ExecutorBackend,

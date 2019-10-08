@@ -1,3 +1,4 @@
+/* eslint-disable */
 import * as childProcess from 'child_process'
 import { getLogger } from '@stencila/logga'
 const lps = require('length-prefixed-stream')
