@@ -1,5 +1,5 @@
-import * as childProcess from "child_process"
-import {getLogger} from '@stencila/logga'
+import * as childProcess from 'child_process'
+import { getLogger } from '@stencila/logga'
 const lps = require('length-prefixed-stream')
 const { spawn } = require('child_process')
 const log = getLogger('engine:backends')
@@ -10,7 +10,7 @@ export interface ExecutorBackend {
   execute(o: any): Promise<any>
 }
 
-export class StencilaPythonBackend implements ExecutorBackend {
+abstract class StdioBackend implements ExecutorBackend {
   private process?: childProcess.ChildProcess
 
   private stdin: any
@@ -19,9 +19,10 @@ export class StencilaPythonBackend implements ExecutorBackend {
 
   private executionRequestCount: number = 0
 
-  setup(): void {
-    this.process = spawn('python3', ['-m', 'stencila.schema', 'listen'])
-    if (!this.process) throw new Error('Spawning python3 failed')
+  protected abstract spawn(): childProcess.ChildProcess
+
+  public setup(): void {
+    this.process = this.spawn()
     if (
       this.process.stdout === null ||
       this.process.stdin === null ||
@@ -42,15 +43,15 @@ export class StencilaPythonBackend implements ExecutorBackend {
     this.stdin.pipe(this.process.stdin)
   }
 
-  receive(json: Buffer, raw: boolean = false) {
+  private receive(json: Buffer, raw: boolean = false) {
     const response = JSON.parse(json.toString())
     const resolve = this.executionRequests[response.id]
     resolve(response.body)
     delete this.executionRequests[response.id]
   }
 
-  async execute(o: any): Promise<any> {
-    if (!this.process) {
+  public async execute(o: any): Promise<any> {
+    if (this.process === undefined) {
       throw new Error('Can not execute before setup')
     }
 
@@ -70,5 +71,27 @@ export class StencilaPythonBackend implements ExecutorBackend {
     this.stdin.write(JSON.stringify(req))
 
     return promise
+  }
+}
+
+export class StencilaPythonBackend extends StdioBackend {
+  protected spawn() {
+    return spawn('python3', ['-m', 'stencila.schema', 'listen'])
+  }
+}
+
+export class StencilaJsBackend extends StdioBackend {
+  protected spawn() {
+    return spawn(
+      'npx',
+      [
+        'ts-node',
+        '/Users/ben/Documents/stencila/schema/ts/interpreter',
+        'listen'
+      ],
+      {
+        cwd: '/Users/ben/Documents/stencila/schema'
+      }
+    )
   }
 }

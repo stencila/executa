@@ -1,16 +1,23 @@
 import { getLogger } from '@stencila/logga'
-import { ExecutorBackend, StencilaPythonBackend } from './backends'
+import {
+  ExecutorBackend,
+  StencilaJsBackend,
+  StencilaPythonBackend
+} from './backends'
 
 const log = getLogger('engine:serve')
 
 export default class Executa {
-  backends: { [key: string]: ExecutorBackend } = {}
+  private backends: { [key: string]: ExecutorBackend } = {}
 
-  getBackend(name: string): ExecutorBackend {
+  private getBackend(name: string): ExecutorBackend {
     if (this.backends[name] === undefined) {
       switch (name) {
         case 'python':
           this.backends[name] = new StencilaPythonBackend()
+          break
+        case 'javascript':
+          this.backends[name] = new StencilaJsBackend()
           break
         default:
           throw new Error(`Unknown backend '${name}'`)
@@ -21,9 +28,8 @@ export default class Executa {
     return this.backends[name]
   }
 
-  async execute(code: any): Promise<any> {
+  public async execute(code: any): Promise<any> {
     const backend = this.getBackend(code.programmingLanguage)
-
-    return await backend.execute(code)
+    return backend.execute(code)
   }
 }
