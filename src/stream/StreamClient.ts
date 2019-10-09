@@ -4,7 +4,7 @@ import * as lps from 'length-prefixed-stream'
 import Client from '../base/Client'
 import Request from '../base/Request'
 
-export default class StreamClient extends Client {
+export default abstract class StreamClient extends Client {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */
@@ -29,8 +29,6 @@ export default class StreamClient extends Client {
       this.receive(json)
     })
   }
-
-  // Implementation of `Client` methods
 
   protected send(request: Request): void {
     this.encoder.write(JSON.stringify(request) + '\n')

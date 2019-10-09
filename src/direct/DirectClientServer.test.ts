@@ -1,20 +1,12 @@
-import { PassThrough } from 'stream'
 import * as stencila from '@stencila/schema'
-import StreamClient from './StreamClient'
-import StreamServer from './StreamServer'
+import DirectClient from './DirectClient'
+import DirectServer from './DirectServer'
 import Executor from '../base/Executor'
 
-describe('StreamClient and StreamServer', () => {
+describe('DirectClient and DirectServer', () => {
   const executor = new Executor()
-
-  // @ts-ignore Ignore the fact that this is an abstract class
-  const server = new StreamServer(executor)
-  const serverIncoming = new PassThrough()
-  const serverOutgoing = new PassThrough()
-  server.start(serverIncoming, serverOutgoing)
-
-  // @ts-ignore Ignore the fact that this is an abstract class
-  const client = new StreamClient(serverIncoming, serverOutgoing)
+  const server = new DirectServer(executor)
+  const client = new DirectClient(server.address())
 
   test('calling manifest', async () => {
     expect(await client.manifest()).toEqual(await executor.manifest())

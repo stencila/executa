@@ -1,9 +1,15 @@
 export enum Transport {
+  direct = 'direct',
   stdio = 'stdio',
   vsock = 'vsock',
   tcp = 'tcp',
   http = 'http',
   ws = 'ws'
+}
+
+export interface DirectAddress {
+  type: Transport.direct
+  server: any
 }
 
 export interface StdioAddress {
@@ -65,6 +71,7 @@ export interface WebsocketAddress extends HttpAddress {
 }
 
 export type Address =
+  | DirectAddress
   | StdioAddress
   | VsockAddress
   | TcpAddress

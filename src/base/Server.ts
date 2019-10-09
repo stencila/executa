@@ -113,12 +113,12 @@ export default abstract class Server {
   /**
    * Start the server
    */
-  public abstract start(): void
+  public start(): void {}
 
   /**
    * Stop the server
    */
-  public abstract stop(): void
+  public stop(): void {}
 
   /**
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`

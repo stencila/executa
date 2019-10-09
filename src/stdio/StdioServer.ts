@@ -9,8 +9,4 @@ export default class StdioServer extends StreamServer {
       args: process.argv.slice(1)
     }
   }
-
-  public start(): void {
-    super.start(process.stdin, process.stdout)
-  }
 }

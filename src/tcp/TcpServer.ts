@@ -45,7 +45,7 @@ export default class TcpServer extends StreamServer {
         super.start(socket, socket)
       }))
       server.on('connection', client => {
-       log.info(`Client connected`)
+        log.info(`Client connected`)
         this.clients.push(client)
         client.on('close', () => {
           log.info(`Client disconnected`)

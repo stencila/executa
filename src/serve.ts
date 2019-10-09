@@ -9,6 +9,8 @@ import Executor from './base/Executor'
 import Server from './base/Server'
 import discoverStdio from './stdio/discover'
 import TcpServer from './tcp/TcpServer'
+import StdioClient from './stdio/StdioClient'
+import { ClientType } from './base/Client'
 
 const { _, ...options } = minimist(process.argv.slice(2))
 
@@ -28,8 +30,11 @@ if (manifests.length === 0) {
   )
 }
 
+// Create a list of client types that can be used by executor
+const clientTypes: ClientType[] = [StdioClient as ClientType]
+
 // Create executor that will served by servers
-const executor = new Executor(manifests)
+const executor = new Executor(manifests, clientTypes)
 
 // Add server classes based on supplied options
 const servers: Server[] = []

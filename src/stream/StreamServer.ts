@@ -8,8 +8,6 @@ export default abstract class StreamServer extends Server {
    */
   private encoder: lps.Encoder
 
-  // Implementation of `Server` methods
-
   public start(
     incoming: Readable = process.stdin,
     outgoing: Writable = process.stdout
@@ -25,6 +23,4 @@ export default abstract class StreamServer extends Server {
     this.encoder = lps.encode()
     this.encoder.pipe(outgoing)
   }
-
-  public stop(): void {}
 }
