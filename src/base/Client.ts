@@ -2,6 +2,7 @@ import { Node } from '@stencila/schema'
 import { Interface, Method, Manifest } from './Executor'
 import Request from './Request'
 import Response from './Response'
+import { Address } from './Transports'
 
 /**
  * A base client class which acts as a proxy to a remote `Executor`.
@@ -108,4 +109,8 @@ export default abstract class Client implements Interface {
     resolve(response)
     delete this.requests[response.id]
   }
+}
+
+export interface ClientType {
+  new (address: Address): Client
 }

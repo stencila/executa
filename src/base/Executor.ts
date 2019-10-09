@@ -1,7 +1,7 @@
 import { Node } from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import Ajv from 'ajv'
-import Client from './Client'
+import Client, { ClientType } from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
 import { getLogger } from '@stencila/logga'
@@ -132,13 +132,22 @@ const ajv = new Ajv()
  *   a `WebSocketClient` to an executor running on
  *   a remote machine.
  */
-class Peer {
+export class Peer {
   /**
    * The manifest of the peer executor.
    */
   private manifest: Manifest
 
-  // private Clients: new ()
+  /**
+   * A list of classes, that extend `Client`, and are available
+   * to connect to peer executors.
+   *
+   * This property is used for dependency injection, rather than importing
+   * clients for all transports into this module when they may
+   * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
+   * The order of this list, defines the preference for the transport.
+   */
+  private readonly clientTypes: ClientType[]
 
   /**
    * The client for the peer executor.
@@ -156,8 +165,9 @@ class Peer {
    */
   private validators: { [key: string]: Ajv.ValidateFunction } = {}
 
-  public constructor(manifest: Manifest) {
+  public constructor(manifest: Manifest, clientTypes: ClientType[]) {
     this.manifest = manifest
+    this.clientTypes = clientTypes
   }
 
   /**
@@ -186,14 +196,46 @@ class Peer {
     return validator(params) as boolean
   }
 
-  public connect(): Client {
-    let client: Client
-    // @ts-ignore
-    return client
+  /**
+   * Connect to the remote `Executor`.
+   *
+   * Finds the first client type that the peer
+   * executor supports.
+   *
+   * @returns A client instance or `undefined` if not able to connect
+   */
+  public connect(): boolean {
+    for (const ClientType of this.clientTypes) {
+      // Get the transport for the client type
+      // There should be a better way to do this
+      const transportMap: { [key: string]: Transport } = {
+        DirectClient: Transport.direct,
+        StdioClient: Transport.stdio,
+        VsockClient: Transport.vsock,
+        TcpClient: Transport.tcp,
+        HttpClient: Transport.http,
+        WebsocketClient: Transport.ws
+      }
+      const transport = transportMap[ClientType.name]
+      if (transport === undefined)
+        throw new Error('Wooah! This should not happen!')
+
+      // See if the peer has an address the transport
+      const address = this.manifest.addresses[transport]
+      if (address !== undefined) {
+        this.client = new ClientType(address)
+        return true
+      }
+    }
+    // Unable to connect to the peer
+    return false
   }
 
   /**
    * Call a method of a remote `Executor`.
+   *
+   * Ensures that there is a connection to the
+   * executor and then passes the request to it.
    *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
@@ -202,9 +244,8 @@ class Peer {
     method: Method,
     params: { [key: string]: any } = {}
   ): Promise<Type> {
-    if (this.client === undefined) {
-      this.client = this.connect()
-    }
+    if (this.client === undefined)
+      throw new Error("WTF, no client! You shouldn't be calling this!")
     return this.client.call<Type>(method, params)
   }
 }
@@ -230,9 +271,11 @@ export default class Executor implements Interface {
    */
   private servers: Server[] = []
 
-  public constructor(peers: Manifest[] = []) {
-    // Create peers using the manifests provided
-    this.peers = peers.map(peer => new Peer(peer))
+  public constructor(
+    manifests: Manifest[] = [],
+    clientTypes: ClientType[] = []
+  ) {
+    this.peers = manifests.map(manifest => new Peer(manifest, clientTypes))
   }
 
   /**
@@ -355,7 +398,9 @@ export default class Executor implements Interface {
     // Attempt to delegate to a peer
     for (const peer of this.peers) {
       if (peer.capable(method, params)) {
-        return peer.call<Type>(method, params)
+        if (peer.connect()) {
+          return peer.call<Type>(method, params)
+        }
       }
     }
     // No peer has necessary capability so resort to fallback
