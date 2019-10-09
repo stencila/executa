@@ -37,7 +37,7 @@ describe('Peer', () => {
     expect(peer.capable(Method.execute, {})).toBe(false)
   })
 
-  test('capable: schema object capabilties', () => {
+  test('capable: schema object capabilities', () => {
     const peer = new Peer(
       {
         capabilities: {
@@ -106,6 +106,47 @@ describe('Peer', () => {
         node: { type: 'CodeExpression', programmingLanguage: 'python' }
       })
     ).toBe(true)
+  })
+
+  test('capable: multiple capabilities', () => {
+    const peer = new Peer(
+      {
+        capabilities: {
+          decode: [
+            {
+              required: ['content', 'format'],
+              properties: {
+                content: {
+                  type: 'string'
+                },
+                format: {
+                  enum: ['julia']
+                }
+              }
+            },
+            {
+              required: ['content', 'format'],
+              properties: {
+                content: {
+                  type: 'string'
+                },
+                format: {
+                  enum: ['haskell']
+                }
+              }
+            }
+          ]
+        },
+        addresses: {}
+      },
+      []
+    )
+
+    const canDecode = (format: string) =>
+      peer.capable(Method.decode, { content: 'foo', format })
+    expect(canDecode('julia')).toBe(true)
+    expect(canDecode('haskell')).toBe(true)
+    expect(canDecode('csharp')).toBe(false)
   })
 
   test('connect: no addresses', async () => {

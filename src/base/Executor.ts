@@ -30,7 +30,7 @@ export enum Method {
  * capability for that method.
  */
 export interface Capabilities {
-  [key: string]: JSONSchema7Definition
+  [key: string]: JSONSchema7Definition | JSONSchema7Definition[]
 }
 
 export interface Addresses {
@@ -136,7 +136,7 @@ export class Peer {
   /**
    * The manifest of the peer executor.
    */
-  private manifest: Manifest
+  public readonly manifest: Manifest
 
   /**
    * A list of classes, that extend `Client`, and are available
@@ -147,7 +147,7 @@ export class Peer {
    * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
    * The order of this list, defines the preference for the transport.
    */
-  private readonly clientTypes: ClientType[]
+  public readonly clientTypes: ClientType[]
 
   /**
    * The client for the peer executor.
@@ -163,7 +163,7 @@ export class Peer {
    * Validation functions are just-in-time compiled
    * in the `capable` method.
    */
-  private validators: { [key: string]: Ajv.ValidateFunction } = {}
+  private validators: { [key: string]: Ajv.ValidateFunction[] } = {}
 
   public constructor(manifest: Manifest, clientTypes: ClientType[]) {
     this.manifest = manifest
@@ -182,18 +182,22 @@ export class Peer {
    * @param params The parameter values of the call
    */
   public capable(method: Method, params: { [key: string]: unknown }): boolean {
-    let validator = this.validators[method]
-    if (validator === undefined) {
-      const capability = this.manifest.capabilities[method]
-      // Peer does not have capability defined
-      if (capability === undefined) return false
-      // Peer defines capability as boolean (which is a valid JSON Schema)
-      if (typeof capability === 'boolean') return capability
-      // Peer defines capability as a JSON Schema object which requires compiling
-      // to a validator function, that is cached
-      validator = this.validators[method] = ajv.compile(capability)
+    let validators = this.validators[method]
+    if (validators === undefined) {
+      let capabilities = this.manifest.capabilities[method]
+      // Peer does not have any capabilities defined for this method
+      if (capabilities === undefined) return false
+      // Peer defines capability as a single JSON Schema definition
+      if (!Array.isArray(capabilities)) capabilities = [capabilities]
+      // Compile JSON Schema definitions to validation functions
+      validators = this.validators[method] = capabilities.map(schema =>
+        ajv.compile(schema)
+      )
     }
-    return validator(params) as boolean
+    for (const validator of validators) {
+      if (validator(params)) return true
+    }
+    return false
   }
 
   /**
@@ -319,22 +323,42 @@ export default class Executor implements Interface {
    * as `compile` and `execute` can handle.
    */
   protected async capabilities(): Promise<Capabilities> {
-    return {
-      decode: {
-        properties: {
-          content: { type: 'string' },
-          format: { enum: ['json'] }
-        },
-        required: ['content']
-      },
-      encode: {
-        properties: {
-          node: true,
-          format: { enum: ['json'] }
-        },
-        required: ['node']
+    const capabilities: Capabilities = {
+      decode: [
+        {
+          properties: {
+            content: { type: 'string' },
+            format: { enum: ['json'] }
+          },
+          required: ['content']
+        }
+      ],
+      encode: [
+        {
+          properties: {
+            node: true,
+            format: { enum: ['json'] }
+          },
+          required: ['node']
+        }
+      ],
+      compile: [],
+      build: [],
+      execute: []
+    }
+    for (const peer of this.peers) {
+      const manifest = peer.manifest
+      for (const [method, additional] of Object.entries(
+        manifest.capabilities
+      )) {
+        const current = capabilities[method]
+        capabilities[method] = [
+          ...(Array.isArray(current) ? current : [current]),
+          ...(Array.isArray(additional) ? additional : [additional])
+        ]
       }
     }
+    return capabilities
   }
 
   /**
@@ -395,6 +419,8 @@ export default class Executor implements Interface {
     params: { [key: string]: any },
     fallback: () => Promise<Type>
   ): Promise<Type> {
+    log.debug(`Delegating: ${method}(${Object.keys(params).join(', ')})`)
+
     // Attempt to delegate to a peer
     for (const peer of this.peers) {
       if (peer.capable(method, params)) {
@@ -403,7 +429,9 @@ export default class Executor implements Interface {
         }
       }
     }
+
     // No peer has necessary capability so resort to fallback
+    log.debug(`Not able to  ${JSON.stringify(params)} `)
     return fallback()
   }
 }
