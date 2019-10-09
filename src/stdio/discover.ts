@@ -4,7 +4,7 @@ import { Transport } from '../base/Transports'
 export default function discover(): Manifest[] {
   // TODO: implement discovery of manifest files from ~/.stencila/executors/ (or similar)
   // Should be able to mostly copy and paste from
-  //   https://github.com/stencila/py/blob/f12607960ffe8b68c1d3f0ee7df34b3d094fc58d/stencila/host.py#L151-L161
+  //   https://github.com/stencila/node/blob/24c30d1c89b5f6b6719a0beeda7a55d19401c294/lib/host/Host.js#L654-L666
   // See https://github.com/stencila/executa/issues/2
   return [python, js]
 }
