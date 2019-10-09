@@ -1,5 +1,6 @@
 import TcpClient from './TcpClient'
 import TcpServer from './TcpServer'
+import { TcpAddress } from '../base/Transports'
 
 const server = new TcpServer()
 let client: TcpClient
@@ -7,7 +8,7 @@ let client: TcpClient
 beforeAll(async () => {
   server.start()
   await new Promise(resolve => setTimeout(resolve, 1000))
-  client = new TcpClient()
+  client = new TcpClient(server.address() as TcpAddress)
 })
 
 afterAll(() => {

@@ -18,8 +18,8 @@ class TestClient extends Client {
 test('client', async () => {
   const client = new TestClient()
 
-  expect(await client.capabilities()).toEqual({
-    method: 'capabilities',
+  expect(await client.manifest()).toEqual({
+    method: 'manifest',
     params: {}
   })
 

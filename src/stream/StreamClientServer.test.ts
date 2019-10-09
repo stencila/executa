@@ -7,6 +7,7 @@ import Executor from '../base/Executor'
 describe('StreamClient and StreamServer', () => {
   const executor = new Executor()
 
+  // @ts-ignore Ignore the fact that this is an abstract class
   const server = new StreamServer(executor)
   const serverIncoming = new PassThrough()
   const serverOutgoing = new PassThrough()
@@ -14,8 +15,8 @@ describe('StreamClient and StreamServer', () => {
 
   const client = new StreamClient(serverIncoming, serverOutgoing)
 
-  test('calling capabilities', async () => {
-    expect(await client.capabilities()).toEqual(await executor.capabilities())
+  test('calling manifest', async () => {
+    expect(await client.manifest()).toEqual(await executor.manifest())
   })
 
   test('calling methods with node', async () => {
