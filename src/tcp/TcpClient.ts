@@ -1,13 +1,19 @@
 import { Socket } from 'net'
 import StreamClient from '../stream/StreamClient'
 import { getLogger } from '@stencila/logga'
-import { TcpAddress } from '../base/Transports'
+import { TcpAddress, tcpAddress } from '../base/Transports'
 
 const log = getLogger('executa:tcp:client')
 
 export default class TcpClient extends StreamClient {
-  public constructor(address: Omit<TcpAddress, 'type'>) {
-    const { host = '127.0.0.1', port = 2000 } = address
+  socket: Socket
+
+  public constructor(address?: string | Omit<TcpAddress, 'type'>) {
+    const { host, port } = tcpAddress(address, {
+      host: '127.0.0.1',
+      port: 2000
+    })
+
     const socket = new Socket()
 
     socket.connect(port, host, () => {
@@ -19,5 +25,10 @@ export default class TcpClient extends StreamClient {
     })
 
     super(socket, socket)
+    this.socket = socket
+  }
+
+  public stop() {
+    this.socket.destroy()
   }
 }
