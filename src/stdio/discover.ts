@@ -55,7 +55,7 @@ const js: Manifest = {
               enum: ['CodeChunk', 'CodeExpression']
             },
             programmingLanguage: {
-              enum: ['python']
+              enum: ['javascript']
             }
           }
         }
