@@ -8,4 +8,4 @@ os:
 
 script:
   - npm run lint
-  - npm run cover
+  - npm run test:cover
