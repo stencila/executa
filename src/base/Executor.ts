@@ -225,6 +225,9 @@ export default class Executor implements Interface {
    */
   private peers: Peer[]
 
+  /**
+   * Servers that will pass on requests to this executor.
+   */
   private servers: Server[] = []
 
   public constructor(peers: Manifest[] = []) {
@@ -232,13 +235,22 @@ export default class Executor implements Interface {
     this.peers = peers.map(peer => new Peer(peer))
   }
 
-  public start(servers: Server[] = []) {
+  /**
+   * Start servers for the executor.
+   *
+   * @param servers An array of `Server` instances that pass
+   *                requests on to this executor
+   */
+  public start(servers: Server[] = []): void {
     this.servers = servers
     log.info('Starting servers')
     this.servers.forEach(server => server.start())
   }
 
-  public stop() {
+  /**
+   * Stop servers for the executor.
+   */
+  public stop(): void {
     log.info('Stopping servers')
     this.servers.forEach(server => server.stop())
   }
@@ -282,6 +294,9 @@ export default class Executor implements Interface {
     }
   }
 
+  /**
+   * Get a map of server addresses for this executor.
+   */
   protected async addresses(): Promise<Addresses> {
     return this.servers
       .map(server => server.address())
