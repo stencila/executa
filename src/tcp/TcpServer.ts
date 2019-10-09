@@ -2,6 +2,7 @@ import StreamServer from '../stream/StreamServer'
 import Executor from '../base/Executor'
 import { getLogger } from '@stencila/logga'
 import { createServer, Server } from 'net'
+import { TcpAddress, Transport } from '../base/Transports'
 
 const log = getLogger('executa:tcp:server')
 
@@ -20,6 +21,14 @@ export default class TcpServer extends StreamServer {
     super(executor)
     this.port = port
     this.host = host
+  }
+
+  public address(): TcpAddress {
+    return {
+      type: Transport.tcp,
+      host: this.host,
+      port: this.port
+    }
   }
 
   public start(): void {

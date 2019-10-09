@@ -2,6 +2,7 @@ import Error from './Error'
 import Executor from './Executor'
 import Request from './Request'
 import Response from './Response'
+import { Address } from './Transports'
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -17,6 +18,8 @@ export default abstract class Server {
     if (executor === undefined) executor = new Executor()
     this.executor = executor
   }
+
+  public abstract address(): Address
 
   /**
    * Handle a request
@@ -67,8 +70,8 @@ export default abstract class Server {
         throw new Error(-32600, 'Invalid request: missing "method" property')
 
       switch (request.method) {
-        case 'capabilities':
-          result = await this.executor.capabilities()
+        case 'manifest':
+          result = await this.executor.manifest()
           break
         case 'decode':
           result = await this.executor.decode(

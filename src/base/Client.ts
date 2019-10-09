@@ -1,5 +1,5 @@
 import { Node } from '@stencila/schema'
-import { Interface, Method, Capabilities } from './Executor'
+import { Interface, Method, Manifest } from './Executor'
 import Request from './Request'
 import Response from './Response'
 
@@ -16,10 +16,10 @@ export default abstract class Client implements Interface {
   private requests: { [key: number]: (response: Request) => void } = {}
 
   /**
-   * Call the remote `Executor`'s `capabilities` method
+   * Call the remote `Executor`'s `manifest` method
    */
-  public async capabilities(): Promise<Capabilities> {
-    return this.call<Capabilities>(Method.capabilities)
+  public async manifest(): Promise<Manifest> {
+    return this.call<Manifest>(Method.manifest)
   }
 
   /**

@@ -2,8 +2,9 @@ import { Readable, Writable } from 'stream'
 // @ts-ignore
 import * as lps from 'length-prefixed-stream'
 import Server from '../base/Server'
+import { StdioAddress, Transport } from '../base/Transports'
 
-export default class StreamServer extends Server {
+export default abstract class StreamServer extends Server {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */
