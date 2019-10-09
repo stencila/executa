@@ -1,67 +1,77 @@
-import Client from './Client'
-import { ExecutionClient } from '../stdio/ExecutionClient'
+import { Manifest } from '../base/Executor'
+import { Transport } from '../base/Transports'
 
-enum ExecutorType {
-  subprocess = 'subprocess'
+export default function discover(): Manifest[] {
+  // TODO: implement discovery of manifest files from ~/.stencila/executors/ (or similar)
+  // Should be able to mostly copy and paste from
+  //   https://github.com/stencila/py/blob/f12607960ffe8b68c1d3f0ee7df34b3d094fc58d/stencila/host.py#L151-L161
+  // See https://github.com/stencila/executa/issues/2
+  return [python, js]
 }
 
-interface SubprocessOptions {
-  spawn: string[]
-  shell?: boolean
-  cwd?: string
-}
+// These are just stubs to be replaced by JSON read in from manifest.json files...
 
-interface Manifest {
-  id: string
-  executorType: ExecutorType
-  programmingLanguage?: string
-  options?: SubprocessOptions
-}
-
-export class ManifestFacade {
-  public static getPeers(): Client[] {
-    return ManifestFacade.getManifests()
-      .map(manifest => {
-        if (manifest.executorType !== ExecutorType.subprocess) return null
-        if (manifest.options === undefined) return null
-        if (manifest.programmingLanguage === undefined) return null
-
-        const { spawn, ...rest } = manifest.options
-        const [command, ...commandArgs] = manifest.options.spawn
-        return new ExecutionClient(
-          command,
-          commandArgs,
-          rest,
-          manifest.programmingLanguage
-        )
-      })
-      .filter(c => c != null) as Client[]
-  }
-
-  public static getManifests(): Manifest[] {
-    return [
-      {
-        id: 'python',
-        programmingLanguage: 'python',
-        executorType: ExecutorType.subprocess,
-        options: {
-          spawn: ['python3', '-m', 'stencila.schema', 'listen']
-        }
-      },
-      {
-        id: 'javascript',
-        programmingLanguage: 'javascript',
-        executorType: ExecutorType.subprocess,
-        options: {
-          spawn: [
-            'npx',
-            'ts-node',
-            '/Users/ben/Documents/stencila/schema/ts/interpreter',
-            'listen'
-          ],
-          cwd: '/Users/ben/Documents/stencila/schema'
+const python: Manifest = {
+  capabilities: {
+    execute: {
+      type: 'object',
+      required: ['node'],
+      properties: {
+        node: {
+          type: 'object',
+          required: ['type', 'programmingLanguage'],
+          properties: {
+            type: {
+              enum: ['CodeChunk', 'CodeExpression']
+            },
+            programmingLanguage: {
+              enum: ['python']
+            }
+          }
         }
       }
-    ]
+    }
+  },
+  addresses: {
+    stdio: {
+      type: Transport.stdio,
+      command: 'python3',
+      args: ['-m', 'stencila.schema', 'listen']
+    }
+  }
+}
+
+const js: Manifest = {
+  capabilities: {
+    execute: {
+      type: 'object',
+      required: ['node'],
+      properties: {
+        node: {
+          type: 'object',
+          required: ['type', 'programmingLanguage'],
+          properties: {
+            type: {
+              enum: ['CodeChunk', 'CodeExpression']
+            },
+            programmingLanguage: {
+              enum: ['python']
+            }
+          }
+        }
+      }
+    }
+  },
+  addresses: {
+    stdio: {
+      type: Transport.stdio,
+      command: 'npx',
+      args: [
+        'ts-node',
+        '/Users/ben/Documents/stencila/schema/ts/interpreter',
+        'listen'
+      ],
+      cwd: '/Users/ben/Documents/stencila/schema'
+    }
   }
 }

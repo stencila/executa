@@ -4,6 +4,9 @@ import Ajv from 'ajv'
 import Client from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
+import { getLogger } from '@stencila/logga'
+
+const log = getLogger('executa:executor')
 
 /**
  * The methods of an `Executor` class.
@@ -222,21 +225,22 @@ export default class Executor implements Interface {
    */
   private peers: Peer[]
 
-  private servers: Server[]
+  private servers: Server[] = []
 
-  public constructor(
-    peers: Manifest[] = [],
-    Servers: (new (executor: Executor) => Server)[] = []
-  ) {
+  public constructor(peers: Manifest[] = []) {
     // Create peers using the manifests provided
     this.peers = peers.map(peer => new Peer(peer))
+  }
 
-    // Create and start servers using the server classes provided
-    this.servers = Servers.map(Server => {
-      const server = new Server(this)
-      server.start()
-      return server
-    })
+  public start(servers: Server[] = []) {
+    this.servers = servers
+    log.info('Starting servers')
+    this.servers.forEach(server => server.start())
+  }
+
+  public stop() {
+    log.info('Stopping servers')
+    this.servers.forEach(server => server.stop())
   }
 
   /**
