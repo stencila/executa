@@ -1,8 +1,8 @@
 import StreamServer from '../stream/StreamServer'
 import Executor from '../base/Executor'
 import { getLogger } from '@stencila/logga'
-import { createServer, Server } from 'net'
-import { TcpAddress, Transport } from '../base/Transports'
+import { createServer, Server, Socket, AddressInfo } from 'net'
+import { TcpAddress, tcpAddress, Transport } from '../base/Transports'
 
 const log = getLogger('executa:tcp:server')
 
@@ -13,14 +13,20 @@ export default class TcpServer extends StreamServer {
 
   private server?: Server
 
+  private clients: Socket[] = []
+
   public constructor(
     executor?: Executor,
-    port: number = 7300,
-    host: string = '127.0.0.1'
+    address?: string | Omit<TcpAddress, 'type'>
   ) {
     super(executor)
-    this.port = port
+
+    const { host, port } = tcpAddress(address, {
+      host: '127.0.0.1',
+      port: 2000
+    })
     this.host = host
+    this.port = port
   }
 
   public address(): TcpAddress {
@@ -32,9 +38,35 @@ export default class TcpServer extends StreamServer {
   }
 
   public start(): void {
-    this.server = createServer(socket => {
-      super.start(socket, socket)
-    })
-    this.server.listen(this.port, this.host)
+    if (this.server === undefined) {
+      log.info(`Starting server tcp://${this.host}:${this.port}`)
+
+      const server = (this.server = createServer(socket => {
+        super.start(socket, socket)
+      }))
+      server.on('connection', client => {
+       log.info(`Client connected`)
+        this.clients.push(client)
+        client.on('close', () => {
+          log.info(`Client disconnected`)
+          this.clients.splice(this.clients.indexOf(client), 1)
+        })
+      })
+
+      server.listen(this.port, this.host)
+    }
+  }
+
+  public stop(): void {
+    if (this.server !== undefined) {
+      log.info(`Stopping server tcp://${this.host}:${this.port}`)
+
+      this.clients.forEach(client => client.destroy())
+      this.server.close(() => {
+        if (this.server !== undefined) this.server.unref()
+      })
+
+      this.server = undefined
+    }
   }
 }
