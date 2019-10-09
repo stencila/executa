@@ -195,7 +195,7 @@ export class Peer {
       )
     }
     for (const validator of validators) {
-      if (validator(params)) return true
+      if (validator(params) === true) return true
     }
     return false
   }

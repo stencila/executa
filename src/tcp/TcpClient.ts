@@ -6,7 +6,7 @@ import { TcpAddress, tcpAddress } from '../base/Transports'
 const log = getLogger('executa:tcp:client')
 
 export default class TcpClient extends StreamClient {
-  socket: Socket
+  private socket: Socket
 
   public constructor(address?: string | Omit<TcpAddress, 'type'>) {
     const { host, port } = tcpAddress(address, {
