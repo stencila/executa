@@ -32,7 +32,7 @@ export interface TcpAddress {
 }
 
 export function tcpAddress(
-  address: undefined | string | Omit<TcpAddress, 'type'>,
+  address: undefined | string | number | Omit<TcpAddress, 'type'>,
   defaults: {
     host: string
     port: number
@@ -55,6 +55,8 @@ export function tcpAddress(
     } else {
       return defaults
     }
+  } else if (typeof address === 'number') {
+    return { host: defaults.host, port: address}
   } else {
     const { host = defaults.host, port = defaults.port } = address
     return { host, port }
