@@ -56,7 +56,7 @@ export function tcpAddress(
       return defaults
     }
   } else if (typeof address === 'number') {
-    return { host: defaults.host, port: address}
+    return { host: defaults.host, port: address }
   } else {
     const { host = defaults.host, port = defaults.port } = address
     return { host, port }

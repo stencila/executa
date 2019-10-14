@@ -1,7 +1,6 @@
-import {tcpAddress} from './Transports'
+import { tcpAddress } from './Transports'
 
 describe('tcpAddress', () => {
-
   const defaults = {
     host: '127.0.0.1',
     port: 4321
@@ -27,5 +26,4 @@ describe('tcpAddress', () => {
       port: 2030
     })
   })
-
 })
