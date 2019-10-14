@@ -226,6 +226,9 @@ describe('Peer', () => {
   })
 })
 
+/**
+ * An executor class that gives the answer to life.
+ */
 class DeepThought extends Executor {
   public static readonly question: string =
     'the answer to life the universe and everything'
@@ -257,6 +260,9 @@ class DeepThought extends Executor {
   }
 }
 
+/**
+ * An executor class that actslike a simple Javascript calculator.
+ */
 class Calculator extends Executor {
   public async capabilities(): Promise<Capabilities> {
     return {
@@ -288,6 +294,10 @@ class Calculator extends Executor {
 }
 
 describe('Executor', () => {
+  /**
+   * Test that delegation, without JSON-RPC or transport layer,
+   * works OK.
+   */
   test('peers: in-process', async () => {
     const deepThought = new DeepThought()
     const calculator = new Calculator()
@@ -361,5 +371,48 @@ describe('Executor', () => {
     expect(executed.content[0].content[1].output).toEqual(84)
     // @ts-ignore
     expect(executed.content[1].content[1].outputs[0]).toEqual(42)
+  })
+
+  /**
+   * Test that delegation via JSON-RPC, but no transport layer,
+   * works OK.
+   */
+  test('peers: direct', async () => {
+    const deepThought = new DeepThought()
+    const calculator = new Calculator()
+
+    const manifests: Manifest[] = [
+      {
+        addresses: {
+          direct: {
+            type: Transport.direct,
+            server: new DirectServer(deepThought)
+          }
+        },
+        capabilities: await deepThought.capabilities()
+      },
+      {
+        addresses: {
+          direct: {
+            type: Transport.direct,
+            server: new DirectServer(calculator)
+          }
+        },
+        capabilities: await calculator.capabilities()
+      }
+    ]
+    const executor = new Executor(manifests, [DirectClient as ClientType])
+
+    expect(await executor.execute(codeChunk(DeepThought.question))).toEqual({
+      type: 'CodeChunk',
+      text: DeepThought.question,
+      outputs: [42]
+    })
+
+    expect(await executor.execute(codeExpression('1 + 2 + 3 * 5'))).toEqual({
+      type: 'CodeExpression',
+      text: '1 + 2 + 3 * 5',
+      output: 18
+    })
   })
 })
