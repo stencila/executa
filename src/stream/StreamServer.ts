@@ -8,10 +8,10 @@ export default abstract class StreamServer extends Server {
    */
   private encoder: lps.Encoder
 
-  public start(
+  public async start(
     incoming: Readable = process.stdin,
     outgoing: Writable = process.stdout
-  ): void {
+  ): Promise<void> {
     const decoder = lps.decode()
     incoming.pipe(decoder)
     decoder.on('data', async (data: Buffer) => {

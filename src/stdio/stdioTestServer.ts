@@ -2,5 +2,8 @@
 
 import StdioServer from './StdioServer'
 
-const server = new StdioServer()
-server.run()
+// eslint-disable-next-line @typescript-eslint/no-floating-promises
+;(async () => {
+  const server = new StdioServer()
+  await server.run()
+})()

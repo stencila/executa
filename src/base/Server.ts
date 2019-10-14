@@ -14,12 +14,12 @@ export default abstract class Server {
    */
   private executor: Executor
 
+  public abstract readonly address: Address
+
   public constructor(executor?: Executor) {
     if (executor === undefined) executor = new Executor()
     this.executor = executor
   }
-
-  public abstract address(): Address
 
   /**
    * Handle a request
@@ -54,8 +54,12 @@ export default abstract class Server {
     }
 
     try {
+      if (request === null) {
+        throw new Error(-32600, `Invalid request`)
+      }
+
       if (typeof request === 'string') {
-        // Parse JSON into an request
+        // Parse JSON into a request
         try {
           request = JSON.parse(request) as Request
         } catch (err) {
@@ -113,22 +117,24 @@ export default abstract class Server {
   /**
    * Start the server
    */
-  public start(): void {}
+  public async start(): Promise<void> {}
 
   /**
    * Stop the server
    */
-  public stop(): void {}
+  public async stop(): Promise<void> {}
 
   /**
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
    */
-  public run(): void {
+  public async run(): Promise<void> {
     if (process !== undefined) {
-      const stop = (): void => this.stop()
+      const stop = async (): Promise<void> => {
+        await this.stop()
+      }
       process.on('SIGINT', stop)
       process.on('SIGTERM', stop)
     }
-    this.start()
+    await this.start()
   }
 }

@@ -25,51 +25,86 @@ export interface VsockAddress {
   cid?: number
 }
 
-export interface TcpAddress {
-  type: Transport.tcp | Transport.http | Transport.ws
-  host?: string
-  port?: number
-}
+export type TcpAddressInitializer =
+  | undefined
+  | number
+  | string
+  | { host: string; port: number }
+  | TcpAddress
+export class TcpAddress {
+  public readonly type: Transport.tcp | Transport.http | Transport.ws =
+    Transport.tcp
 
-export function tcpAddress(
-  address: undefined | string | number | Omit<TcpAddress, 'type'>,
-  defaults: {
-    host: string
-    port: number
-  }
-): Required<Omit<TcpAddress, 'type'>> {
-  if (address === undefined) {
-    return defaults
-  } else if (typeof address === 'string') {
-    const parts = address.split(':')
-    if (parts.length === 1) {
-      return {
-        host: defaults.host,
-        port: parseInt(parts[0])
-      }
-    } else if (parts.length >= 2) {
-      return {
-        host: parts[0],
-        port: parseInt(parts[1])
-      }
-    } else {
-      return defaults
+  public readonly host: string
+
+  public readonly port: number
+
+  public constructor(
+    address?: TcpAddressInitializer,
+    defaults: {
+      host: string
+      port: number
+    } = {
+      host: '127.0.0.1',
+      port: 2000
     }
-  } else if (typeof address === 'number') {
-    return { host: defaults.host, port: address }
-  } else {
-    const { host = defaults.host, port = defaults.port } = address
-    return { host, port }
+  ) {
+    const { host, port } = (function() {
+      if (address === undefined) {
+        return defaults
+      } else if (typeof address === 'string') {
+        const parts = address.split(':')
+        if (parts.length === 1) {
+          return {
+            host: defaults.host,
+            port: parseInt(parts[0])
+          }
+        } else if (parts.length >= 2) {
+          return {
+            host: parts[0],
+            port: parseInt(parts[1])
+          }
+        } else {
+          return defaults
+        }
+      } else if (typeof address === 'number') {
+        return { host: defaults.host, port: address }
+      } else {
+        const { host = defaults.host, port = defaults.port } = address
+        return { host, port }
+      }
+    })()
+    if (address instanceof TcpAddress) this.type = address.type
+    this.host = host
+    this.port = port
+  }
+
+  public toString(): string {
+    return `${this.type}://${this.host}:${this.port}`
   }
 }
 
-export interface HttpAddress extends TcpAddress {
-  type: Transport.http | Transport.ws
-  jwt?: string
+export class HttpAddress extends TcpAddress {
+  public readonly type: Transport.http | Transport.ws = Transport.http
+
+  public readonly jwt?: string
+
+  public constructor(
+    address?: TcpAddressInitializer,
+    defaults: {
+      host: string
+      port: number
+    } = {
+      host: '127.0.0.1',
+      port: 8000
+    }
+  ) {
+    super(address, defaults)
+  }
 }
 
-export interface WebsocketAddress extends HttpAddress {
-  type: Transport.ws
+export class WebSocketAddress extends HttpAddress {
+  public readonly type: Transport.ws = Transport.ws
 }
 
 export type Address =
@@ -78,4 +113,4 @@ export type Address =
   | VsockAddress
   | TcpAddress
   | HttpAddress
-  | WebsocketAddress
+  | WebSocketAddress

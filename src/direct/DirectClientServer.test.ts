@@ -6,7 +6,7 @@ import Executor from '../base/Executor'
 describe('DirectClient and DirectServer', () => {
   const executor = new Executor()
   const server = new DirectServer(executor)
-  const client = new DirectClient(server.address())
+  const client = new DirectClient(server.address)
 
   test('calling manifest', async () => {
     expect(await client.manifest()).toEqual(await executor.manifest())
@@ -27,6 +27,4 @@ describe('DirectClient and DirectServer', () => {
     // @ts-ignore
     expect(Object.keys(client.requests).length).toEqual(0)
   })
-
-  server.stop()
 })

@@ -1,16 +1,18 @@
-import { defaultHandler, getLogger, LogLevel, replaceHandlers } from '@stencila/logga';
-import fs from 'fs';
-import minimist from 'minimist';
-import { promisify } from 'util';
-import { ClientType } from './base/Client';
-import Executor from './base/Executor';
-import Server from './base/Server';
-import discoverStdio from './stdio/discover';
-import StdioClient from './stdio/StdioClient';
-import TcpServer from './tcp/TcpServer';
-
-const readFile = promisify(fs.readFile)
-const writeFile = promisify(fs.writeFile)
+import {
+  defaultHandler,
+  getLogger,
+  LogLevel,
+  replaceHandlers
+} from '@stencila/logga'
+import minimist from 'minimist'
+import { ClientType } from './base/Client'
+import Executor from './base/Executor'
+import Server from './base/Server'
+import discoverStdio from './stdio/discover'
+import StdioClient from './stdio/StdioClient'
+import HttpServer from './http/HttpServer'
+import TcpServer from './tcp/TcpServer'
+import WebSocketServer from './ws/WebSocketServer'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
@@ -56,18 +58,24 @@ const init = async () => {
 /**
  * Serve the executor
  */
-const serve = (executor: Executor) => {
+const serve = async (executor: Executor) => {
   // Add server classes based on supplied options
   const servers: Server[] = []
   if (options.tcp !== undefined) {
     servers.push(new TcpServer(executor, options.tcp))
+  }
+  if (options.http !== undefined) {
+    servers.push(new HttpServer(executor, options.http))
+  }
+  if (options.ws !== undefined) {
+    servers.push(new WebSocketServer(executor, options.ws))
   }
   if (servers.length === 0) {
     log.warn(
       'No servers specified in options (e.g. --tcp --stdio). Executor will not be accessible.'
     )
   }
-  executor.start(servers)
+  await executor.start(servers)
 }
 
 /**
@@ -75,15 +83,10 @@ const serve = (executor: Executor) => {
  */
 const convert = async (executor: Executor): Promise<void> => {
   const input = args[1]
-  const output = args[2] || '-'
+  const output = args[2] !== undefined ? args[2] : '-'
 
-  const content = await readFile(input, 'utf8')
-
-  const decoded = await executor.decode(content)
-  const encoded = await executor.encode(decoded)
-
-  if (output === '-') console.log(encoded)
-  else await writeFile(output, encoded)
+  const decoded = await executor.decode(input)
+  await executor.encode(decoded, output)
 }
 
 /**
@@ -91,16 +94,11 @@ const convert = async (executor: Executor): Promise<void> => {
  */
 const execute = async (executor: Executor): Promise<void> => {
   const input = args[1]
-  const output = args[2] || input
+  const output = args[2] !== undefined ? args[2] : input
 
-  const content = await readFile(input, 'utf8')
-
-  const decoded = await executor.decode(content)
+  const decoded = await executor.decode(input)
   const executed = await executor.execute(decoded)
-  const encoded = await executor.encode(executed)
-
-  if (output === '-') console.log(encoded)
-  else await writeFile(output, encoded)
+  await executor.encode(executed, output)
 }
 
 // Run the main function and log any exceptions

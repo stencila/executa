@@ -180,7 +180,9 @@ describe('Peer', () => {
         capabilities: {},
         addresses: {
           http: {
-            type: Transport.http
+            type: Transport.http,
+            host: '127.0.0.1',
+            port: 8000
           }
         }
       },

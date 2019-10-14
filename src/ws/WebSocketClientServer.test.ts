@@ -1,20 +1,20 @@
-import TcpClient from './TcpClient'
-import TcpServer from './TcpServer'
+import WebSocketClient from './WebSocketClient'
+import WebSocketServer from './WebSocketServer'
 
-const server = new TcpServer()
-let client: TcpClient
+const server = new WebSocketServer()
+let client: WebSocketClient
 
 beforeAll(async () => {
   await server.start()
   await new Promise(resolve => setTimeout(resolve, 100))
-  client = new TcpClient(server.address)
+  client = new WebSocketClient(server.address)
 })
 
 afterAll(async () => {
   await server.stop()
 })
 
-describe('TcpClient and TcpServer', () => {
+describe('WebSocketClient and WebSocketServer', () => {
   test('decode', async () => {
     expect(await client.decode('3.14')).toEqual(3.14)
     expect(await client.decode('{"type":"Entity"}', 'json')).toEqual({

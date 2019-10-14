@@ -1,20 +1,20 @@
-import TcpClient from './TcpClient'
-import TcpServer from './TcpServer'
+import HttpClient from './HttpClient'
+import HttpServer from './HttpServer'
 
-const server = new TcpServer()
-let client: TcpClient
+const server = new HttpServer()
+let client: HttpClient
 
 beforeAll(async () => {
   await server.start()
   await new Promise(resolve => setTimeout(resolve, 100))
-  client = new TcpClient(server.address)
+  client = new HttpClient(server.address)
 })
 
 afterAll(async () => {
   await server.stop()
 })
 
-describe('TcpClient and TcpServer', () => {
+describe('HttpClient and HttpServer', () => {
   test('decode', async () => {
     expect(await client.decode('3.14')).toEqual(3.14)
     expect(await client.decode('{"type":"Entity"}', 'json')).toEqual({
