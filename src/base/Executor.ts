@@ -221,12 +221,16 @@ export class Peer {
    * @returns A client instance or `undefined` if not able to connect
    */
   public connect(): boolean {
+    // Check if already connected
+    if (this.interface !== undefined) return true
+
     // If the executor is in-process, just use it directly
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     if (this.manifest.executor instanceof Executor) {
       this.interface = this.manifest.executor
       return true
     }
+
     // Connect to remote executor in order of preference of
     // transports
     for (const ClientType of this.clientTypes) {
