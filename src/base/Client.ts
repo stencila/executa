@@ -5,10 +5,10 @@ import Response from './Response'
 import { Address } from './Transports'
 
 /**
- * A base client class which acts as a proxy to a remote `Executor`.
+ * A client to a remote, out of process, `Executor`.
  *
- * Implements aynchronous, proxy methods for `Executor` methods `compile`, `build`, `execute`, etc.
- * Those methods send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
+ * Implements asynchronous, methods for `Executor` methods `compile`, `build`, `execute`, etc.
+ * which send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
 export default abstract class Client implements Interface {
   /**

@@ -1,7 +1,7 @@
-import { Node } from '@stencila/schema'
+import { Node, isPrimitive, nodeType } from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import Ajv from 'ajv'
-import Client, { ClientType } from './Client'
+import { ClientType } from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
 import { getLogger } from '@stencila/logga'
@@ -44,15 +44,21 @@ export interface Addresses {
  */
 export interface Manifest {
   /**
+   * The actual in-process `Executor`, or
+   * it's id i it is ou-of-process
+   */
+  executor?: Executor | string
+
+  /**
    * The capabilities of the executor
    */
-  capabilities: Capabilities
+  capabilities?: Capabilities
 
   /**
    * The addresses of servers that can be used
    * to communicate with the executor
    */
-  addresses: Addresses
+  addresses?: Addresses
 }
 
 /**
@@ -150,12 +156,13 @@ export class Peer {
   public readonly clientTypes: ClientType[]
 
   /**
-   * The client for the peer executor.
+   * The interface to the peer executor.
    *
-   * The type of client e.g. `StdioClient` vs `WebSocketClient`
+   * May be an in-process `Executor` or a `Client` to an out-of-process
+   * `Executor`, in which case it's type e.g. `StdioClient` vs `WebSocketClient`
    * will depend upon the available transports in `manifest.transports`.
    */
-  private client?: Client
+  private interface?: Interface
 
   /**
    * Ajv validation functions for each method.
@@ -184,11 +191,16 @@ export class Peer {
   public capable(method: Method, params: { [key: string]: unknown }): boolean {
     let validators = this.validators[method]
     if (validators === undefined) {
+      // Peer does not have any capabilities defined
+      if (this.manifest.capabilities === undefined) return false
+
       let capabilities = this.manifest.capabilities[method]
-      // Peer does not have any capabilities defined for this method
+      // Peer does not have any capabilities for this method defined
       if (capabilities === undefined) return false
+
       // Peer defines capability as a single JSON Schema definition
       if (!Array.isArray(capabilities)) capabilities = [capabilities]
+
       // Compile JSON Schema definitions to validation functions
       validators = this.validators[method] = capabilities.map(schema =>
         ajv.compile(schema)
@@ -201,7 +213,7 @@ export class Peer {
   }
 
   /**
-   * Connect to the remote `Executor`.
+   * Connect to the `Executor`.
    *
    * Finds the first client type that the peer
    * executor supports.
@@ -209,6 +221,14 @@ export class Peer {
    * @returns A client instance or `undefined` if not able to connect
    */
   public connect(): boolean {
+    // If the executor is in-process, just use it directly
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    if (this.manifest.executor instanceof Executor) {
+      this.interface = this.manifest.executor
+      return true
+    }
+    // Connect to remote executor in order of preference of
+    // transports
     for (const ClientType of this.clientTypes) {
       // Get the transport for the client type
       // There should be a better way to do this
@@ -224,10 +244,11 @@ export class Peer {
       if (transport === undefined)
         throw new Error('Wooah! This should not happen!')
 
-      // See if the peer has an address the transport
+      // See if the peer has an address for the transport
+      if (this.manifest.addresses === undefined) return false
       const address = this.manifest.addresses[transport]
       if (address !== undefined) {
-        this.client = new ClientType(address)
+        this.interface = new ClientType(address)
         return true
       }
     }
@@ -248,9 +269,9 @@ export class Peer {
     method: Method,
     params: { [key: string]: any } = {}
   ): Promise<Type> {
-    if (this.client === undefined)
+    if (this.interface === undefined)
       throw new Error("WTF, no client! You shouldn't be calling this!")
-    return this.client.call<Type>(method, params)
+    return this.interface.call<Type>(method, params)
   }
 }
 
@@ -348,6 +369,7 @@ export default class Executor implements Interface {
     }
     for (const peer of this.peers) {
       const manifest = peer.manifest
+      if (manifest.capabilities === undefined) continue
       for (const [method, additional] of Object.entries(
         manifest.capabilities
       )) {
@@ -392,8 +414,23 @@ export default class Executor implements Interface {
     return this.delegate(Method.build, { node }, async () => node)
   }
 
+  /**
+   * Execute a `Node`.
+   *
+   * Walks the node tree and attempts to delegate
+   * execution of certain types of nodes (currently `CodeChunk` and `CodeExpression`).
+   *
+   * @param node The node to execute
+   */
   public async execute(node: Node): Promise<Node> {
-    return this.delegate(Method.execute, { node }, async () => node)
+    return this.walk(node, async node => {
+      switch (nodeType(node)) {
+        case 'CodeChunk':
+        case 'CodeExpression':
+          return this.delegate(Method.execute, { node }, async () => node)
+      }
+      return node
+    })
   }
 
   public async call(
@@ -414,6 +451,26 @@ export default class Executor implements Interface {
     }
   }
 
+  private async walk(
+    node: Node,
+    transformer: (node: Node) => Promise<Node>
+  ): Promise<Node> {
+    return walk(node)
+    async function walk(node: Node): Promise<Node> {
+      const transformed = await transformer(node)
+      if (transformed === undefined || isPrimitive(transformed))
+        return transformed
+      if (Array.isArray(transformed)) return Promise.all(transformed.map(walk))
+      return Object.entries(transformed).reduce(
+        async (prev, [key, child]) => ({
+          ...(await prev),
+          ...{ [key]: await walk(child) }
+        }),
+        Promise.resolve({})
+      )
+    }
+  }
+
   private async delegate<Type>(
     method: Method,
     params: { [key: string]: any },
@@ -431,7 +488,7 @@ export default class Executor implements Interface {
     }
 
     // No peer has necessary capability so resort to fallback
-    log.debug(`Not able to  ${JSON.stringify(params)} `)
+    log.debug(`Unable to delegate node: ${JSON.stringify(params)} `)
     return fallback()
   }
 }
