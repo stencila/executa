@@ -4,8 +4,8 @@
   "description": "Execution delegator for various language backends.",
   "main": "index.js",
   "scripts": {
-    "serve": "ts-node src/serve.ts --tcp=7300",
-    "serve:dev": "ts-node-dev src/serve.ts --tcp=7300",
+    "cli": "ts-node src/cli.ts",
+    "cli:dev": "ts-node-dev src/cli.ts",
     "console": "ts-node src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
