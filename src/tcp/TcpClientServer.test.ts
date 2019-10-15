@@ -1,36 +1,11 @@
 import TcpClient from './TcpClient'
 import TcpServer from './TcpServer'
-import { TcpAddress } from '../base/Transports'
+import { testClient } from '../test/testClient'
 
-const server = new TcpServer()
-let client: TcpClient
-
-beforeAll(async () => {
-  server.start()
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  client = new TcpClient(server.address() as TcpAddress)
-})
-
-afterAll(() => {
-  server.stop()
-})
-
-describe('TcpClient and TcpServer', () => {
-  test('decode', async () => {
-    expect(await client.decode('3.14')).toEqual(3.14)
-    expect(await client.decode('{"type":"Entity"}', 'json')).toEqual({
-      type: 'Entity'
-    })
-  })
-
-  test('encode', async () => {
-    expect(await client.encode(3.14)).toEqual('3.14')
-    expect(await client.encode({ type: 'Entity' }, 'json')).toEqual(
-      '{"type":"Entity"}'
-    )
-  })
-
-  test('execute', async () => {
-    expect(await client.execute({ type: 'Entity' })).toEqual({ type: 'Entity' })
-  })
+test('TcpClient and TcpServer', async () => {
+  const server = new TcpServer()
+  await server.start()
+  const client = new TcpClient(server.address)
+  await testClient(client)
+  await server.stop()
 })

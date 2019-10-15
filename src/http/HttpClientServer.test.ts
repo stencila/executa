@@ -1,0 +1,16 @@
+import { testClient } from '../test/testClient'
+import HttpClient from './HttpClient'
+import HttpServer from './HttpServer'
+import { HttpAddress } from '../base/Transports'
+
+beforeAll(() => {
+  process.env.JWT_SECRET = 'not-a-secret-at-all'
+})
+
+test('HttpClient and HttpServer', async () => {
+  const server = new HttpServer()
+  await server.start()
+  const client = new HttpClient(server.address)
+  await testClient(client)
+  await server.stop()
+})

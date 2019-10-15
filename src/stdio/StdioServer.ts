@@ -2,7 +2,7 @@ import StreamServer from '../stream/StreamServer'
 import { StdioAddress, Transport } from '../base/Transports'
 
 export default class StdioServer extends StreamServer {
-  public address(): StdioAddress {
+  public get address(): StdioAddress {
     return {
       type: Transport.stdio,
       command: process.argv[0],

@@ -1,4 +1,4 @@
-import { tcpAddress } from './Transports'
+import { TcpAddress } from './Transports'
 
 describe('tcpAddress', () => {
   const defaults = {
@@ -7,21 +7,24 @@ describe('tcpAddress', () => {
   }
 
   test('parses a string with host and port', () => {
-    expect(tcpAddress('example.com:2010', defaults)).toEqual({
+    expect(new TcpAddress('example.com:2010', defaults)).toEqual({
+      type: 'tcp',
       host: 'example.com',
       port: 2010
     })
   })
 
   test('parses a number as the port', () => {
-    expect(tcpAddress(2020, defaults)).toEqual({
+    expect(new TcpAddress(2020, defaults)).toEqual({
+      type: 'tcp',
       host: '127.0.0.1',
       port: 2020
     })
   })
 
   test('parses a string with just port', () => {
-    expect(tcpAddress('2030', defaults)).toEqual({
+    expect(new TcpAddress('2030', defaults)).toEqual({
+      type: 'tcp',
       host: '127.0.0.1',
       port: 2030
     })

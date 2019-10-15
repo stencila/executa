@@ -221,12 +221,16 @@ export class Peer {
    * @returns A client instance or `undefined` if not able to connect
    */
   public connect(): boolean {
+    // Check if already connected
+    if (this.interface !== undefined) return true
+
     // If the executor is in-process, just use it directly
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
     if (this.manifest.executor instanceof Executor) {
       this.interface = this.manifest.executor
       return true
     }
+
     // Connect to remote executor in order of preference of
     // transports
     for (const ClientType of this.clientTypes) {
@@ -309,16 +313,18 @@ export default class Executor implements Interface {
    * @param servers An array of `Server` instances that pass
    *                requests on to this executor
    */
-  public start(servers: Server[] = []): void {
+  public async start(servers: Server[] = []): Promise<void[]> {
     this.servers = servers
-    log.info('Starting servers')
-    this.servers.forEach(server => server.start())
+    log.info(
+      `Starting servers: ${this.servers.map(server => server.address.type)}`
+    )
+    return Promise.all(this.servers.map(server => server.start()))
   }
 
   /**
    * Stop servers for the executor.
    */
-  public stop(): void {
+  public async stop(): Promise<void> {
     log.info('Stopping servers')
     this.servers.forEach(server => server.stop())
   }
@@ -388,7 +394,7 @@ export default class Executor implements Interface {
    */
   protected async addresses(): Promise<Addresses> {
     return this.servers
-      .map(server => server.address())
+      .map(server => server.address)
       .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
   }
 

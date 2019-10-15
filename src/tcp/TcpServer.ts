@@ -2,70 +2,68 @@ import StreamServer from '../stream/StreamServer'
 import Executor from '../base/Executor'
 import { getLogger } from '@stencila/logga'
 import { createServer, Server, Socket } from 'net'
-import { TcpAddress, tcpAddress, Transport } from '../base/Transports'
+import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 
 const log = getLogger('executa:tcp:server')
 
 export default class TcpServer extends StreamServer {
-  private port: number
+  protected readonly host: string
 
-  private host: string
+  protected readonly port: number
 
-  private server?: Server
+  protected server?: Server
 
-  private clients: Socket[] = []
+  protected clients: Socket[] = []
 
   public constructor(
     executor?: Executor,
-    address?: string | Omit<TcpAddress, 'type'>
+    address: TcpAddress = new TcpAddress()
   ) {
     super(executor)
 
-    const { host, port } = tcpAddress(address, {
-      host: '127.0.0.1',
-      port: 2000
-    })
+    const { host, port } = address
     this.host = host
     this.port = port
   }
 
-  public address(): TcpAddress {
-    return {
-      type: Transport.tcp,
+  public get address(): TcpAddress {
+    return new TcpAddress({
       host: this.host,
       port: this.port
-    }
+    })
   }
 
-  public start(): void {
+  protected onConnection(client: Socket) {
+    this.clients.push(client)
+    client.on('close', () => {
+      this.clients.splice(this.clients.indexOf(client), 1)
+    })
+  }
+
+  public async start(): Promise<void> {
     if (this.server === undefined) {
-      log.info(`Starting server tcp://${this.host}:${this.port}`)
+      log.info(`Starting server: ${this.address.toString()}`)
 
-      const server = (this.server = createServer(socket => {
-        super.start(socket, socket)
+      const server = (this.server = createServer(async socket => {
+        await super.start(socket, socket)
       }))
-      server.on('connection', client => {
-        log.info(`Client connected`)
-        this.clients.push(client)
-        client.on('close', () => {
-          log.info(`Client disconnected`)
-          this.clients.splice(this.clients.indexOf(client), 1)
-        })
-      })
+      server.on('connection', client => this.onConnection(client))
 
-      server.listen(this.port, this.host)
+      const { host, port } = this.address
+      return new Promise(resolve => server.listen(port, host, () => resolve()))
     }
   }
 
-  public stop(): void {
+  public async stop(): Promise<void> {
     if (this.server !== undefined) {
-      log.info(`Stopping server tcp://${this.host}:${this.port}`)
+      log.info(`Stopping server ${this.address.toString()}`)
 
       this.clients.forEach(client => client.destroy())
+      this.clients = []
+
       this.server.close(() => {
         if (this.server !== undefined) this.server.unref()
       })
-
       this.server = undefined
     }
   }
