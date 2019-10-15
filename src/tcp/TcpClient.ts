@@ -1,7 +1,7 @@
 import { Socket } from 'net'
 import StreamClient from '../stream/StreamClient'
 import { getLogger } from '@stencila/logga'
-import { TcpAddressInitializer, TcpAddress } from '../base/Transports'
+import { TcpAddress } from '../base/Transports'
 
 const log = getLogger('executa:tcp:client')
 
