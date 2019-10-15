@@ -34,7 +34,8 @@ export default class TcpServer extends StreamServer {
       }))
       server.on('connection', client => this.onConnection(client))
 
-      server.listen(this.address.port, this.address.host)
+      const { host, port } = this.address
+      return new Promise(resolve => server.listen(port, host, () => resolve()))
     }
   }
 

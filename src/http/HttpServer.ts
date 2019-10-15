@@ -67,8 +67,9 @@ export default class HttpServer extends TcpServer {
     this.server = app.server
   }
 
-  public async start() {
+  public async start(): Promise<void> {
     log.info(`Starting server: ${this.address.toString()}`)
-    await this.app.listen(this.address.port)
+    const { host, port } = this.address
+    return new Promise(resolve => this.app.listen(port, host, () => resolve()))
   }
 }
