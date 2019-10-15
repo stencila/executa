@@ -19,10 +19,14 @@ export interface StdioAddress {
   cwd?: string
 }
 
-export interface VsockAddress {
-  type: Transport.vsock
-  port?: number
-  cid?: number
+export class VsockAddress {
+  public readonly type: Transport.vsock = Transport.vsock
+
+  public readonly port: number
+
+  public constructor (port: number = 6000) {
+    this.port = port
+  }
 }
 
 export type TcpAddressInitializer =
