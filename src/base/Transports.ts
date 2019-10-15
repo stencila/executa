@@ -26,11 +26,10 @@ export interface VsockAddress {
 }
 
 export type TcpAddressInitializer =
-  | undefined
   | number
   | string
   | { host: string; port: number }
-  | TcpAddress
+
 export class TcpAddress {
   public readonly type: Transport.tcp | Transport.http | Transport.ws =
     Transport.tcp
@@ -74,7 +73,6 @@ export class TcpAddress {
         return { host, port }
       }
     })()
-    if (address instanceof TcpAddress) this.type = address.type
     this.host = host
     this.port = port
   }
@@ -89,17 +87,12 @@ export class HttpAddress extends TcpAddress {
 
   public readonly jwt?: string
 
-  public constructor(
-    address?: TcpAddressInitializer,
-    defaults: {
-      host: string
-      port: number
-    } = {
+  public constructor(address?: TcpAddressInitializer, jwt?: string) {
+    super(address, {
       host: '127.0.0.1',
       port: 8000
-    }
-  ) {
-    super(address, defaults)
+    })
+    this.jwt = jwt
   }
 }
 

@@ -7,15 +7,30 @@ import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 const log = getLogger('executa:tcp:server')
 
 export default class TcpServer extends StreamServer {
-  public readonly address: TcpAddress
+  protected readonly host: string
+
+  protected readonly port: number
 
   protected server?: Server
 
   protected clients: Socket[] = []
 
-  public constructor(executor?: Executor, address?: TcpAddressInitializer) {
+  public constructor(
+    executor?: Executor,
+    address: TcpAddress = new TcpAddress()
+  ) {
     super(executor)
-    this.address = new TcpAddress(address)
+
+    const { host, port } = address
+    this.host = host
+    this.port = port
+  }
+
+  public get address(): TcpAddress {
+    return new TcpAddress({
+      host: this.host,
+      port: this.port
+    })
   }
 
   protected onConnection(client: Socket) {

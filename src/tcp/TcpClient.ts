@@ -6,24 +6,19 @@ import { TcpAddressInitializer, TcpAddress } from '../base/Transports'
 const log = getLogger('executa:tcp:client')
 
 export default class TcpClient extends StreamClient {
-  private address: TcpAddress
-
   private socket: Socket
 
-  public constructor(address: TcpAddressInitializer) {
-    const address_ = new TcpAddress(address)
-    const { host, port } = address_
-
+  public constructor(address: TcpAddress = new TcpAddress()) {
     const socket = new Socket()
+    const { host, port } = address
     socket.connect(port, host, () => {
-      log.debug(`Connection open: ${this.address.toString()}`)
+      log.debug(`Connection open: ${address.toString()}`)
     })
     socket.on('close', () => {
       log.debug(`Connection closed: ${host}:${port}`)
     })
     super(socket, socket)
 
-    this.address = address_
     this.socket = socket
   }
 

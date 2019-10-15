@@ -14,12 +14,15 @@ export default abstract class Server {
    */
   private executor: Executor
 
-  public abstract readonly address: Address
-
   public constructor(executor?: Executor) {
     if (executor === undefined) executor = new Executor()
     this.executor = executor
   }
+
+  /**
+   * Get the address of the server
+   */
+  public abstract get address(): Address
 
   /**
    * Handle a request
