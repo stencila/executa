@@ -9,20 +9,14 @@ import { WebSocketAddress, TcpAddressInitializer } from '../base/Transports'
  */
 export default class WebSocketClient extends Client {
   /**
-   * The address of the `WebSocketServer`
-   */
-  private address: WebSocketAddress
-
-  /**
    * A `WebSocket` instance
    */
   private socket: WebSocket
 
-  public constructor(address?: TcpAddressInitializer) {
+  public constructor(address: WebSocketAddress = new WebSocketAddress()) {
     super()
-    this.address = new WebSocketAddress(address)
 
-    this.socket = new WebSocket(this.address.toString())
+    this.socket = new WebSocket(address.toString())
     this.socket.addEventListener('message', (event: MessageEvent) => {
       this.receive(event.data)
     })

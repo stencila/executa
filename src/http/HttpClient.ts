@@ -2,20 +2,22 @@ import fetch from 'cross-fetch'
 import Client from '../base/Client'
 import Request from '../base/Request'
 import { HttpAddress, TcpAddressInitializer } from '../base/Transports'
+import Response from '../base/Response'
+import JsonRpcError from '../base/Error'
 
 /**
  * A `Client` using HTTP/S for communication.
  */
 export default class HttpClient extends Client {
-  private readonly address: HttpAddress
+  public readonly url: string
 
-  public constructor(address?: TcpAddressInitializer) {
+  private readonly jwt?: string
+
+  public constructor(address: HttpAddress = new HttpAddress()) {
     super()
-    this.address = new HttpAddress(address)
-  }
 
-  public get url() {
-    return this.address.toString()
+    this.url = address.toString()
+    this.jwt = address.jwt
   }
 
   protected send(request: Request): Promise<void> {
@@ -26,12 +28,25 @@ export default class HttpClient extends Client {
       credentials: 'same-origin', // include, *same-origin, omit
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        Accept: 'application/json; charset=utf-8'
+        Accept: 'application/json; charset=utf-8',
+        ...(this.jwt !== undefined
+          ? { Authorization: `Bearer ${this.jwt}` }
+          : {})
       },
       body: JSON.stringify(request)
     })
-      .then(response => response.json())
-      .then(response => this.receive(response))
+      .then(async reply => {
+        if (reply.status >= 400) {
+          // Translate the HTTP error into JSON-RPC error
+          const message = await reply.text()
+          const error = new JsonRpcError(-32600, message)
+          return new Response(request.id, undefined, error)
+        }
+        return reply.json()
+      })
+      .then((response: Response) => {
+        this.receive(response)
+      })
   }
 
   // Additional methods for getting and posting to server

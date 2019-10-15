@@ -11,8 +11,11 @@ const log = getLogger('executa:ws:server')
  * A `Server` using WebSockets for communication.
  */
 export default class WebSocketServer extends HttpServer {
-  public constructor(executor?: Executor, address?: TcpAddressInitializer) {
-    super(executor, new WebSocketAddress(address))
+  public constructor(
+    executor?: Executor,
+    address: WebSocketAddress = new WebSocketAddress()
+  ) {
+    super(executor, address)
 
     this.app.register(fastifyWebsocket, {
       handle: (connection: any) => {
@@ -26,5 +29,15 @@ export default class WebSocketServer extends HttpServer {
       },
       options: {}
     })
+  }
+
+  public get address(): WebSocketAddress {
+    return new WebSocketAddress(
+      {
+        host: this.host,
+        port: this.port
+      },
+      this.defaultJwt
+    )
   }
 }
