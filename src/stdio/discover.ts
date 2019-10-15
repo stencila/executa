@@ -1,5 +1,4 @@
 import { Manifest } from '../base/Executor'
-import { Transport } from '../base/Transports'
 import * as path from 'path'
 import * as os from 'os'
 import * as fs from 'fs'
@@ -13,11 +12,6 @@ const log = getLogger('executa:serve')
 const EXECUTORS_DIR_NAME = 'executors'
 
 export default async function discover(): Promise<Manifest[]> {
-  // TODO: implement discovery of manifest files from ~/.stencila/executors/ (or similar)
-  // Should be able to mostly copy and paste from
-  //   https://github.com/stencila/node/blob/24c30d1c89b5f6b6719a0beeda7a55d19401c294/lib/host/Host.js#L654-L666
-  // See https://github.com/stencila/executa/issues/2
-
   let stencilaHome: string
 
   switch (os.platform()) {
@@ -69,7 +63,9 @@ export default async function discover(): Promise<Manifest[]> {
       }
 
       try {
-        manifests.push(JSON.parse(json) as Manifest)
+        const manifest = JSON.parse(json) as Manifest
+        log.info(`Added manifest at ${file}`)
+        manifests.push(manifest)
       } catch (error) {
         log.warn(`Warning: error parsing file "${file}": ${error.message}`)
       }
@@ -77,44 +73,5 @@ export default async function discover(): Promise<Manifest[]> {
   }
 
   await discoverDir(executorsDir)
-
-  manifests.push(js)
   return manifests
-}
-
-// These are just stubs to be replaced by JSON read in from manifest.json files...
-
-const js: Manifest = {
-  capabilities: {
-    execute: {
-      type: 'object',
-      required: ['node'],
-      properties: {
-        node: {
-          type: 'object',
-          required: ['type', 'programmingLanguage'],
-          properties: {
-            type: {
-              enum: ['CodeChunk', 'CodeExpression']
-            },
-            programmingLanguage: {
-              enum: ['javascript']
-            }
-          }
-        }
-      }
-    }
-  },
-  addresses: {
-    stdio: {
-      type: Transport.stdio,
-      command: 'npx',
-      args: [
-        'ts-node',
-        '/Users/ben/Documents/stencila/schema/ts/interpreter',
-        'listen'
-      ],
-      cwd: '/Users/ben/Documents/stencila/schema'
-    }
-  }
 }
