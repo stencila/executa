@@ -302,17 +302,18 @@ describe('Executor', () => {
     const deepThought = new DeepThought()
     const calculator = new Calculator()
 
-    const manifests: Manifest[] = [
-      {
-        executor: deepThought,
-        capabilities: await deepThought.capabilities()
-      },
-      {
-        executor: calculator,
-        capabilities: await calculator.capabilities()
-      }
-    ]
-    const executor = new Executor(manifests)
+    const executor = new Executor([
+      async () => [
+        {
+          executor: deepThought,
+          capabilities: await deepThought.capabilities()
+        },
+        {
+          executor: calculator,
+          capabilities: await calculator.capabilities()
+        }
+      ]
+    ])
 
     // Delegates executable nodes to peers
 
@@ -381,27 +382,31 @@ describe('Executor', () => {
     const deepThought = new DeepThought()
     const calculator = new Calculator()
 
-    const manifests: Manifest[] = [
-      {
-        addresses: {
-          direct: {
-            type: Transport.direct,
-            server: new DirectServer(deepThought)
+    const executor = new Executor(
+      [
+        async () => [
+          {
+            addresses: {
+              direct: {
+                type: Transport.direct,
+                server: new DirectServer(deepThought)
+              }
+            },
+            capabilities: await deepThought.capabilities()
+          },
+          {
+            addresses: {
+              direct: {
+                type: Transport.direct,
+                server: new DirectServer(calculator)
+              }
+            },
+            capabilities: await calculator.capabilities()
           }
-        },
-        capabilities: await deepThought.capabilities()
-      },
-      {
-        addresses: {
-          direct: {
-            type: Transport.direct,
-            server: new DirectServer(calculator)
-          }
-        },
-        capabilities: await calculator.capabilities()
-      }
-    ]
-    const executor = new Executor(manifests, [DirectClient as ClientType])
+        ]
+      ],
+      [DirectClient as ClientType]
+    )
 
     expect(await executor.execute(codeChunk(DeepThought.question))).toEqual({
       type: 'CodeChunk',

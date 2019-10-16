@@ -33,6 +33,9 @@ export interface Capabilities {
   [key: string]: JSONSchema7Definition | JSONSchema7Definition[]
 }
 
+/**
+ * The addresses of an `Executor`.
+ */
 export interface Addresses {
   [key: string]: Address
 }
@@ -62,6 +65,12 @@ export interface Manifest {
 }
 
 /**
+ * A function that can be called to obtain
+ * a list of potential peer `Executors`
+ */
+type DiscoveryFunction = () => Promise<Manifest[]>
+
+/**
  * Interface for `Executor` classes and their proxies.
  */
 export abstract class Interface {
@@ -69,6 +78,7 @@ export abstract class Interface {
    * Get the manifest of the executor
    *
    * @see Capabilities
+   * @see Addresses
    */
   abstract async manifest(): Promise<Manifest>
 
@@ -131,12 +141,6 @@ const ajv = new Ajv()
 /**
  * A instance of a `Executor` used as a peer
  * to delegate method calls to.
- *
- * A peer can be created from:
- *
- * - a `Client` to an existing executor e.g.
- *   a `WebSocketClient` to an executor running on
- *   a remote machine.
  */
 export class Peer {
   /**
@@ -160,7 +164,7 @@ export class Peer {
    *
    * May be an in-process `Executor` or a `Client` to an out-of-process
    * `Executor`, in which case it's type e.g. `StdioClient` vs `WebSocketClient`
-   * will depend upon the available transports in `manifest.transports`.
+   * will depend upon the available transports in `manifest.addresses`.
    */
   private interface?: Interface
 
@@ -290,21 +294,40 @@ export class Peer {
  */
 export default class Executor implements Interface {
   /**
+   * Functions used to obtain manifests of potential
+   * peer executors.
+   */
+  private readonly discoveryFunctions: DiscoveryFunction[]
+
+  /**
+   * Classes of `Client` that this executor is able
+   * to use to connect to peer executors.
+   */
+  private readonly clientTypes: ClientType[]
+
+  /**
    * Peer executors that are delegated to depending
    * upon their capabilities and the request at hand.
+   *
+   * This list is just-in-time populated when a request
+   * is made to the executor that it needs to delegate,
+   * or by explicitly calling `discover()`.
    */
-  private peers: Peer[]
+  private peers?: Peer[]
 
   /**
    * Servers that will pass on requests to this executor.
+   *
+   * @see start
    */
   private servers: Server[] = []
 
   public constructor(
-    manifests: Manifest[] = [],
+    discoveryFunctions: DiscoveryFunction[] = [],
     clientTypes: ClientType[] = []
   ) {
-    this.peers = manifests.map(manifest => new Peer(manifest, clientTypes))
+    this.discoveryFunctions = discoveryFunctions
+    this.clientTypes = clientTypes
   }
 
   /**
@@ -350,6 +373,8 @@ export default class Executor implements Interface {
    * as `compile` and `execute` can handle.
    */
   protected async capabilities(): Promise<Capabilities> {
+    // Define the capabilities that this executor
+    // has without needing to delegate
     const capabilities: Capabilities = {
       decode: [
         {
@@ -373,6 +398,14 @@ export default class Executor implements Interface {
       build: [],
       execute: []
     }
+
+    // Do peer discovery if not yet done
+    if (this.peers === undefined) await this.discover()
+    // This may be able to be removed with assert signatures in TS 3.7
+    if (this.peers === undefined)
+      throw new Error(`Whaaaat! How can this be, peers are still undefined!?`)
+
+    // Merge in the capabilities of peer executors
     for (const peer of this.peers) {
       const manifest = peer.manifest
       if (manifest.capabilities === undefined) continue
@@ -386,6 +419,7 @@ export default class Executor implements Interface {
         ]
       }
     }
+
     return capabilities
   }
 
@@ -480,12 +514,53 @@ export default class Executor implements Interface {
     }
   }
 
+  /**
+   * Discover peers by calling discovery functions.
+   *
+   * This gets called just-in-time, but you may also want to
+   * call it ahead-of-time to reduce latency
+   * in the first method call.
+   */
+  private async discover(): Promise<void> {
+    log.info(`Discovering peers`)
+
+    // Get the list of manifests
+    const manifests = await this.discoveryFunctions.reduce(
+      async (all: Promise<Manifest[]>, discoveryFunction) => {
+        return [...(await all), ...(await discoveryFunction())]
+      },
+      Promise.resolve([])
+    )
+
+    if (manifests.length === 0) {
+      log.warn(
+        'No peer executors discovered. Executor will have limited capabilities.'
+      )
+    }
+
+    // Create a list of peers
+    this.peers = manifests.map(manifest => new Peer(manifest, this.clientTypes))
+  }
+
+  /**
+   * Delegate a method call to a peer.
+   *
+   * @param method The method name
+   * @param params The parameter values (i.e. the arguments)
+   * @param fallback A fallback function called if unable to delegate
+   */
   private async delegate<Type>(
     method: Method,
     params: { [key: string]: any },
     fallback: () => Promise<Type>
   ): Promise<Type> {
     log.debug(`Delegating: ${method}(${Object.keys(params).join(', ')})`)
+
+    // Do peer discovery if not yet done
+    if (this.peers === undefined) await this.discover()
+    // This may be able to be removed with assert signatures in TS 3.7
+    if (this.peers === undefined)
+      throw new Error(`Whaaaat! How can this be, peers are still undefined!?`)
 
     // Attempt to delegate to a peer
     for (const peer of this.peers) {

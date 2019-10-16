@@ -25,7 +25,7 @@ replaceHandlers(data =>
 
 const main = async () => {
   // Initialize the executor
-  const executor = await init()
+  const executor = new Executor([discoverStdio], [StdioClient as ClientType])
 
   // Run command
   const command = args[0]
@@ -34,25 +34,6 @@ const main = async () => {
   else {
     log.error(`Unrecognised command: ${command}`)
   }
-}
-
-/**
- * Initialize the executor
- */
-const init = async () => {
-  // Discover other executors registered on this machine
-  // In the future this may attempt to discover remote executors as well
-  const manifests = await discoverStdio()
-  if (manifests.length === 0) {
-    log.warn(
-      'No peer executors discovered on this machine. Executor will have limited capabilities.'
-    )
-  }
-
-  // Create a list of client types that can be used by executor
-  const clientTypes: ClientType[] = [StdioClient as ClientType]
-
-  return new Executor(manifests, clientTypes)
 }
 
 /**
