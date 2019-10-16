@@ -1,3 +1,3 @@
 # executa
 
-Execution Engines for Stencila
+> Executors for executable documents
