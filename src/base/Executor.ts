@@ -458,12 +458,15 @@ export default class Executor implements Interface {
   }
 
   private async walk(
-    node: Node,
+    root: Node,
     transformer: (node: Node) => Promise<Node>
   ): Promise<Node> {
-    return walk(node)
+    return walk(root)
     async function walk(node: Node): Promise<Node> {
       const transformed = await transformer(node)
+
+      if (transformed !== node) return transformed
+
       if (transformed === undefined || isPrimitive(transformed))
         return transformed
       if (Array.isArray(transformed)) return Promise.all(transformed.map(walk))
