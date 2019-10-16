@@ -37,6 +37,7 @@ export default class WebSocketServer extends HttpServer {
         host: this.host,
         port: this.port
       },
+      '',
       this.defaultJwt
     )
   }
