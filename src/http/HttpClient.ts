@@ -56,9 +56,10 @@ export default class HttpClient extends Client {
    *
    * @param path Path to request
    */
-  public async get(path: string) {
-    return fetch(this.url + '/' + path)
-  }
+  // TODO: Reinstate after renaming Response to JrpcResponse
+  // public async get(path: string) {
+  //  return fetch(this.url + '/' + path)
+  // }
 
   /**
    * Make a POST request to the server

@@ -17,7 +17,7 @@ export default class WebSocketClient extends Client {
     super()
 
     this.socket = new WebSocket(address.toString())
-    this.socket.addEventListener('message', (event: MessageEvent) => {
+    this.socket.addEventListener('message', event => {
       this.receive(event.data)
     })
   }

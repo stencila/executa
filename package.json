@@ -12,6 +12,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cover": "jest --coverage",
+    "build": "tsc",
     "docs": "npm run docs:readme && npm run docs:ts",
     "docs:readme": "markdown-toc -i --maxdepth=4 README.md",
     "docs:ts": "typedoc --options typedoc.js ./src"
@@ -34,6 +35,7 @@
   "dependencies": {
     "@stencila/logga": "^1.3.0",
     "@stencila/schema": "^0.29.0",
+    "@types/ws": "^6.0.3",
     "ajv": "^6.10.2",
     "cross-fetch": "^3.0.4",
     "fastify": "^2.10.0",
