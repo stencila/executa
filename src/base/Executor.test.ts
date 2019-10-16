@@ -1,4 +1,4 @@
-import Executor, { Peer, Manifest, Method, Capabilities } from './Executor'
+import { Executor, Peer, Manifest, Method, Capabilities } from './Executor'
 import DirectServer from '../direct/DirectServer'
 import DirectClient from '../direct/DirectClient'
 import { ClientType } from './Client'

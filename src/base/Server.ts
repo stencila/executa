@@ -1,5 +1,5 @@
 import Error from './JsonRpcError'
-import Executor from './Executor'
+import { Executor } from './Executor'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'

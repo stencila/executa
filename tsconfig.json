@@ -1,6 +1,7 @@
 {
   "extends": "@stencila/dev-config/tsconfig.json",
   "compilerOptions": {
+    "module": "esnext",
     "outDir": "dist"
   },
   "include": ["src/**/*.ts"]

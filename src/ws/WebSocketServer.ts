@@ -3,7 +3,7 @@ import { getLogger } from '@stencila/logga'
 import fastifyWebsocket from 'fastify-websocket'
 import HttpServer from '../http/HttpServer'
 import { WebSocketAddress, TcpAddressInitializer } from '../base/Transports'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 
 const log = getLogger('executa:ws:server')
 

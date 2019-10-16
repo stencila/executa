@@ -27,7 +27,7 @@ import {
 import minimist from 'minimist'
 import * as readline from 'readline'
 import { ClientType } from './base/Client'
-import Executor, { Manifest, Method } from './base/Executor'
+import { Executor } from './base/Executor'
 import TcpClient from './tcp/TcpClient'
 import discoverTcp from './tcp/discover'
 import { CodeChunk } from '@stencila/schema'

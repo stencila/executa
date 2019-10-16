@@ -6,7 +6,7 @@ import {
 } from '@stencila/logga'
 import minimist from 'minimist'
 import { ClientType } from './base/Client'
-import Executor from './base/Executor'
+import { Executor } from './base/Executor'
 import Server from './base/Server'
 import discoverStdio from './stdio/discover'
 import StdioClient from './stdio/StdioClient'

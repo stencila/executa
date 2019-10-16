@@ -292,7 +292,7 @@ export class Peer {
  * the `Node` unchanged (for `compile`, `build` etc) or
  * attempting to use JSON as format (for `decode` and `encode`).
  */
-export default class Executor implements Interface {
+export class Executor implements Interface {
   /**
    * Functions used to obtain manifests of potential
    * peer executors.

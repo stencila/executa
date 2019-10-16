@@ -1,5 +1,5 @@
 import StreamServer from '../stream/StreamServer'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 import { getLogger } from '@stencila/logga'
 import { createServer, Server, Socket } from 'net'
 import { TcpAddress } from '../base/Transports'

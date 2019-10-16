@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { ChildProcess, spawn } from 'child_process'
 import path from 'path'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 import { VsockAddress } from '../base/Transports'
 import StreamServer from '../stream/StreamServer'
 
