@@ -1,11 +1,11 @@
-import Error from './Error'
+import Error from './JsonRpcError'
 
 /**
  * A JSON-RPC 2.0 response
  *
  * @see {@link https://www.jsonrpc.org/specification#response_object}
  */
-export default class Response {
+export default class JsonRpcResponse {
   /**
    * A string specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
    */

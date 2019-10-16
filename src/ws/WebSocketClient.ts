@@ -1,7 +1,7 @@
 import WebSocket from 'isomorphic-ws'
 
 import Client from '../base/Client'
-import Request from '../base/Request'
+import JsonRpcRequest from '../base/JsonRpcRequest'
 import { WebSocketAddress, TcpAddressInitializer } from '../base/Transports'
 
 /**
@@ -22,7 +22,7 @@ export default class WebSocketClient extends Client {
     })
   }
 
-  protected async send(request: Request): Promise<void> {
+  protected async send(request: JsonRpcRequest): Promise<void> {
     if (this.socket.readyState !== WebSocket.OPEN) {
       await new Promise(resolve => {
         this.socket.onopen = () => resolve()

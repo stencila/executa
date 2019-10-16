@@ -1,7 +1,7 @@
 import { Node } from '@stencila/schema'
 import { Interface, Method, Manifest } from './Executor'
-import Request from './Request'
-import Response from './Response'
+import JsonRpcRequest from './JsonRpcRequest'
+import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
 
 /**
@@ -14,7 +14,7 @@ export default abstract class Client implements Interface {
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: { [key: number]: (response: Request) => void } = {}
+  private requests: { [key: number]: (response: JsonRpcRequest) => void } = {}
 
   /**
    * Call the remote `Executor`'s `manifest` method
@@ -68,9 +68,9 @@ export default abstract class Client implements Interface {
     method: Method,
     params: { [key: string]: any } = {}
   ): Promise<Type> {
-    const request = new Request(method, params)
+    const request = new JsonRpcRequest(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
-      this.requests[request.id] = (response: Response) => {
+      this.requests[request.id] = (response: JsonRpcResponse) => {
         if (response.error !== undefined)
           return reject(new Error(response.error.message))
         resolve(response.result)
@@ -88,7 +88,7 @@ export default abstract class Client implements Interface {
    *
    * @param request The JSON-RPC request
    */
-  protected abstract send(request: Request): void
+  protected abstract send(request: JsonRpcRequest): void
 
   /**
    * Receive a response from the server.
@@ -99,9 +99,9 @@ export default abstract class Client implements Interface {
    *
    * @param response The JSON-RPC response
    */
-  protected receive(response: string | Response): void {
+  protected receive(response: string | JsonRpcResponse): void {
     if (typeof response === 'string')
-      response = JSON.parse(response) as Response
+      response = JSON.parse(response) as JsonRpcResponse
     if (response.id < 0) throw new Error(`Response is missing id: ${response}`)
     const resolve = this.requests[response.id]
     if (resolve === undefined)

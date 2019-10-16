@@ -1,6 +1,6 @@
 import Client from './Client'
-import Request from './Request'
-import Response from './Response'
+import JsonRpcRequest from './JsonRpcRequest'
+import JsonRpcResponse from './JsonRpcResponse'
 
 /**
  * Simple test client that implements the
@@ -8,9 +8,9 @@ import Response from './Response'
  * called method and arguments.
  */
 class TestClient extends Client {
-  public send(request: Request): void {
+  public send(request: JsonRpcRequest): void {
     const { id, method, params } = request
-    const response = new Response(id, { method, params })
+    const response = new JsonRpcResponse(id, { method, params })
     this.receive(response)
   }
 }

@@ -1,9 +1,9 @@
 import fetch from 'cross-fetch'
 import Client from '../base/Client'
-import Request from '../base/Request'
+import JsonRpcRequest from '../base/JsonRpcRequest'
 import { HttpAddress, TcpAddressInitializer } from '../base/Transports'
-import Response from '../base/Response'
-import JsonRpcError from '../base/Error'
+import JsonRpcResponse from '../base/JsonRpcResponse'
+import JsonRpcError from '../base/JsonRpcError'
 
 /**
  * A `Client` using HTTP/S for communication.
@@ -20,7 +20,7 @@ export default class HttpClient extends Client {
     this.jwt = address.jwt
   }
 
-  protected send(request: Request): Promise<void> {
+  protected send(request: JsonRpcRequest): Promise<void> {
     return fetch(this.url, {
       method: 'POST',
       mode: 'cors', // no-cors, cors, *same-origin
@@ -40,11 +40,11 @@ export default class HttpClient extends Client {
           // Translate the HTTP error into JSON-RPC error
           const message = await reply.text()
           const error = new JsonRpcError(-32600, message)
-          return new Response(request.id, undefined, error)
+          return new JsonRpcResponse(request.id, undefined, error)
         }
         return reply.json()
       })
-      .then((response: Response) => {
+      .then((response: JsonRpcResponse) => {
         this.receive(response)
       })
   }
@@ -56,10 +56,9 @@ export default class HttpClient extends Client {
    *
    * @param path Path to request
    */
-  // TODO: Reinstate after renaming Response to JrpcResponse
-  // public async get(path: string) {
-  //  return fetch(this.url + '/' + path)
-  // }
+  public async get(path: string): Promise<Response> {
+    return fetch(this.url + '/' + path)
+  }
 
   /**
    * Make a POST request to the server
@@ -67,7 +66,7 @@ export default class HttpClient extends Client {
    * @param path  Path to request
    * @param data Data to POST in the request body
    */
-  public async post(path: string, data?: {}) {
+  public async post(path: string, data?: {}): Promise<Response> {
     return fetch(this.url + '/' + path, {
       method: 'POST',
       credentials: 'same-origin',

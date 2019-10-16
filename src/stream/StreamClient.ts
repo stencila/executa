@@ -2,7 +2,7 @@ import { Readable, Writable } from 'stream'
 // @ts-ignore
 import * as lps from 'length-prefixed-stream'
 import Client from '../base/Client'
-import Request from '../base/Request'
+import JsonRpcRequest from '../base/JsonRpcRequest'
 
 export default abstract class StreamClient extends Client {
   /**
@@ -30,7 +30,7 @@ export default abstract class StreamClient extends Client {
     })
   }
 
-  protected send(request: Request): void {
+  protected send(request: JsonRpcRequest): void {
     this.encoder.write(JSON.stringify(request) + '\n')
   }
 }

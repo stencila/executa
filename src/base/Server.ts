@@ -1,7 +1,7 @@
-import Error from './Error'
+import Error from './JsonRpcError'
 import Executor from './Executor'
-import Request from './Request'
-import Response from './Response'
+import JsonRpcRequest from './JsonRpcRequest'
+import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
 
 /**
@@ -32,16 +32,16 @@ export default abstract class Server {
    * @returns A JSON-RPC response as an object or string (default)
    */
   protected async receive(
-    request: string | Request,
+    request: string | JsonRpcRequest,
     stringify: boolean = true
-  ): Promise<string | Response> {
+  ): Promise<string | JsonRpcResponse> {
     let id = -1
     let result
     let error
 
     // Extract a parameter by name from Object or by index from Array
     function param(
-      request: Request,
+      request: JsonRpcRequest,
       index: number,
       name: string,
       required: boolean = true
@@ -64,7 +64,7 @@ export default abstract class Server {
       if (typeof request === 'string') {
         // Parse JSON into a request
         try {
-          request = JSON.parse(request) as Request
+          request = JSON.parse(request) as JsonRpcRequest
         } catch (err) {
           throw new Error(-32700, `Parse error: ${err.message}`)
         }
@@ -113,7 +113,7 @@ export default abstract class Server {
             })
     }
 
-    const response = new Response(id, result, error)
+    const response = new JsonRpcResponse(id, result, error)
     return stringify ? JSON.stringify(response) : response
   }
 

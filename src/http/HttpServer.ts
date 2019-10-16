@@ -3,8 +3,8 @@ import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import Executor from '../base/Executor'
-import Request from '../base/Request'
-import Response from '../base/Response'
+import JsonRpcRequest from '../base/JsonRpcRequest'
+import JsonRpcResponse from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
 import TcpServer from '../tcp/TcpServer'
 
@@ -71,11 +71,11 @@ export default class HttpServer extends TcpServer {
     // and HTTP error codes
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
-        const jsonRpcRequest = new Request(method, request.body)
+        const jsonRpcRequest = new JsonRpcRequest(method, request.body)
         const jsonRpcResponse = (await this.receive(
           jsonRpcRequest,
           false
-        )) as Response
+        )) as JsonRpcResponse
 
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse

@@ -3,7 +3,7 @@
  *
  * @see {@link https://www.jsonrpc.org/specification#request_object}
  */
-export default class Request {
+export default class JsonRpcRequest {
   /**
    * A string specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
    */
@@ -41,8 +41,8 @@ export default class Request {
   private static counter: number = 0
 
   public constructor(method?: string, params?: { [key: string]: any } | any[]) {
-    Request.counter += 1
-    this.id = Request.counter
+    JsonRpcRequest.counter += 1
+    this.id = JsonRpcRequest.counter
     this.method = method
     this.params = params
   }
