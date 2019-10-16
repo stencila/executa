@@ -39,7 +39,7 @@ export class UdsAddress {
 }
 
 /**
- * An address int the Linux VSOCK address family
+ * An address in the Linux VSOCK address family
  *
  * @see http://man7.org/linux/man-pages/man7/vsock.7.html
  */
@@ -123,17 +123,42 @@ export class TcpAddress {
   }
 }
 
+/**
+ * An address in the HTTP address family
+ *
+ * @see https://www.w3.org/Addressing/HTTPAddressing.html
+ */
 export class HttpAddress extends TcpAddress {
   public readonly type: Transport.http | Transport.ws = Transport.http
 
+  /**
+   * The path for the address.
+   *
+   * Should begin with a forward slash e.g. `/some/route`
+   */
+  public readonly path: string
+
+  /**
+   * The JSON Web Token (JWT) to use add to requests
+   * to this address.
+   */
   public readonly jwt?: string
 
-  public constructor(address?: TcpAddressInitializer, jwt?: string) {
+  public constructor(
+    address?: TcpAddressInitializer,
+    path: string = '',
+    jwt?: string
+  ) {
     super(address, {
       host: '127.0.0.1',
       port: 8000
     })
+    this.path = path
     this.jwt = jwt
+  }
+
+  public toString(): string {
+    return `${super.toString()}${this.path}`
   }
 }
 

@@ -100,6 +100,7 @@ export default class HttpServer extends TcpServer {
         host: this.host,
         port: this.port
       },
+      '',
       this.defaultJwt
     )
   }
