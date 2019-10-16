@@ -1,3 +1,12 @@
+## [0.1.1](https://github.com/stencila/executa/compare/v0.1.0...v0.1.1) (2019-10-16)
+
+
+### Bug Fixes
+
+* **Console:** Fix for new Executor constuctor API ([7b4351c](https://github.com/stencila/executa/commit/7b4351c))
+* **HttpAddress:** Add path to HttpAddress ([0036afc](https://github.com/stencila/executa/commit/0036afc))
+* **WebSocketServer:** Call with correct args ([be87b69](https://github.com/stencila/executa/commit/be87b69))
+
 # 0.1.0 (2019-10-16)
 
 
