@@ -54,13 +54,8 @@ replaceHandlers(data => {
 
 // eslint-disable-next-line
 ;(async () => {
-  // Collect manifest of the peer `TcpServer`
-  const manifests: Manifest[] = await discoverTcp()
-  const clientTypes: ClientType[] = [TcpClient as ClientType]
-  log.debug(`Obtained manifests: ${JSON.stringify(manifests, null, ' ')}`)
-
   // Create executor (no need to start it, since it has no servers)
-  const executor = new Executor(manifests, clientTypes)
+  const executor = new Executor([discoverTcp], [TcpClient as ClientType])
 
   // Create the REPL with the starting prompt
   const repl = readline.createInterface({
