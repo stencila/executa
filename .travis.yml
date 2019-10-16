@@ -9,3 +9,29 @@ os:
 script:
   - npm run lint
   - npm run test:cover -- --testTimeout=120000 --forceExit
+  - npm run build
+  - npm run docs
+
+after_success:
+  # Upload test coverage to codecov.io
+  - bash <(curl -s https://codecov.io/bash)
+
+deploy:
+  # Deploy documentation to Github Pages (only on Linux)
+  # See https://docs.travis-ci.com/user/deployment/pages/
+  - provider: pages
+    skip-cleanup: true
+    github-token: $GITHUB_TOKEN
+    local-dir: docs
+    on:
+      branch: master
+      condition: $TRAVIS_OS_NAME = linux
+
+  # Do a semantic release (only on Linux)
+  - provider: script
+    skip_cleanup: true
+    script: npx semantic-release
+    on:
+      branch: master
+      condition: $TRAVIS_OS_NAME = linux
+
