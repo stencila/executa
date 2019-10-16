@@ -1,13 +1,13 @@
-import { getLogger } from '@stencila/logga';
-import Executor from '../base/Executor';
-import { VsockAddress } from '../base/Transports';
-import StreamServer from '../stream/StreamServer';
-import { spawn, ChildProcess } from 'child_process';
+import { getLogger } from '@stencila/logga'
+import { ChildProcess, spawn } from 'child_process'
+import path from 'path'
+import Executor from '../base/Executor'
+import { VsockAddress } from '../base/Transports'
+import StreamServer from '../stream/StreamServer'
 
 const log = getLogger('executa:vsock:server')
 
 export default class VsockServer extends StreamServer {
-
   public readonly port: number
 
   private server?: ChildProcess
@@ -27,9 +27,12 @@ export default class VsockServer extends StreamServer {
 
   public async start(): Promise<void> {
     if (this.server === undefined) {
-      const server = (this.server = spawn(__dirname + '/vsock-server', [`${this.port}`]))
+      const server = (this.server = spawn(
+        path.join(__dirname, 'vsock-server'),
+        [`${this.port}`]
+      ))
       server.on('error', log.error)
-      super.start(server.stdout, server.stdin)
+      return super.start(server.stdout, server.stdin)
     }
   }
 

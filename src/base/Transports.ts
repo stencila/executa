@@ -33,7 +33,7 @@ export class UdsAddress {
    */
   public readonly path: string
 
-  public constructor (path: string) {
+  public constructor(path: string) {
     this.path = path
   }
 }
@@ -60,7 +60,7 @@ export class VsockAddress {
    */
   public readonly path?: string
 
-  public constructor (port: number = 6000, path?: string) {
+  public constructor(port: number = 6000, path?: string) {
     this.port = port
     this.path = path
   }
