@@ -1,10 +1,10 @@
-import { Node, isPrimitive, nodeType } from '@stencila/schema'
-import { JSONSchema7Definition } from 'json-schema'
+import { getLogger } from '@stencila/logga'
+import { isPrimitive, Node, nodeType } from '@stencila/schema'
 import Ajv from 'ajv'
+import { JSONSchema7Definition } from 'json-schema'
 import { ClientType } from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:executor')
 
@@ -347,9 +347,9 @@ export class Executor implements Interface {
   /**
    * Stop servers for the executor.
    */
-  public async stop(): Promise<void> {
+  public stop(): Promise<void>[] {
     log.info('Stopping servers')
-    this.servers.forEach(server => server.stop())
+    return this.servers.map(server => server.stop())
   }
 
   /**
@@ -426,20 +426,20 @@ export class Executor implements Interface {
   /**
    * Get a map of server addresses for this executor.
    */
-  protected async addresses(): Promise<Addresses> {
+  protected addresses(): Addresses {
     return this.servers
       .map(server => server.address)
       .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
   }
 
-  public async decode(content: string, format: string = 'json'): Promise<Node> {
+  public async decode(content: string, format = 'json'): Promise<Node> {
     if (format === 'json') return JSON.parse(content)
     return this.delegate(Method.decode, { content, format }, () =>
       this.decode(content, 'json')
     )
   }
 
-  public async encode(node: Node, format: string = 'json'): Promise<string> {
+  public async encode(node: Node, format = 'json'): Promise<string> {
     if (format === 'json') return JSON.stringify(node)
     return this.delegate(Method.encode, { node, format }, () =>
       this.encode(node, 'json')
@@ -447,11 +447,11 @@ export class Executor implements Interface {
   }
 
   public async compile(node: Node): Promise<Node> {
-    return this.delegate(Method.compile, { node }, async () => node)
+    return this.delegate(Method.compile, { node }, () => Promise.resolve(node))
   }
 
   public async build(node: Node): Promise<Node> {
-    return this.delegate(Method.build, { node }, async () => node)
+    return this.delegate(Method.build, { node }, () => Promise.resolve(node))
   }
 
   /**
@@ -462,14 +462,16 @@ export class Executor implements Interface {
    *
    * @param node The node to execute
    */
-  public async execute(node: Node): Promise<Node> {
-    return this.walk(node, async node => {
+  public execute(node: Node): Promise<Node> {
+    return this.walk(node, node => {
       switch (nodeType(node)) {
         case 'CodeChunk':
         case 'CodeExpression':
-          return this.delegate(Method.execute, { node }, async () => node)
+          return this.delegate(Method.execute, { node }, () =>
+            Promise.resolve(node)
+          )
       }
-      return node
+      return Promise.resolve(node)
     })
   }
 
@@ -479,15 +481,15 @@ export class Executor implements Interface {
   ): Promise<any> {
     switch (method) {
       case Method.decode:
-        return this.decode(params['content'], params['format'])
+        return this.decode(params.content, params.format)
       case Method.encode:
-        return this.encode(params['node'], params['format'])
+        return this.encode(params.node, params.format)
       case Method.compile:
-        return this.compile(params['node'])
+        return this.compile(params.node)
       case Method.build:
-        return this.build(params['node'])
+        return this.build(params.node)
       case Method.execute:
-        return this.execute(params['node'])
+        return this.execute(params.node)
     }
   }
 

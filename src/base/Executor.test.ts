@@ -1,10 +1,10 @@
-import { Executor, Peer, Manifest, Method, Capabilities } from './Executor'
-import DirectServer from '../direct/DirectServer'
+import { Article, codeChunk, codeExpression, isA, Node } from '@stencila/schema'
 import DirectClient from '../direct/DirectClient'
-import { ClientType } from './Client'
-import { Transport } from './Transports'
+import DirectServer from '../direct/DirectServer'
 import StdioClient from '../stdio/StdioClient'
-import { codeChunk, Node, isA, codeExpression, Article } from '@stencila/schema'
+import { ClientType } from './Client'
+import { Capabilities, Executor, Manifest, Method, Peer } from './Executor'
+import { Transport } from './Transports'
 
 describe('Peer', () => {
   test('capable: no capabilities', () => {
@@ -150,7 +150,7 @@ describe('Peer', () => {
     expect(canDecode('csharp')).toBe(false)
   })
 
-  test('connect: no addresses', async () => {
+  test('connect: no addresses', () => {
     const peer = new Peer(
       {
         capabilities: {},
@@ -162,7 +162,7 @@ describe('Peer', () => {
     expect(peer.connect()).toBe(false)
   })
 
-  test('connect: no client types', async () => {
+  test('connect: no client types', () => {
     const peer = new Peer(
       {
         capabilities: {},
@@ -174,7 +174,7 @@ describe('Peer', () => {
     expect(peer.connect()).toBe(false)
   })
 
-  test('connect: no addresses match client types', async () => {
+  test('connect: no addresses match client types', () => {
     const peer = new Peer(
       {
         capabilities: {},
@@ -192,7 +192,7 @@ describe('Peer', () => {
     expect(peer.connect()).toBe(false)
   })
 
-  test('connect: order of client types equals preference', async () => {
+  test('connect: order of client types equals preference', () => {
     const directServer = new DirectServer()
     const manifest: Manifest = {
       capabilities: {},
@@ -234,7 +234,7 @@ class DeepThought extends Executor {
     'the answer to life the universe and everything'
 
   public async capabilities(): Promise<Capabilities> {
-    return {
+    return Promise.resolve({
       execute: {
         properties: {
           node: {
@@ -249,14 +249,14 @@ class DeepThought extends Executor {
           }
         }
       }
-    }
+    })
   }
 
   public async execute(node: Node): Promise<Node> {
     if (isA('CodeChunk', node) && node.text === DeepThought.question) {
-      return { ...node, outputs: [42] }
+      return Promise.resolve({ ...node, outputs: [42] })
     }
-    return node
+    return Promise.resolve(node)
   }
 }
 
@@ -265,7 +265,7 @@ class DeepThought extends Executor {
  */
 class Calculator extends Executor {
   public async capabilities(): Promise<Capabilities> {
-    return {
+    return Promise.resolve({
       execute: {
         properties: {
           node: {
@@ -281,15 +281,15 @@ class Calculator extends Executor {
           }
         }
       }
-    }
+    })
   }
 
   public async execute(node: Node): Promise<Node> {
     if (isA('CodeExpression', node)) {
       // eslint-disable-next-line no-eval
-      return { ...node, output: eval(node.text) }
+      return Promise.resolve({ ...node, output: eval(node.text) })
     }
-    return node
+    return Promise.resolve(node)
   }
 }
 

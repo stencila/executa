@@ -32,7 +32,7 @@ export default class JsonRpcResponse {
    */
   public readonly error?: Error
 
-  public constructor(id: number = -1, result?: any, error?: Error) {
+  public constructor(id = -1, result?: any, error?: Error) {
     this.id = id
     this.result = result
     this.error = error

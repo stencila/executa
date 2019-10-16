@@ -1,6 +1,8 @@
 import path from 'path'
 import StdioClient from './StdioClient'
 
+jest.setTimeout(30 * 1000)
+
 describe('StdioClient and StdioServer', () => {
   const client = new StdioClient(
     'npx ts-node ' + path.join(__dirname, 'stdioTestServer.ts')

@@ -60,7 +60,7 @@ export class VsockAddress {
    */
   public readonly path?: string
 
-  public constructor(port: number = 6000, path?: string) {
+  public constructor(port = 6000, path?: string) {
     this.port = port
     this.path = path
   }
@@ -144,11 +144,7 @@ export class HttpAddress extends TcpAddress {
    */
   public readonly jwt?: string
 
-  public constructor(
-    address?: TcpAddressInitializer,
-    path: string = '',
-    jwt?: string
-  ) {
+  public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
     super(address, {
       host: '127.0.0.1',
       port: 8000

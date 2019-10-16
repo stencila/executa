@@ -19,18 +19,18 @@
  */
 
 import {
+  defaultHandler,
   getLogger,
   LogLevel,
-  replaceHandlers,
-  defaultHandler
+  replaceHandlers
 } from '@stencila/logga'
+import { CodeChunk } from '@stencila/schema'
 import minimist from 'minimist'
 import * as readline from 'readline'
 import { ClientType } from './base/Client'
 import { Executor } from './base/Executor'
-import TcpClient from './tcp/TcpClient'
 import discoverTcp from './tcp/discover'
-import { CodeChunk } from '@stencila/schema'
+import TcpClient from './tcp/TcpClient'
 
 const { _, ...options } = minimist(process.argv.slice(2))
 
@@ -65,8 +65,7 @@ replaceHandlers(data => {
   })
   repl.prompt()
 
-  // For each line the user enters...
-  repl.on('line', async (line: string) => {
+  const getLine = async (line: string): Promise<void> => {
     // When user enters a line, execute a `CodeChunk`
     const result = (await executor.execute({
       type: 'CodeChunk',
@@ -91,5 +90,12 @@ replaceHandlers(data => {
 
     // Provide a new prompt
     repl.prompt()
+  }
+
+  // For each line the user enters...
+  repl.on('line', line => {
+    getLine(line).catch(e => {
+      console.warn(e)
+    })
   })
 })()

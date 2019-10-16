@@ -38,7 +38,7 @@ export default class JsonRpcRequest {
    * Request ids don't need to be sequential but this helps with debugging.
    * Request ids don't need to be unique across clients.
    */
-  private static counter: number = 0
+  private static counter = 0
 
   public constructor(method?: string, params?: { [key: string]: any } | any[]) {
     JsonRpcRequest.counter += 1
