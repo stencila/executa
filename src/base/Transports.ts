@@ -1,6 +1,7 @@
 export enum Transport {
   direct = 'direct',
   stdio = 'stdio',
+  uds = 'uds',
   vsock = 'vsock',
   tcp = 'tcp',
   http = 'http',
@@ -19,10 +20,50 @@ export interface StdioAddress {
   cwd?: string
 }
 
-export interface VsockAddress {
-  type: Transport.vsock
-  port?: number
-  cid?: number
+/**
+ * An address in the Unix Domain Socket (UDS) address family
+ *
+ * @see https://en.wikipedia.org/wiki/Unix_domain_socket
+ */
+export class UdsAddress {
+  public readonly type: Transport.uds = Transport.uds
+
+  /**
+   * The file system path to the socket
+   */
+  public readonly path: string
+
+  public constructor(path: string) {
+    this.path = path
+  }
+}
+
+/**
+ * An address int the Linux VSOCK address family
+ *
+ * @see http://man7.org/linux/man-pages/man7/vsock.7.html
+ */
+export class VsockAddress {
+  public readonly type: Transport.vsock = Transport.vsock
+
+  /**
+   * The port number
+   */
+  public readonly port: number
+
+  /**
+   * The file system path to the socket
+   *
+   * Although VSOCK addresses do not include a path,
+   * Firecracker uses a UDS on the host. This allows
+   * for that use case.
+   */
+  public readonly path?: string
+
+  public constructor(port: number = 6000, path?: string) {
+    this.port = port
+    this.path = path
+  }
 }
 
 export type TcpAddressInitializer =

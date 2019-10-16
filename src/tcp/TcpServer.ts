@@ -2,7 +2,7 @@ import StreamServer from '../stream/StreamServer'
 import Executor from '../base/Executor'
 import { getLogger } from '@stencila/logga'
 import { createServer, Server, Socket } from 'net'
-import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
+import { TcpAddress } from '../base/Transports'
 
 const log = getLogger('executa:tcp:server')
 
