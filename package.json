@@ -1,6 +1,6 @@
 {
   "name": "executa",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Execution delegator for various language backends.",
   "main": "index.js",
   "scripts": {
