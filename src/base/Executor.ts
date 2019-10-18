@@ -470,7 +470,14 @@ export class Executor implements Interface {
         case 'CodeChunk':
         case 'CodeExpression':
           return this.delegate(Method.execute, { node }, () =>
-            Promise.resolve(node)
+            Promise.resolve({
+              ...(node as object),
+              errors: [{
+                type: 'CodeError',
+                kind: 'incapable',
+                message: 'Not able to execute this type of code.'
+              }]
+            })
           )
       }
       return Promise.resolve(node)
