@@ -71,6 +71,8 @@ export type TcpAddressInitializer =
   | string
   | { host: string; port: number }
 
+export type TcpAddressDefaults = { host: string; port: number }
+
 export class TcpAddress {
   public readonly type: Transport.tcp | Transport.http | Transport.ws =
     Transport.tcp
@@ -81,12 +83,9 @@ export class TcpAddress {
 
   public constructor(
     address?: TcpAddressInitializer,
-    defaults: {
-      host: string
-      port: number
-    } = {
+    defaults: TcpAddressDefaults = {
       host: '127.0.0.1',
-      port: 2000
+      port: 7000
     }
   ) {
     const { host, port } = (function() {
@@ -144,11 +143,16 @@ export class HttpAddress extends TcpAddress {
    */
   public readonly jwt?: string
 
-  public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
-    super(address, {
+  public constructor(
+    address?: TcpAddressInitializer,
+    path = '',
+    jwt?: string,
+    defaults: TcpAddressDefaults = {
       host: '127.0.0.1',
       port: 8000
-    })
+    }
+  ) {
+    super(address, defaults)
     this.path = path
     this.jwt = jwt
   }
@@ -160,6 +164,13 @@ export class HttpAddress extends TcpAddress {
 
 export class WebSocketAddress extends HttpAddress {
   public readonly type: Transport.ws = Transport.ws
+
+  public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
+    super(address, path, jwt, {
+      host: '127.0.0.1',
+      port: 9000
+    })
+  }
 }
 
 export type Address =

@@ -31,7 +31,7 @@ describe('TcpAddress', () => {
   })
 
   test('toString', () => {
-    expect(new TcpAddress().toString()).toEqual('tcp://127.0.0.1:2000')
+    expect(new TcpAddress().toString()).toEqual('tcp://127.0.0.1:7000')
   })
 })
 
