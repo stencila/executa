@@ -5,12 +5,6 @@ import json from 'rollup-plugin-json'
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 
-const entryFiles = [
-  './src/base/Executor.ts',
-  './src/http/discover.ts',
-  './src/ws/WebSocketClient.ts'
-]
-
 const plugins = [
   typescript({
     tsconfig: 'tsconfig.browser.json'
@@ -27,47 +21,42 @@ const plugins = [
   })
 ]
 
-export default entryFiles.reduce(
-  (config, entryFile) => [
-    ...config,
-    {
-      input: entryFile,
-      plugins,
-      output: [
-        {
-          dir: 'dist/lib',
-          format: 'cjs'
-        },
-        {
-          dir: 'dist/esm',
-          format: 'esm'
-        }
-      ]
-    },
-    {
-      input: entryFile,
-      plugins: [
-        ...plugins,
-        builtins(),
-        resolve({
-          browser: true
-        })
-      ],
+export default [
+  {
+    input: 'src/index.ts',
+    plugins,
+    output: [
+      {
+        dir: 'dist/lib',
+        format: 'cjs'
+      },
+      {
+        dir: 'dist/esm',
+        format: 'esm'
+      }
+    ]
+  },
+  {
+    input: 'src/index.browser.ts',
 
-      // Do not bundle modules that provide things already
-      // in the browser. Put them in `output.globals`
-      external: ['cross-fetch', 'isomorphic-ws'],
+    plugins: [
+      ...plugins,
+      builtins(),
+      resolve()
+    ],
 
-      output: {
-        name: 'executa',
-        dir: 'dist/browser',
-        format: 'iife',
-        globals: {
-          'cross-fetch': 'fetch',
-          'isomorphic-ws': 'WebSocket'
-        }
+    // Do not bundle modules that provide things already
+    // in the browser. Put them in `output.globals`
+    external: ['cross-fetch', 'isomorphic-ws'],
+
+    output: {
+      name: 'executa',
+      file: 'dist/browser/index.js',
+      format: 'iife',
+      globals: {
+        'cross-fetch': 'fetch',
+        'isomorphic-ws': 'WebSocket'
       }
     }
-  ],
-  []
-)
+  }
+]
