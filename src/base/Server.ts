@@ -119,17 +119,19 @@ export default abstract class Server {
 
   /**
    * Start the server
+   *
+   * Derived classes may override this method.
    */
   public async start(): Promise<void> {
-    // TODO: Implement function
     return Promise.resolve()
   }
 
   /**
    * Stop the server
+   *
+   * Derived classes may override this method.
    */
   public async stop(): Promise<void> {
-    // TODO: Implement function
     return Promise.resolve()
   }
 
@@ -137,13 +139,14 @@ export default abstract class Server {
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
    */
   public async run(): Promise<void> {
-    if (process !== undefined) {
-      const stop = (): void => {
-        this.stop().catch(e => console.warn('Could not stop the server\n', e))
-      }
-      process.on('SIGINT', stop)
-      process.on('SIGTERM', stop)
+    const stop = (): void => {
+      this.stop()
+        .then(() => process.exit())
+        .catch(e => console.warn('Could not stop the server\n', e))
     }
-    await this.start()
+    process.on('SIGINT', stop)
+    process.on('SIGTERM', stop)
+
+    return this.start()
   }
 }
