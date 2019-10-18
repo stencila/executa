@@ -39,11 +39,7 @@ export default [
   {
     input: 'src/index.browser.ts',
 
-    plugins: [
-      ...plugins,
-      builtins(),
-      resolve()
-    ],
+    plugins: [...plugins, builtins(), resolve()],
 
     // Do not bundle modules that provide things already
     // in the browser. Put them in `output.globals`

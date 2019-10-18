@@ -250,7 +250,9 @@ export class Peer {
       }
       const transport = transportMap[ClientType.name]
       if (transport === undefined)
-        throw new Error(`Wooah! This should not happen! A key is missing for "${ClientType.name}" in in transportMap.`)
+        throw new Error(
+          `Wooah! This should not happen! A key is missing for "${ClientType.name}" in in transportMap.`
+        )
 
       // See if the peer has an address for the transport
       if (this.manifest.addresses === undefined) return false
