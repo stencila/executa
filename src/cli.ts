@@ -6,13 +6,14 @@ import {
 } from '@stencila/logga'
 import minimist from 'minimist'
 import { ClientType } from './base/Client'
-import Executor from './base/Executor'
+import { Executor } from './base/Executor'
 import Server from './base/Server'
 import discoverStdio from './stdio/discover'
 import StdioClient from './stdio/StdioClient'
 import HttpServer from './http/HttpServer'
 import TcpServer from './tcp/TcpServer'
 import WebSocketServer from './ws/WebSocketServer'
+import { HttpAddress, TcpAddress, WebSocketAddress } from './base/Transports'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
@@ -43,13 +44,22 @@ const serve = async (executor: Executor) => {
   // Add server classes based on supplied options
   const servers: Server[] = []
   if (options.tcp !== undefined) {
-    servers.push(new TcpServer(executor, options.tcp))
+    const address = new TcpAddress(
+      typeof options.tcp === 'boolean' ? undefined : options.tcp
+    )
+    servers.push(new TcpServer(executor, address))
   }
   if (options.http !== undefined) {
-    servers.push(new HttpServer(executor, options.http))
+    const address = new HttpAddress(
+      typeof options.http === 'boolean' ? undefined : options.http
+    )
+    servers.push(new HttpServer(executor, address))
   }
   if (options.ws !== undefined) {
-    servers.push(new WebSocketServer(executor, options.ws))
+    const address = new WebSocketAddress(
+      typeof options.ws === 'boolean' ? undefined : options.ws
+    )
+    servers.push(new WebSocketServer(executor, address))
   }
   if (servers.length === 0) {
     log.warn(

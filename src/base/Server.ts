@@ -1,5 +1,5 @@
+import { Executor } from './Executor'
 import Error from './JsonRpcError'
-import Executor from './Executor'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
@@ -33,7 +33,7 @@ export default abstract class Server {
    */
   protected async receive(
     request: string | JsonRpcRequest,
-    stringify: boolean = true
+    stringify = true
   ): Promise<string | JsonRpcResponse> {
     let id = -1
     let result
@@ -44,7 +44,7 @@ export default abstract class Server {
       request: JsonRpcRequest,
       index: number,
       name: string,
-      required: boolean = true
+      required = true
     ): any {
       if (request.params === undefined)
         throw new Error(-32600, 'Invalid request: missing "params" property')
@@ -119,25 +119,34 @@ export default abstract class Server {
 
   /**
    * Start the server
+   *
+   * Derived classes may override this method.
    */
-  public async start(): Promise<void> {}
+  public async start(): Promise<void> {
+    return Promise.resolve()
+  }
 
   /**
    * Stop the server
+   *
+   * Derived classes may override this method.
    */
-  public async stop(): Promise<void> {}
+  public async stop(): Promise<void> {
+    return Promise.resolve()
+  }
 
   /**
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
    */
   public async run(): Promise<void> {
-    if (process !== undefined) {
-      const stop = async (): Promise<void> => {
-        await this.stop()
-      }
-      process.on('SIGINT', stop)
-      process.on('SIGTERM', stop)
+    const stop = (): void => {
+      this.stop()
+        .then(() => process.exit())
+        .catch(e => console.warn('Could not stop the server\n', e))
     }
-    await this.start()
+    process.on('SIGINT', stop)
+    process.on('SIGTERM', stop)
+
+    return this.start()
   }
 }

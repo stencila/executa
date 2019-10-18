@@ -1,7 +1,7 @@
 import * as stencila from '@stencila/schema'
 import DirectClient from './DirectClient'
 import DirectServer from './DirectServer'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 
 describe('DirectClient and DirectServer', () => {
   const executor = new Executor()

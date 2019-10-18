@@ -1,8 +1,8 @@
-import StreamServer from '../stream/StreamServer'
-import Executor from '../base/Executor'
 import { getLogger } from '@stencila/logga'
 import { createServer, Server, Socket } from 'net'
+import { Executor } from '../base/Executor'
 import { TcpAddress } from '../base/Transports'
+import StreamServer from '../stream/StreamServer'
 
 const log = getLogger('executa:tcp:server')
 
@@ -33,7 +33,7 @@ export default class TcpServer extends StreamServer {
     })
   }
 
-  protected onConnection(client: Socket) {
+  protected onConnection(client: Socket): void {
     this.clients.push(client)
     client.on('close', () => {
       this.clients.splice(this.clients.indexOf(client), 1)
@@ -44,8 +44,12 @@ export default class TcpServer extends StreamServer {
     if (this.server === undefined) {
       log.info(`Starting server: ${this.address.toString()}`)
 
-      const server = (this.server = createServer(async socket => {
-        await super.start(socket, socket)
+      const server = (this.server = createServer(socket => {
+        super.start(socket, socket).catch(e => {
+          log.error(
+            `Failed to start server: ${this.address.toString()}\n\n${e}`
+          )
+        })
       }))
       server.on('connection', client => this.onConnection(client))
 
@@ -65,6 +69,7 @@ export default class TcpServer extends StreamServer {
         if (this.server !== undefined) this.server.unref()
       })
       this.server = undefined
+      return Promise.resolve()
     }
   }
 }

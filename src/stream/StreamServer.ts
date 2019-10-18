@@ -1,6 +1,6 @@
-import { Readable, Writable } from 'stream'
 // @ts-ignore
 import * as lps from 'length-prefixed-stream'
+import { Readable, Writable } from 'stream'
 import Server from '../base/Server'
 export default abstract class StreamServer extends Server {
   /**
@@ -8,7 +8,7 @@ export default abstract class StreamServer extends Server {
    */
   private encoder: lps.Encoder
 
-  public async start(
+  public start(
     incoming: Readable = process.stdin,
     outgoing: Writable = process.stdout
   ): Promise<void> {
@@ -22,5 +22,7 @@ export default abstract class StreamServer extends Server {
 
     this.encoder = lps.encode()
     this.encoder.pipe(outgoing)
+
+    return Promise.resolve()
   }
 }

@@ -1,10 +1,10 @@
-import { Node, isPrimitive, nodeType } from '@stencila/schema'
-import { JSONSchema7Definition } from 'json-schema'
+import { getLogger } from '@stencila/logga'
+import { isPrimitive, Node, nodeType } from '@stencila/schema'
 import Ajv from 'ajv'
+import { JSONSchema7Definition } from 'json-schema'
 import { ClientType } from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:executor')
 
@@ -246,11 +246,13 @@ export class Peer {
         VsockClient: Transport.vsock,
         TcpClient: Transport.tcp,
         HttpClient: Transport.http,
-        WebsocketClient: Transport.ws
+        WebSocketClient: Transport.ws
       }
       const transport = transportMap[ClientType.name]
       if (transport === undefined)
-        throw new Error('Wooah! This should not happen!')
+        throw new Error(
+          `Wooah! This should not happen! A key is missing for "${ClientType.name}" in in transportMap.`
+        )
 
       // See if the peer has an address for the transport
       if (this.manifest.addresses === undefined) return false
@@ -292,7 +294,7 @@ export class Peer {
  * the `Node` unchanged (for `compile`, `build` etc) or
  * attempting to use JSON as format (for `decode` and `encode`).
  */
-export default class Executor implements Interface {
+export class Executor implements Interface {
   /**
    * Functions used to obtain manifests of potential
    * peer executors.
@@ -347,9 +349,9 @@ export default class Executor implements Interface {
   /**
    * Stop servers for the executor.
    */
-  public async stop(): Promise<void> {
+  public stop(): Promise<void>[] {
     log.info('Stopping servers')
-    this.servers.forEach(server => server.stop())
+    return this.servers.map(server => server.stop())
   }
 
   /**
@@ -426,20 +428,20 @@ export default class Executor implements Interface {
   /**
    * Get a map of server addresses for this executor.
    */
-  protected async addresses(): Promise<Addresses> {
+  protected addresses(): Addresses {
     return this.servers
       .map(server => server.address)
       .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
   }
 
-  public async decode(content: string, format: string = 'json'): Promise<Node> {
+  public async decode(content: string, format = 'json'): Promise<Node> {
     if (format === 'json') return JSON.parse(content)
     return this.delegate(Method.decode, { content, format }, () =>
       this.decode(content, 'json')
     )
   }
 
-  public async encode(node: Node, format: string = 'json'): Promise<string> {
+  public async encode(node: Node, format = 'json'): Promise<string> {
     if (format === 'json') return JSON.stringify(node)
     return this.delegate(Method.encode, { node, format }, () =>
       this.encode(node, 'json')
@@ -447,11 +449,11 @@ export default class Executor implements Interface {
   }
 
   public async compile(node: Node): Promise<Node> {
-    return this.delegate(Method.compile, { node }, async () => node)
+    return this.delegate(Method.compile, { node }, () => Promise.resolve(node))
   }
 
   public async build(node: Node): Promise<Node> {
-    return this.delegate(Method.build, { node }, async () => node)
+    return this.delegate(Method.build, { node }, () => Promise.resolve(node))
   }
 
   /**
@@ -462,14 +464,23 @@ export default class Executor implements Interface {
    *
    * @param node The node to execute
    */
-  public async execute(node: Node): Promise<Node> {
-    return this.walk(node, async node => {
+  public execute(node: Node): Promise<Node> {
+    return this.walk(node, node => {
       switch (nodeType(node)) {
         case 'CodeChunk':
         case 'CodeExpression':
-          return this.delegate(Method.execute, { node }, async () => node)
+          return this.delegate(Method.execute, { node }, () =>
+            Promise.resolve({
+              ...(node as object),
+              errors: [{
+                type: 'CodeError',
+                kind: 'incapable',
+                message: 'Not able to execute this type of code.'
+              }]
+            })
+          )
       }
-      return node
+      return Promise.resolve(node)
     })
   }
 
@@ -479,15 +490,15 @@ export default class Executor implements Interface {
   ): Promise<any> {
     switch (method) {
       case Method.decode:
-        return this.decode(params['content'], params['format'])
+        return this.decode(params.content, params.format)
       case Method.encode:
-        return this.encode(params['node'], params['format'])
+        return this.encode(params.node, params.format)
       case Method.compile:
-        return this.compile(params['node'])
+        return this.compile(params.node)
       case Method.build:
-        return this.build(params['node'])
+        return this.build(params.node)
       case Method.execute:
-        return this.execute(params['node'])
+        return this.execute(params.node)
     }
   }
 

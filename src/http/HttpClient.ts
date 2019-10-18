@@ -1,7 +1,7 @@
 import fetch from 'cross-fetch'
 import Client from '../base/Client'
 import JsonRpcRequest from '../base/JsonRpcRequest'
-import { HttpAddress, TcpAddressInitializer } from '../base/Transports'
+import { HttpAddress } from '../base/Transports'
 import JsonRpcResponse from '../base/JsonRpcResponse'
 import JsonRpcError from '../base/JsonRpcError'
 
@@ -16,8 +16,9 @@ export default class HttpClient extends Client {
   public constructor(address: HttpAddress = new HttpAddress()) {
     super()
 
-    this.url = address.toString()
-    this.jwt = address.jwt
+    const { host = '127.0.1.1', port = '8000', path = '', jwt } = address
+    this.url = `http://${host}:${port}${path}`
+    this.jwt = jwt
   }
 
   protected send(request: JsonRpcRequest): Promise<void> {

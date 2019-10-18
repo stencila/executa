@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { ChildProcess, spawn } from 'child_process'
 import path from 'path'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 import { VsockAddress } from '../base/Transports'
 import StreamServer from '../stream/StreamServer'
 
@@ -31,14 +31,15 @@ export default class VsockServer extends StreamServer {
         path.join(__dirname, 'vsock-server'),
         [`${this.port}`]
       ))
-      server.on('error', log.error)
+      server.on('error', err => log.error(err))
       return super.start(server.stdout, server.stdin)
     }
   }
 
-  public async stop(): Promise<void> {
+  public stop(): Promise<void> {
     if (this.server !== undefined) {
       this.server.kill()
     }
+    return Promise.resolve()
   }
 }

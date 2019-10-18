@@ -1,11 +1,12 @@
-import { Manifest } from '../base/Executor'
-import * as path from 'path'
-import * as os from 'os'
-import * as fs from 'fs'
-import * as util from 'util'
 import { getLogger } from '@stencila/logga'
+import * as fs from 'fs'
+import glob_ from 'glob'
+import * as os from 'os'
+import * as path from 'path'
+import * as util from 'util'
+import { Manifest } from '../base/Executor'
 
-const glob = util.promisify(require('glob'))
+const glob = util.promisify(glob_)
 
 const log = getLogger('executa:serve')
 

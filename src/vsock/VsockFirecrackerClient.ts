@@ -29,7 +29,7 @@ export default class VsockFirecrackerClient extends StreamClient {
     this.socket = socket
   }
 
-  public async stop() {
+  public stop(): void {
     this.socket.destroy()
   }
 }

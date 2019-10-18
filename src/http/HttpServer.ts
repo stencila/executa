@@ -1,8 +1,9 @@
 import { getLogger } from '@stencila/logga'
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
-import Executor from '../base/Executor'
+import { Executor } from '../base/Executor'
 import JsonRpcRequest from '../base/JsonRpcRequest'
 import JsonRpcResponse from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
@@ -38,6 +39,9 @@ export default class HttpServer extends TcpServer {
 
     // Define the routes
     const app = (this.app = fastify())
+
+    // Register CORS plugin
+    app.register(fastifyCors)
 
     // Register JWT plugin for all routes
     const secret = process.env.JWT_SECRET
@@ -106,9 +110,15 @@ export default class HttpServer extends TcpServer {
   }
 
   public async start(): Promise<void> {
-    log.info(`Starting server: ${this.address.toString()}`)
+    const url = this.address.toString()
+    log.info(`Starting server: ${url}`)
     return new Promise(resolve =>
-      this.app.listen(this.port, this.host, () => resolve())
+      this.app.listen(this.port, this.host, () => {
+        log.info(
+          `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
+        )
+        resolve()
+      })
     )
   }
 }

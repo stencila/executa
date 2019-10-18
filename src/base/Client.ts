@@ -26,14 +26,14 @@ export default abstract class Client implements Interface {
   /**
    * Call the remote `Executor`'s `decode` method
    */
-  public async decode(content: string, format: string = 'json'): Promise<Node> {
+  public async decode(content: string, format = 'json'): Promise<Node> {
     return this.call<string>(Method.decode, { content, format })
   }
 
   /**
    * Call the remote `Executor`'s `encode` method
    */
-  public async encode(node: Node, format: string = 'json'): Promise<string> {
+  public async encode(node: Node, format = 'json'): Promise<string> {
     return this.call<string>(Method.encode, { node, format })
   }
 

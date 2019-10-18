@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+  <title>Executa</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <script src='dist/browser/index.js'></script>
+</head>
+<body>
+  <p>
+    A test of Executa in the browser. Currently it just checks that
+    HTTP and WebSocket connection work. To make this work, in one terminal
+    run an Executor with HTTP and WS servers:
+  </p>
+  <pre><code>JWT_SECRET=not-a-secret ./executa serve --http --ws</code></pre>
+  <p>
+    In another terminal, serve this file
+  </p>
+  <pre><code>npx serve</code></pre>
+  <p>
+    Open http://localhost:5000 and check the console and network tabs.
+  </p>
+  <script>
+    const {Executor, HttpClient, WebSocketClient} = executa
+
+    // This is a JWT generated using JWT_SECRET=not-a-secret , so it will
+    // validate against a server using the same secret (despite changes due to `iat` changes)
+    const jwt = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzEzNzE5OTR9.vnvGwNQWOfgWuMJ-jMm6ZqTP5n7qIGHUckDKDN5_u04'
+
+    const executor = new Executor(
+      // List of discovery functions that will be called once
+      // when a peer is required
+      [
+        // Normally this would be a list of functions that fetch manifests e.g.
+        //    () => httpDiscover({host: 'hub.stenci.la', path: '/project/43/manifest'})
+        // but to avoid authentication we hard code in a manifest for the test server
+        async () => [
+          {
+            addresses: {
+              http: {
+                type: 'http',
+                host: '127.0.0.1',
+                port: '8000',
+                jwt
+              }
+            },
+            capabilities: {
+              compile: true
+            }
+          },
+          {
+            addresses: {
+              ws: {
+                type: 'ws',
+                host: '127.0.0.1',
+                port: '9000',
+                jwt
+              }
+            },
+            capabilities: {
+              execute: true
+            }
+          }
+        ]
+      ],
+      [WebSocketClient, HttpClient]
+    )
+
+    const chunk = {
+      type: 'CodeChunk',
+      programmingLanguage: 'python',
+      text: '6 * 7'
+    }
+    executor.encode(chunk).then(console.log) // No connection made - done locally
+    executor.compile(chunk).then(console.log) // HTTP connection should have been made
+    executor.execute(chunk).then(console.log) // Websocket connection should have been made
+
+  </script>
+</body>
+</html>

@@ -1,9 +1,11 @@
 import { spawn, ChildProcess } from 'child_process'
 import StreamClient from '../stream/StreamClient'
 import { StdioAddress } from '../base/Transports'
+import { getLogger } from '@stencila/logga'
 
+const log = getLogger('executa:stdio:client')
 export default class StdioClient extends StreamClient {
-  private process: ChildProcess
+  private child: ChildProcess
 
   public constructor(address: string | Omit<StdioAddress, 'type'>) {
     let command
@@ -17,12 +19,28 @@ export default class StdioClient extends StreamClient {
       if (address.args !== undefined) args = address.args
     }
 
-    const process = spawn(command, args)
-    const { stdin, stdout, stderr } = process
+    const child = spawn(command, args)
+    const { stdin, stdout, stderr } = child
     if (stdout === null || stdin === null || stderr === null)
       throw new Error('STDIO is not set up right')
 
+    child.on('error', (error: Error) => log.error(error))
+    child.on('exit', (code: number | null, signal: string | null) =>
+      log.error(
+        `Server exited prematurely with exit code ${code} and signal ${signal}`
+      )
+    )
+
     super(stdin, stdout)
-    this.process = process
+    this.child = child
+  }
+
+  /**
+   * Stop the child server process
+   */
+  stop() {
+    // Avoid uneccessary log errors by removing listener
+    this.child.removeAllListeners('exit')
+    this.child.kill()
   }
 }
