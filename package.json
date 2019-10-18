@@ -1,6 +1,6 @@
 {
   "name": "@stencila/executa",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Execution delegator for various language backends.",
   "main": "./dist/lib/index.js",
   "browser": "./dist/browser/index.js",

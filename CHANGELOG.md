@@ -1,3 +1,21 @@
+# [0.2.0](https://github.com/stencila/executa/compare/v0.1.1...v0.2.0) (2019-10-18)
+
+
+### Bug Fixes
+
+* **CLI:** Handle boolean options properly ([8dfa813](https://github.com/stencila/executa/commit/8dfa8136b1cbac6f046717f395fe92968be69121))
+* **Executor:** Add error to code chunk or expr  if unable to delegate execution. ([1660382](https://github.com/stencila/executa/commit/1660382393adc8e208e09d3f2f6d491701bbb582))
+* **Executor:** Fix typo in name ([5c3dc5b](https://github.com/stencila/executa/commit/5c3dc5b7f8abd8e977d37798d444935419103c4a))
+* **HTTP and WS:** Fix WS auth ([9ab1d5e](https://github.com/stencila/executa/commit/9ab1d5ec880ba0193009285450a936a2c37470a7))
+* **HttpServer:** Add CORS ([82b8b2b](https://github.com/stencila/executa/commit/82b8b2becf095c228babf70cfd120c8af35a6510))
+* **StdioClient:** Add error handling ([e219f96](https://github.com/stencila/executa/commit/e219f96495e47456cdd819f6db5363f4086ec130))
+* **WebSocketAddress:** Use different port for HTTP and WS ([d1eaa4b](https://github.com/stencila/executa/commit/d1eaa4becfa70032b57901061c89733f14af29c8))
+
+
+### Features
+
+* **HttpServer:** Provide default token at startup ([00ef456](https://github.com/stencila/executa/commit/00ef456b091237d9ce340e613a16d1c5d0dca526))
+
 ## [0.1.1](https://github.com/stencila/executa/compare/v0.1.0...v0.1.1) (2019-10-16)
 
 
