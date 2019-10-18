@@ -2,7 +2,7 @@ import WebSocket from 'isomorphic-ws'
 
 import Client from '../base/Client'
 import JsonRpcRequest from '../base/JsonRpcRequest'
-import { WebSocketAddress, TcpAddressInitializer } from '../base/Transports'
+import { WebSocketAddress } from '../base/Transports'
 
 /**
  * A `Client` using the WebSockets API for communication.
@@ -16,7 +16,9 @@ export default class WebSocketClient extends Client {
   public constructor(address: WebSocketAddress = new WebSocketAddress()) {
     super()
 
-    this.socket = new WebSocket(address.toString())
+    const { host = '127.0.1.1', port = '9000', path = '', jwt } = address
+    const url = `ws://${host}:${port}${path}`
+    this.socket = new WebSocket(url, jwt)
     this.socket.addEventListener('message', event => {
       this.receive(event.data)
     })
