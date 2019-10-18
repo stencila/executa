@@ -12,7 +12,9 @@ const entryFiles = [
 ]
 
 const plugins = [
-  typescript(),
+  typescript({
+    tsconfig: "tsconfig.browser.json",
+  }),
   commonjs({
     extensions: ['.js', '.ts'],
     namedExports: {
