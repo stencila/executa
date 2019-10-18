@@ -5,6 +5,7 @@
   "main": "./dist/lib/index.js",
   "browser": "./dist/browser/index.js",
   "es2015": "./dist/esm/index.js",
+  "files": ["dist"],
   "scripts": {
     "cli": "ts-node src/cli.ts",
     "cli:dev": "ts-node-dev src/cli.ts",
