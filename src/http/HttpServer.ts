@@ -106,9 +106,15 @@ export default class HttpServer extends TcpServer {
   }
 
   public async start(): Promise<void> {
-    log.info(`Starting server: ${this.address.toString()}`)
+    const url = this.address.toString()
+    log.info(`Starting server: ${url}`)
     return new Promise(resolve =>
-      this.app.listen(this.port, this.host, () => resolve())
+      this.app.listen(this.port, this.host, () => {
+        log.info(
+          `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
+        )
+        resolve()
+      })
     )
   }
 }
