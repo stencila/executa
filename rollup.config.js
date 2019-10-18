@@ -13,7 +13,7 @@ const entryFiles = [
 
 const plugins = [
   typescript({
-    tsconfig: "tsconfig.browser.json",
+    tsconfig: 'tsconfig.browser.json'
   }),
   commonjs({
     extensions: ['.js', '.ts'],
@@ -46,11 +46,26 @@ export default entryFiles.reduce(
     },
     {
       input: entryFile,
-      plugins: [...plugins, builtins(), resolve()],
+      plugins: [
+        ...plugins,
+        builtins(),
+        resolve({
+          browser: true
+        })
+      ],
+
+      // Do not bundle modules that provide things already
+      // in the browser. Put them in `output.globals`
+      external: ['cross-fetch', 'isomorphic-ws'],
+
       output: {
         name: 'executa',
         dir: 'dist/browser',
-        format: 'iife'
+        format: 'iife',
+        globals: {
+          'cross-fetch': 'fetch',
+          'isomorphic-ws': 'WebSocket'
+        }
       }
     }
   ],
