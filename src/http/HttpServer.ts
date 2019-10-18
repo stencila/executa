@@ -1,5 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
@@ -38,6 +39,9 @@ export default class HttpServer extends TcpServer {
 
     // Define the routes
     const app = (this.app = fastify())
+
+    // Register CORS plugin
+    app.register(fastifyCors)
 
     // Register JWT plugin for all routes
     const secret = process.env.JWT_SECRET
