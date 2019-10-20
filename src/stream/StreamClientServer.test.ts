@@ -5,13 +5,12 @@ import StreamServer from './StreamServer'
 import { Executor } from '../base/Executor'
 
 describe('StreamClient and StreamServer', () => {
-  const executor = new Executor()
-
   // @ts-ignore Ignore the fact that this is an abstract class
-  const server = new StreamServer(executor)
+  const server = new StreamServer()
+  const executor = new Executor()
   const serverIncoming = new PassThrough()
   const serverOutgoing = new PassThrough()
-  server.start(serverIncoming, serverOutgoing)
+  server.start(executor, serverIncoming, serverOutgoing)
 
   // @ts-ignore Ignore the fact that this is an abstract class
   const client = new StreamClient(serverIncoming, serverOutgoing)

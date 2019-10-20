@@ -2,9 +2,9 @@ import { getLogger } from '@stencila/logga'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
 import jwt from 'jsonwebtoken'
+import { InternalError } from '../base/InternalError'
+import { WebSocketAddress } from '../base/Transports'
 import HttpServer from '../http/HttpServer'
-import { WebSocketAddress, TcpAddressInitializer } from '../base/Transports'
-import { Executor } from '../base/Executor'
 
 const log = getLogger('executa:ws:server')
 
@@ -12,16 +12,13 @@ const log = getLogger('executa:ws:server')
  * A `Server` using WebSockets for communication.
  */
 export default class WebSocketServer extends HttpServer {
-  public constructor(
-    executor?: Executor,
-    address: WebSocketAddress = new WebSocketAddress()
-  ) {
-    super(executor, address)
+  public constructor(address: WebSocketAddress = new WebSocketAddress()) {
+    super(address)
 
     // Apply JWT-based authorization of each connection
     const secret = process.env.JWT_SECRET
     if (secret === undefined)
-      throw new Error('Environment variable JWT_SECRET must be set')
+      throw new InternalError('Environment variable JWT_SECRET must be set')
     const authorize = (info: any, next: (ok: boolean) => void) => {
       const token = info.req.headers['sec-websocket-protocol']
       if (token !== undefined) {

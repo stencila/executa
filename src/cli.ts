@@ -26,7 +26,38 @@ replaceHandlers(data =>
 
 const main = async () => {
   // Initialize the executor
-  const executor = new Executor([discoverStdio], [StdioClient as ClientType])
+
+  // Add server classes based on supplied options
+  const servers: Server[] = []
+  if (options.tcp !== undefined) {
+    const address = new TcpAddress(
+      typeof options.tcp === 'boolean' ? undefined : options.tcp
+    )
+    servers.push(new TcpServer(address))
+  }
+  if (options.http !== undefined) {
+    const address = new HttpAddress(
+      typeof options.http === 'boolean' ? undefined : options.http
+    )
+    servers.push(new HttpServer(address))
+  }
+  if (options.ws !== undefined) {
+    const address = new WebSocketAddress(
+      typeof options.ws === 'boolean' ? undefined : options.ws
+    )
+    servers.push(new WebSocketServer(address))
+  }
+  if (servers.length === 0) {
+    log.warn(
+      'No servers specified in options (e.g. --tcp --stdio). Executor will not be accessible.'
+    )
+  }
+
+  const executor = new Executor(
+    [discoverStdio],
+    [StdioClient as ClientType],
+    servers
+  )
 
   // Run command
   const command = args[0]
@@ -41,32 +72,7 @@ const main = async () => {
  * Serve the executor
  */
 const serve = async (executor: Executor) => {
-  // Add server classes based on supplied options
-  const servers: Server[] = []
-  if (options.tcp !== undefined) {
-    const address = new TcpAddress(
-      typeof options.tcp === 'boolean' ? undefined : options.tcp
-    )
-    servers.push(new TcpServer(executor, address))
-  }
-  if (options.http !== undefined) {
-    const address = new HttpAddress(
-      typeof options.http === 'boolean' ? undefined : options.http
-    )
-    servers.push(new HttpServer(executor, address))
-  }
-  if (options.ws !== undefined) {
-    const address = new WebSocketAddress(
-      typeof options.ws === 'boolean' ? undefined : options.ws
-    )
-    servers.push(new WebSocketServer(executor, address))
-  }
-  if (servers.length === 0) {
-    log.warn(
-      'No servers specified in options (e.g. --tcp --stdio). Executor will not be accessible.'
-    )
-  }
-  await executor.start(servers)
+  await executor.start()
 }
 
 /**
