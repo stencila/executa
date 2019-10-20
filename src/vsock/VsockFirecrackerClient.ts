@@ -2,6 +2,7 @@ import { getLogger } from '@stencila/logga'
 import net from 'net'
 import { VsockAddress } from '../base/Transports'
 import StreamClient from '../stream/StreamClient'
+import { InternalError } from '../base/InternalError'
 
 const log = getLogger('executa:vsock:client')
 
@@ -10,7 +11,7 @@ export default class VsockFirecrackerClient extends StreamClient {
 
   public constructor(address: VsockAddress = new VsockAddress()) {
     const { path, port } = address
-    if (path === undefined) throw new Error(`Path is required`)
+    if (path === undefined) throw new InternalError(`Path is required`)
 
     const socket = net.connect(path)
     socket.on('connect', () => {
