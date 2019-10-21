@@ -9,18 +9,23 @@ export default [
   {
     input: 'src/index.browser.ts',
 
-    plugins: [typescript({
-      tsconfig: 'tsconfig.browser.json'
-    }),
-    commonjs({
-      extensions: ['.js', '.ts'],
-      namedExports: {
-        '@stencila/schema': ['nodeType', 'isPrimitive']
-      }
-    }),
-    json(), babel({
-      exclude: 'node_modules/**'
-    }), builtins(), resolve()],
+    plugins: [
+      typescript({
+        tsconfig: 'tsconfig.browser.json'
+      }),
+      commonjs({
+        extensions: ['.js', '.ts'],
+        namedExports: {
+          '@stencila/schema': ['nodeType', 'isPrimitive']
+        }
+      }),
+      json(),
+      babel({
+        exclude: 'node_modules/**'
+      }),
+      builtins(),
+      resolve()
+    ],
 
     // Do not bundle modules that provide things already
     // in the browser. Put them in `output.globals`

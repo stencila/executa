@@ -122,5 +122,5 @@ export default abstract class Client implements Interface {
 }
 
 export interface ClientType {
-  new (address: Address): Client
+  new (address: any): Client
 }

@@ -13,9 +13,14 @@ import StdioClient from './stdio/StdioClient'
 import HttpServer from './http/HttpServer'
 import TcpServer from './tcp/TcpServer'
 import WebSocketServer from './ws/WebSocketServer'
-import { HttpAddress, TcpAddress, WebSocketAddress, VsockAddress } from './base/Transports'
-import VsockServer from './vsock/VsockServer';
-import StdioServer from './stdio/StdioServer';
+import {
+  HttpAddress,
+  TcpAddress,
+  WebSocketAddress,
+  VsockAddress
+} from './base/Transports'
+import VsockServer from './vsock/VsockServer'
+import StdioServer from './stdio/StdioServer'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
@@ -35,24 +40,40 @@ const main = async () => {
     servers.push(new StdioServer())
   }
   if (options.vsock !== undefined) {
-    servers.push(new VsockServer(new VsockAddress(
-      typeof options.vsock === 'boolean' ? undefined : options.vsock
-    )))
+    servers.push(
+      new VsockServer(
+        new VsockAddress(
+          typeof options.vsock === 'boolean' ? undefined : options.vsock
+        )
+      )
+    )
   }
   if (options.tcp !== undefined) {
-    servers.push(new TcpServer(new TcpAddress(
-      typeof options.tcp === 'boolean' ? undefined : options.tcp
-    )))
+    servers.push(
+      new TcpServer(
+        new TcpAddress(
+          typeof options.tcp === 'boolean' ? undefined : options.tcp
+        )
+      )
+    )
   }
   if (options.http !== undefined) {
-    servers.push(new HttpServer(new HttpAddress(
-      typeof options.http === 'boolean' ? undefined : options.http
-    )))
+    servers.push(
+      new HttpServer(
+        new HttpAddress(
+          typeof options.http === 'boolean' ? undefined : options.http
+        )
+      )
+    )
   }
   if (options.ws !== undefined) {
-    servers.push(new WebSocketServer(new WebSocketAddress(
-      typeof options.ws === 'boolean' ? undefined : options.ws
-    )))
+    servers.push(
+      new WebSocketServer(
+        new WebSocketAddress(
+          typeof options.ws === 'boolean' ? undefined : options.ws
+        )
+      )
+    )
   }
   if (servers.length === 0) {
     log.warn(
