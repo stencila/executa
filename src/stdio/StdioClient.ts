@@ -27,8 +27,11 @@ export default class StdioClient extends StreamClient {
       )
     )
 
-    const { stdin, stdout } = child
+    // Use stdin and stout for transport and pipe stderr to
+    // stderr of current process
+    const { stdin, stdout, stderr } = child
     super(stdin, stdout)
+    stderr.pipe(process.stderr)
 
     this.child = child
   }
