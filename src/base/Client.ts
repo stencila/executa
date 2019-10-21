@@ -3,6 +3,7 @@ import { Interface, Method, Manifest } from './Executor'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
+import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -59,6 +60,20 @@ export default abstract class Client implements Interface {
   }
 
   /**
+   * Call the remote `Executor`'s `begin` method
+   */
+  public async begin(node: Node): Promise<Node> {
+    return this.call<Node>(Method.begin, { node })
+  }
+
+  /**
+   * Call the remote `Executor`'s `end` method
+   */
+  public async end(node: Node): Promise<Node> {
+    return this.call<Node>(Method.end, { node })
+  }
+
+  /**
    * Call a method of a remote `Executor`.
    *
    * @param method The name of the method
@@ -72,6 +87,8 @@ export default abstract class Client implements Interface {
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: JsonRpcResponse) => {
         if (response.error !== undefined)
+          // This is a plain `Error` because it is intended for the caller and
+          // is not a JSON-RPC or internal error
           return reject(new Error(response.error.message))
         resolve(response.result)
       }
@@ -102,15 +119,22 @@ export default abstract class Client implements Interface {
   protected receive(response: string | JsonRpcResponse): void {
     if (typeof response === 'string')
       response = JSON.parse(response) as JsonRpcResponse
-    if (response.id < 0) throw new Error(`Response is missing id: ${response}`)
+    if (response.id < 0)
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InternalError,
+        `Response is missing id: ${response}`
+      )
     const resolve = this.requests[response.id]
     if (resolve === undefined)
-      throw new Error(`No request found for response with id: ${response.id}`)
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InternalError,
+        `No request found for response with id: ${response.id}`
+      )
     resolve(response)
     delete this.requests[response.id]
   }
 }
 
 export interface ClientType {
-  new (address: Address): Client
+  new (address: any): Client
 }

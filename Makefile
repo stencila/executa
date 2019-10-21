@@ -18,6 +18,9 @@ cover:
 build:
 	npm run build
 
+docker:
+	docker build --tag stencila/executa .
+
 docs:
 	npm run docs
 .PHONY: docs

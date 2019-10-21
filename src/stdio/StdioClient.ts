@@ -20,10 +20,6 @@ export default class StdioClient extends StreamClient {
     }
 
     const child = spawn(command, args)
-    const { stdin, stdout, stderr } = child
-    if (stdout === null || stdin === null || stderr === null)
-      throw new Error('STDIO is not set up right')
-
     child.on('error', (error: Error) => log.error(error))
     child.on('exit', (code: number | null, signal: string | null) =>
       log.error(
@@ -31,7 +27,12 @@ export default class StdioClient extends StreamClient {
       )
     )
 
+    // Use stdin and stout for transport and pipe stderr to
+    // stderr of current process
+    const { stdin, stdout, stderr } = child
     super(stdin, stdout)
+    stderr.pipe(process.stderr)
+
     this.child = child
   }
 
@@ -39,7 +40,7 @@ export default class StdioClient extends StreamClient {
    * Stop the child server process
    */
   stop() {
-    // Avoid uneccessary log errors by removing listener
+    // Avoid unnecessary log errors by removing listener
     this.child.removeAllListeners('exit')
     this.child.kill()
   }

@@ -5,6 +5,7 @@ import { JSONSchema7Definition } from 'json-schema'
 import { ClientType } from './Client'
 import Server from './Server'
 import { Address, Transport } from './Transports'
+import { InternalError } from './InternalError'
 
 const log = getLogger('executa:executor')
 
@@ -17,7 +18,9 @@ export enum Method {
   encode = 'encode',
   compile = 'compile',
   build = 'build',
-  execute = 'execute'
+  execute = 'execute',
+  begin = 'begin',
+  end = 'end'
 }
 
 /**
@@ -123,6 +126,22 @@ export abstract class Interface {
    * @returns The executed node
    */
   abstract async execute(node: Node): Promise<Node>
+
+  /**
+   * Begin running a `Node`.
+   *
+   * @param node The node to run
+   * @returns The node after it has begun running
+   */
+  abstract async begin(node: Node): Promise<Node>
+
+  /**
+   * End running a `Node`.
+   *
+   * @param node The running node
+   * @returns The node after it has ended running
+   */
+  abstract async end(node: Node): Promise<Node>
 
   /**
    * Call one of the above methods.
@@ -250,8 +269,8 @@ export class Peer {
       }
       const transport = transportMap[ClientType.name]
       if (transport === undefined)
-        throw new Error(
-          `Wooah! This should not happen! A key is missing for "${ClientType.name}" in in transportMap.`
+        throw new InternalError(
+          `Wooah! A key is missing for "${ClientType.name}" in transportMap.`
         )
 
       // See if the peer has an address for the transport
@@ -280,7 +299,9 @@ export class Peer {
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     if (this.interface === undefined)
-      throw new Error("WTF, no client! You shouldn't be calling this!")
+      throw new InternalError(
+        "WTF, no client! You shouldn't be calling this yet!"
+      )
     return this.interface.call<Type>(method, params)
   }
 }
@@ -319,39 +340,37 @@ export class Executor implements Interface {
 
   /**
    * Servers that will pass on requests to this executor.
-   *
-   * @see start
    */
-  private servers: Server[] = []
+  private readonly servers: Server[] = []
 
   public constructor(
     discoveryFunctions: DiscoveryFunction[] = [],
-    clientTypes: ClientType[] = []
+    clientTypes: ClientType[] = [],
+    servers: Server[] = []
   ) {
     this.discoveryFunctions = discoveryFunctions
     this.clientTypes = clientTypes
+    this.servers = servers
   }
 
   /**
    * Start servers for the executor.
-   *
-   * @param servers An array of `Server` instances that pass
-   *                requests on to this executor
    */
-  public async start(servers: Server[] = []): Promise<void[]> {
-    this.servers = servers
+  public async start(): Promise<void> {
     log.info(
-      `Starting servers: ${this.servers.map(server => server.address.type)}`
+      `Starting servers: ${this.servers
+        .map(server => server.address.type)
+        .join(', ')}`
     )
-    return Promise.all(this.servers.map(server => server.start()))
+    await Promise.all(this.servers.map(server => server.start(this)))
   }
 
   /**
    * Stop servers for the executor.
    */
-  public stop(): Promise<void>[] {
+  public async stop(): Promise<void> {
     log.info('Stopping servers')
-    return this.servers.map(server => server.stop())
+    await Promise.all(this.servers.map(server => server.stop()))
   }
 
   /**
@@ -363,7 +382,7 @@ export class Executor implements Interface {
   public async manifest(): Promise<Manifest> {
     return {
       capabilities: await this.capabilities(),
-      addresses: await this.addresses()
+      addresses: this.addresses()
     }
   }
 
@@ -405,7 +424,9 @@ export class Executor implements Interface {
     if (this.peers === undefined) await this.discover()
     // This may be able to be removed with assert signatures in TS 3.7
     if (this.peers === undefined)
-      throw new Error(`Whaaaat! How can this be, peers are still undefined!?`)
+      throw new InternalError(
+        `Whaaaat! How can this be, peers are still undefined!?`
+      )
 
     // Merge in the capabilities of peer executors
     for (const peer of this.peers) {
@@ -460,7 +481,8 @@ export class Executor implements Interface {
    * Execute a `Node`.
    *
    * Walks the node tree and attempts to delegate
-   * execution of certain types of nodes (currently `CodeChunk` and `CodeExpression`).
+   * execution of certain types of nodes
+   * (currently `CodeChunk` and `CodeExpression`).
    *
    * @param node The node to execute
    */
@@ -472,16 +494,32 @@ export class Executor implements Interface {
           return this.delegate(Method.execute, { node }, () =>
             Promise.resolve({
               ...(node as object),
-              errors: [{
-                type: 'CodeError',
-                kind: 'incapable',
-                message: 'Not able to execute this type of code.'
-              }]
+              errors: [
+                {
+                  type: 'CodeError',
+                  kind: 'incapable',
+                  message: 'Not able to execute this type of code.'
+                }
+              ]
             })
           )
       }
       return Promise.resolve(node)
     })
+  }
+
+  /**
+   * Begin running a `Node`.
+   */
+  public begin(node: Node): Promise<Node> {
+    return this.delegate(Method.begin, { node }, () => Promise.resolve(node))
+  }
+
+  /**
+   * End running a `Node`.
+   */
+  public end(node: Node): Promise<Node> {
+    return this.delegate(Method.end, { node }, () => Promise.resolve(node))
   }
 
   public async call(
@@ -571,7 +609,9 @@ export class Executor implements Interface {
     if (this.peers === undefined) await this.discover()
     // This may be able to be removed with assert signatures in TS 3.7
     if (this.peers === undefined)
-      throw new Error(`Whaaaat! How can this be, peers are still undefined!?`)
+      throw new InternalError(
+        `Whaaaat! How can this be, peers are still undefined!?`
+      )
 
     // Attempt to delegate to a peer
     for (const peer of this.peers) {

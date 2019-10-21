@@ -15,11 +15,8 @@ export default class TcpServer extends StreamServer {
 
   protected clients: Socket[] = []
 
-  public constructor(
-    executor?: Executor,
-    address: TcpAddress = new TcpAddress()
-  ) {
-    super(executor)
+  public constructor(address: TcpAddress = new TcpAddress()) {
+    super()
 
     const { host, port } = address
     this.host = host
@@ -40,12 +37,12 @@ export default class TcpServer extends StreamServer {
     })
   }
 
-  public async start(): Promise<void> {
+  public async start(executor?: Executor): Promise<void> {
     if (this.server === undefined) {
       log.info(`Starting server: ${this.address.toString()}`)
 
       const server = (this.server = createServer(socket => {
-        super.start(socket, socket).catch(e => {
+        super.start(executor, socket, socket).catch(e => {
           log.error(
             `Failed to start server: ${this.address.toString()}\n\n${e}`
           )

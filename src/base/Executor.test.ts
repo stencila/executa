@@ -380,7 +380,12 @@ describe('Executor', () => {
    */
   test('peers: direct', async () => {
     const deepThought = new DeepThought()
+    const deepThoughtServer = new DirectServer()
+    await deepThoughtServer.start(deepThought)
+
     const calculator = new Calculator()
+    const calculatorServer = new DirectServer()
+    await calculatorServer.start(calculator)
 
     const executor = new Executor(
       [
@@ -389,7 +394,7 @@ describe('Executor', () => {
             addresses: {
               direct: {
                 type: Transport.direct,
-                server: new DirectServer(deepThought)
+                server: deepThoughtServer
               }
             },
             capabilities: await deepThought.capabilities()
@@ -398,7 +403,7 @@ describe('Executor', () => {
             addresses: {
               direct: {
                 type: Transport.direct,
-                server: new DirectServer(calculator)
+                server: calculatorServer
               }
             },
             capabilities: await calculator.capabilities()

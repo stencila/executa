@@ -1,8 +1,9 @@
 import { Executor } from './Executor'
-import Error from './JsonRpcError'
+import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
+import { InternalError } from './InternalError'
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -12,12 +13,7 @@ export default abstract class Server {
   /**
    * The executor that this server dispatches to.
    */
-  private executor: Executor
-
-  public constructor(executor?: Executor) {
-    if (executor === undefined) executor = new Executor()
-    this.executor = executor
-  }
+  protected executor?: Executor
 
   /**
    * Get the address of the server
@@ -35,6 +31,9 @@ export default abstract class Server {
     request: string | JsonRpcRequest,
     stringify = true
   ): Promise<string | JsonRpcResponse> {
+    if (this.executor === undefined)
+      throw new InternalError('Executor has not been initialized')
+
     let id = -1
     let result
     let error
@@ -47,18 +46,27 @@ export default abstract class Server {
       required = true
     ): any {
       if (request.params === undefined)
-        throw new Error(-32600, 'Invalid request: missing "params" property')
+        throw new JsonRpcError(
+          JsonRpcErrorCode.InvalidRequest,
+          'Invalid request: missing "params" property'
+        )
       const value = Array.isArray(request.params)
         ? request.params[index]
         : request.params[name]
       if (required && value === undefined)
-        throw new Error(-32602, `Invalid params: "${name}" is missing`)
+        throw new JsonRpcError(
+          JsonRpcErrorCode.InvalidParams,
+          `Invalid params: "${name}" is missing`
+        )
       return value
     }
 
     try {
       if (request === null) {
-        throw new Error(-32600, `Invalid request`)
+        throw new JsonRpcError(
+          JsonRpcErrorCode.InvalidRequest,
+          `Invalid request`
+        )
       }
 
       if (typeof request === 'string') {
@@ -66,7 +74,10 @@ export default abstract class Server {
         try {
           request = JSON.parse(request) as JsonRpcRequest
         } catch (err) {
-          throw new Error(-32700, `Parse error: ${err.message}`)
+          throw new JsonRpcError(
+            JsonRpcErrorCode.ParseError,
+            `Parse error: ${err.message}`
+          )
         }
       }
 
@@ -74,7 +85,10 @@ export default abstract class Server {
       id = request.id
 
       if (request.method === undefined)
-        throw new Error(-32600, 'Invalid request: missing "method" property')
+        throw new JsonRpcError(
+          JsonRpcErrorCode.MethodNotFound,
+          'Invalid request: missing "method" property'
+        )
 
       switch (request.method) {
         case 'manifest':
@@ -93,24 +107,31 @@ export default abstract class Server {
           )
           break
         case 'compile':
-          result = await this.executor.compile(param(request, 0, 'node'))
-          break
         case 'build':
-          result = await this.executor.build(param(request, 0, 'node'))
-          break
         case 'execute':
-          result = await this.executor.execute(param(request, 0, 'node'))
+        case 'begin':
+        case 'end':
+          result = await this.executor[request.method](
+            param(request, 0, 'node')
+          )
           break
         default:
-          throw new Error(-32601, `Method not found: "${request.method}"`)
+          throw new JsonRpcError(
+            JsonRpcErrorCode.MethodNotFound,
+            `Method not found: "${request.method}"`
+          )
       }
     } catch (exc) {
       error =
-        exc instanceof Error
+        exc instanceof JsonRpcError
           ? exc
-          : new Error(-32603, `Internal error: ${exc.message}`, {
-              trace: exc.stack
-            })
+          : new JsonRpcError(
+              JsonRpcErrorCode.ServerError,
+              `Internal error: ${exc.message}`,
+              {
+                trace: exc.stack
+              }
+            )
     }
 
     const response = new JsonRpcResponse(id, result, error)
@@ -120,9 +141,12 @@ export default abstract class Server {
   /**
    * Start the server
    *
-   * Derived classes may override this method.
+   * When overriding this method, derived classes should
+   * call this method, or ensure that `executor` is set themselves.
    */
-  public async start(): Promise<void> {
+  public start(executor?: Executor): Promise<void> {
+    if (executor === undefined) executor = new Executor()
+    this.executor = executor
     return Promise.resolve()
   }
 
@@ -131,14 +155,14 @@ export default abstract class Server {
    *
    * Derived classes may override this method.
    */
-  public async stop(): Promise<void> {
+  public stop(): Promise<void> {
     return Promise.resolve()
   }
 
   /**
    * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
    */
-  public async run(): Promise<void> {
+  public run(): Promise<void> {
     const stop = (): void => {
       this.stop()
         .then(() => process.exit())

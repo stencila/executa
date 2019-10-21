@@ -4,10 +4,12 @@ import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
+import { InternalError } from '../base/InternalError'
 import JsonRpcRequest from '../base/JsonRpcRequest'
 import JsonRpcResponse from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
 import TcpServer from '../tcp/TcpServer'
+import { JsonRpcErrorCode } from '../base/JsonRpcError'
 
 const log = getLogger('executa:http:server')
 
@@ -31,11 +33,8 @@ export default class HttpServer extends TcpServer {
    */
   protected defaultJwt: string
 
-  public constructor(
-    executor?: Executor,
-    address: HttpAddress = new HttpAddress()
-  ) {
-    super(executor, address)
+  public constructor(address: HttpAddress = new HttpAddress()) {
+    super(address)
 
     // Define the routes
     const app = (this.app = fastify())
@@ -46,7 +45,7 @@ export default class HttpServer extends TcpServer {
     // Register JWT plugin for all routes
     const secret = process.env.JWT_SECRET
     if (secret === undefined)
-      throw new Error('Environment variable JWT_SECRET must be set')
+      throw new InternalError('Environment variable JWT_SECRET must be set')
     app.register(fastifyJwt, {
       secret
     })
@@ -84,7 +83,9 @@ export default class HttpServer extends TcpServer {
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse
         if (error !== undefined)
-          reply.status(error.code < -32603 ? 400 : 500).send({ error: error })
+          reply
+            .status(error.code < JsonRpcErrorCode.InternalError ? 400 : 500)
+            .send({ error: error })
         else reply.send(result)
       }
     }
@@ -94,6 +95,8 @@ export default class HttpServer extends TcpServer {
     app.post('/compile', wrap('compile'))
     app.post('/build', wrap('build'))
     app.post('/execute', wrap('execute'))
+    app.post('/begin', wrap('begin'))
+    app.post('/end', wrap('end'))
 
     this.server = app.server
   }
@@ -109,7 +112,10 @@ export default class HttpServer extends TcpServer {
     )
   }
 
-  public async start(): Promise<void> {
+  public async start(executor?: Executor): Promise<void> {
+    if (executor === undefined) executor = new Executor()
+    this.executor = executor
+
     const url = this.address.toString()
     log.info(`Starting server: ${url}`)
     return new Promise(resolve =>

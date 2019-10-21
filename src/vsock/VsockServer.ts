@@ -12,11 +12,8 @@ export default class VsockServer extends StreamServer {
 
   private server?: ChildProcess
 
-  public constructor(
-    executor?: Executor,
-    address: VsockAddress = new VsockAddress()
-  ) {
-    super(executor)
+  public constructor(address: VsockAddress = new VsockAddress()) {
+    super()
 
     this.port = address.port
   }
@@ -25,14 +22,14 @@ export default class VsockServer extends StreamServer {
     return new VsockAddress(this.port)
   }
 
-  public async start(): Promise<void> {
+  public async start(executor?: Executor): Promise<void> {
     if (this.server === undefined) {
       const server = (this.server = spawn(
         path.join(__dirname, 'vsock-server'),
         [`${this.port}`]
       ))
       server.on('error', err => log.error(err))
-      return super.start(server.stdout, server.stdin)
+      return super.start(executor, server.stdout, server.stdin)
     }
   }
 
