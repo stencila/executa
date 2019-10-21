@@ -110,7 +110,6 @@ export default class HttpServer extends TcpServer {
   public async start(executor?: Executor): Promise<void> {
     if (executor === undefined) executor = new Executor()
     this.executor = executor
-    console.log(this.executor)
 
     const url = this.address.toString()
     log.info(`Starting server: ${url}`)
