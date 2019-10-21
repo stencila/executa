@@ -4,7 +4,6 @@
   "description": "Execution delegator for various language backends.",
   "main": "./dist/lib/index.js",
   "browser": "./dist/browser/index.js",
-  "es2015": "./dist/esm/index.js",
   "files": [
     "dist"
   ],
@@ -17,7 +16,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cover": "jest --coverage",
-    "build": "rollup --config",
+    "build": "tsc && rollup --config",
     "docs": "npm run docs:readme && npm run docs:ts",
     "docs:readme": "markdown-toc -i --maxdepth=4 README.md",
     "docs:ts": "typedoc --options typedoc.js ./src"

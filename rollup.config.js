@@ -5,41 +5,22 @@ import json from 'rollup-plugin-json'
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 
-const plugins = [
-  typescript({
-    tsconfig: 'tsconfig.browser.json'
-  }),
-  commonjs({
-    extensions: ['.js', '.ts'],
-    namedExports: {
-      '@stencila/schema': ['nodeType', 'isPrimitive']
-    }
-  }),
-  json(),
-  babel({
-    exclude: 'node_modules/**'
-  })
-]
-
 export default [
-  {
-    input: 'src/index.ts',
-    plugins,
-    output: [
-      {
-        dir: 'dist/lib',
-        format: 'cjs'
-      },
-      {
-        dir: 'dist/esm',
-        format: 'esm'
-      }
-    ]
-  },
   {
     input: 'src/index.browser.ts',
 
-    plugins: [...plugins, builtins(), resolve()],
+    plugins: [typescript({
+      tsconfig: 'tsconfig.browser.json'
+    }),
+    commonjs({
+      extensions: ['.js', '.ts'],
+      namedExports: {
+        '@stencila/schema': ['nodeType', 'isPrimitive']
+      }
+    }),
+    json(), babel({
+      exclude: 'node_modules/**'
+    }), builtins(), resolve()],
 
     // Do not bundle modules that provide things already
     // in the browser. Put them in `output.globals`
