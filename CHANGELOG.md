@@ -1,3 +1,17 @@
+# [0.3.0](https://github.com/stencila/executa/compare/v0.2.0...v0.3.0) (2019-10-21)
+
+
+### Bug Fixes
+
+* **Dependencies:** Add glob to package.json ([232ccce](https://github.com/stencila/executa/commit/232ccce4e349d85ff6ff96e2eac80d16f745c89a))
+* **StdioClient:** pipe stderr to current process stderr ([0c12d40](https://github.com/stencila/executa/commit/0c12d405438e596dd1d6febf2034abcaca0805a2))
+
+
+### Features
+
+* **Docker:** Add setup for building and testing Dockerfile ([80d4964](https://github.com/stencila/executa/commit/80d4964d4e369f91ded040aa63876f6a489f8ada))
+* Add begin and end methods ([074cfa0](https://github.com/stencila/executa/commit/074cfa07551c9465552b1f63efb58e069fe77509))
+
 # [0.2.0](https://github.com/stencila/executa/compare/v0.1.1...v0.2.0) (2019-10-18)
 
 
