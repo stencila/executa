@@ -13,7 +13,9 @@ import StdioClient from './stdio/StdioClient'
 import HttpServer from './http/HttpServer'
 import TcpServer from './tcp/TcpServer'
 import WebSocketServer from './ws/WebSocketServer'
-import { HttpAddress, TcpAddress, WebSocketAddress } from './base/Transports'
+import { HttpAddress, TcpAddress, WebSocketAddress, VsockAddress } from './base/Transports'
+import VsockServer from './vsock/VsockServer';
+import StdioServer from './stdio/StdioServer';
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
@@ -29,23 +31,28 @@ const main = async () => {
 
   // Add server classes based on supplied options
   const servers: Server[] = []
+  if (options.stdio !== undefined) {
+    servers.push(new StdioServer())
+  }
+  if (options.vsock !== undefined) {
+    servers.push(new VsockServer(new VsockAddress(
+      typeof options.vsock === 'boolean' ? undefined : options.vsock
+    )))
+  }
   if (options.tcp !== undefined) {
-    const address = new TcpAddress(
+    servers.push(new TcpServer(new TcpAddress(
       typeof options.tcp === 'boolean' ? undefined : options.tcp
-    )
-    servers.push(new TcpServer(address))
+    )))
   }
   if (options.http !== undefined) {
-    const address = new HttpAddress(
+    servers.push(new HttpServer(new HttpAddress(
       typeof options.http === 'boolean' ? undefined : options.http
-    )
-    servers.push(new HttpServer(address))
+    )))
   }
   if (options.ws !== undefined) {
-    const address = new WebSocketAddress(
+    servers.push(new WebSocketServer(new WebSocketAddress(
       typeof options.ws === 'boolean' ? undefined : options.ws
-    )
-    servers.push(new WebSocketServer(address))
+    )))
   }
   if (servers.length === 0) {
     log.warn(

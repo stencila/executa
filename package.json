@@ -1,6 +1,6 @@
 {
   "name": "@stencila/executa",
-  "version": "0.2.0",
+  "version": "0.2.0-next.1",
   "description": "Execution delegator for various language backends.",
   "main": "./dist/lib/index.js",
   "browser": "./dist/browser/index.js",
@@ -16,7 +16,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cover": "jest --coverage",
-    "build": "tsc && rollup --config",
+    "build": "npm run build:node && npm run build:browser",
+    "build:node": "tsc",
+    "build:browser": "rollup --config",
     "docs": "npm run docs:readme && npm run docs:ts",
     "docs:readme": "markdown-toc -i --maxdepth=4 README.md",
     "docs:ts": "typedoc --options typedoc.js ./src"
