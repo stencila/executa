@@ -107,13 +107,13 @@ export default abstract class Server {
           )
           break
         case 'compile':
-          result = await this.executor.compile(param(request, 0, 'node'))
-          break
         case 'build':
-          result = await this.executor.build(param(request, 0, 'node'))
-          break
         case 'execute':
-          result = await this.executor.execute(param(request, 0, 'node'))
+        case 'begin':
+        case 'end':
+          result = await this.executor[request.method](
+            param(request, 0, 'node')
+          )
           break
         default:
           throw new JsonRpcError(

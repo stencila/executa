@@ -60,6 +60,20 @@ export default abstract class Client implements Interface {
   }
 
   /**
+   * Call the remote `Executor`'s `begin` method
+   */
+  public async begin(node: Node): Promise<Node> {
+    return this.call<Node>(Method.begin, { node })
+  }
+
+  /**
+   * Call the remote `Executor`'s `end` method
+   */
+  public async end(node: Node): Promise<Node> {
+    return this.call<Node>(Method.end, { node })
+  }
+
+  /**
    * Call a method of a remote `Executor`.
    *
    * @param method The name of the method

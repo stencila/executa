@@ -9,6 +9,7 @@ import JsonRpcRequest from '../base/JsonRpcRequest'
 import JsonRpcResponse from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
 import TcpServer from '../tcp/TcpServer'
+import { JsonRpcErrorCode } from '../base/JsonRpcError'
 
 const log = getLogger('executa:http:server')
 
@@ -82,7 +83,9 @@ export default class HttpServer extends TcpServer {
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse
         if (error !== undefined)
-          reply.status(error.code < -32603 ? 400 : 500).send({ error: error })
+          reply
+            .status(error.code < JsonRpcErrorCode.InternalError ? 400 : 500)
+            .send({ error: error })
         else reply.send(result)
       }
     }
@@ -92,6 +95,8 @@ export default class HttpServer extends TcpServer {
     app.post('/compile', wrap('compile'))
     app.post('/build', wrap('build'))
     app.post('/execute', wrap('execute'))
+    app.post('/begin', wrap('begin'))
+    app.post('/end', wrap('end'))
 
     this.server = app.server
   }

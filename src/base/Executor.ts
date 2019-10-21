@@ -18,7 +18,9 @@ export enum Method {
   encode = 'encode',
   compile = 'compile',
   build = 'build',
-  execute = 'execute'
+  execute = 'execute',
+  begin = 'begin',
+  end = 'end'
 }
 
 /**
@@ -124,6 +126,22 @@ export abstract class Interface {
    * @returns The executed node
    */
   abstract async execute(node: Node): Promise<Node>
+
+  /**
+   * Begin running a `Node`.
+   *
+   * @param node The node to run
+   * @returns The node after it has begun running
+   */
+  abstract async begin(node: Node): Promise<Node>
+
+  /**
+   * End running a `Node`.
+   *
+   * @param node The running node
+   * @returns The node after it has ended running
+   */
+  abstract async end(node: Node): Promise<Node>
 
   /**
    * Call one of the above methods.
@@ -463,7 +481,8 @@ export class Executor implements Interface {
    * Execute a `Node`.
    *
    * Walks the node tree and attempts to delegate
-   * execution of certain types of nodes (currently `CodeChunk` and `CodeExpression`).
+   * execution of certain types of nodes
+   * (currently `CodeChunk` and `CodeExpression`).
    *
    * @param node The node to execute
    */
@@ -487,6 +506,20 @@ export class Executor implements Interface {
       }
       return Promise.resolve(node)
     })
+  }
+
+  /**
+   * Begin running a `Node`.
+   */
+  public begin(node: Node): Promise<Node> {
+    return this.delegate(Method.begin, { node }, () => Promise.resolve(node))
+  }
+
+  /**
+   * End running a `Node`.
+   */
+  public end(node: Node): Promise<Node> {
+    return this.delegate(Method.end, { node }, () => Promise.resolve(node))
   }
 
   public async call(
