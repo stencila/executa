@@ -4,6 +4,7 @@
   "description": "Execution delegator for various language backends.",
   "main": "./dist/lib/index.js",
   "browser": "./dist/browser/index.js",
+  "bin": "./dist/lib/cli.js",
   "files": [
     "dist"
   ],

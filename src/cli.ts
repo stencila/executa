@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import {
   defaultHandler,
   getLogger,
@@ -24,7 +26,8 @@ import StdioServer from './stdio/StdioServer'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
-const log = getLogger('executa:serve')
+const log = getLogger('executa:cli')
+
 replaceHandlers(data =>
   defaultHandler(data, {
     level: options.debug !== undefined ? LogLevel.debug : LogLevel.info
@@ -73,11 +76,6 @@ const main = async () => {
           typeof options.ws === 'boolean' ? undefined : options.ws
         )
       )
-    )
-  }
-  if (servers.length === 0) {
-    log.warn(
-      'No servers specified in options (e.g. --tcp --stdio). Executor will not be accessible.'
     )
   }
 

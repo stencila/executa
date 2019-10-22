@@ -357,6 +357,13 @@ export class Executor implements Interface {
    * Start servers for the executor.
    */
   public async start(): Promise<void> {
+    if (this.servers.length === 0) {
+      log.warn(
+        'No servers configured; executor will not be accessible.'
+      )
+      return
+    }
+
     log.info(
       `Starting servers: ${this.servers
         .map(server => server.address.type)
