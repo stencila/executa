@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/stencila/executa/compare/v0.3.0...v0.3.1) (2019-10-22)
+
+
+### Bug Fixes
+
+* **CLI:** Add shebang; add `bin` property and change location of log ([e1929e6](https://github.com/stencila/executa/commit/e1929e6256941958a64add5baa57b87b306a55be))
+
 # [0.3.0](https://github.com/stencila/executa/compare/v0.2.0...v0.3.0) (2019-10-21)
 
 
