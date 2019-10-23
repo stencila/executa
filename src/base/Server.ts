@@ -1,9 +1,9 @@
 import { Executor } from './Executor'
+import { InternalError } from './InternalError'
 import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
 import { Address } from './Transports'
-import { InternalError } from './InternalError'
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -106,9 +106,14 @@ export default abstract class Server {
             param(request, 1, 'format', false)
           )
           break
+        case 'execute':
+          result = await this.executor.execute(
+            param(request, 0, 'node'),
+            param(request, 1, 'session', false)
+          )
+          break
         case 'compile':
         case 'build':
-        case 'execute':
         case 'begin':
         case 'end':
           result = await this.executor[request.method](

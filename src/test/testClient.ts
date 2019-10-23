@@ -19,4 +19,13 @@ export const testClient = async (client: Client) => {
   )
 
   expect(await client.execute({ type: 'Entity' })).toEqual({ type: 'Entity' })
+  expect(
+    await client.execute(
+      { type: 'Entity' },
+      {
+        type: 'SoftwareSession',
+        environment: { type: 'Environment', name: 'anything' }
+      }
+    )
+  ).toEqual({ type: 'Entity' })
 }

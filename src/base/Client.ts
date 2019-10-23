@@ -1,9 +1,8 @@
-import { Node } from '@stencila/schema'
-import { Interface, Method, Manifest } from './Executor'
+import { Node, SoftwareSession } from '@stencila/schema'
+import { Interface, Manifest, Method } from './Executor'
+import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
 import JsonRpcRequest from './JsonRpcRequest'
 import JsonRpcResponse from './JsonRpcResponse'
-import { Address } from './Transports'
-import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -55,8 +54,8 @@ export default abstract class Client implements Interface {
   /**
    * Call the remote `Executor`'s `execute` method
    */
-  public async execute(node: Node): Promise<Node> {
-    return this.call<Node>(Method.execute, { node })
+  public async execute(node: Node, session?: SoftwareSession): Promise<Node> {
+    return this.call<Node>(Method.execute, { node, session })
   }
 
   /**

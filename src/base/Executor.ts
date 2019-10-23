@@ -1,11 +1,11 @@
 import { getLogger } from '@stencila/logga'
-import { isPrimitive, Node, nodeType } from '@stencila/schema'
+import { isPrimitive, Node, nodeType, SoftwareSession } from '@stencila/schema'
 import Ajv from 'ajv'
 import { JSONSchema7Definition } from 'json-schema'
 import { ClientType } from './Client'
+import { InternalError } from './InternalError'
 import Server from './Server'
 import { Address, Transport } from './Transports'
-import { InternalError } from './InternalError'
 
 const log = getLogger('executa:executor')
 
@@ -123,9 +123,10 @@ export abstract class Interface {
    * Execute a `Node`.
    *
    * @param node The node to execute
+   * @param session The session that the node will be executed in
    * @returns The executed node
    */
-  abstract async execute(node: Node): Promise<Node>
+  abstract async execute(node: Node, session?: SoftwareSession): Promise<Node>
 
   /**
    * Begin running a `Node`.
@@ -358,9 +359,7 @@ export class Executor implements Interface {
    */
   public async start(): Promise<void> {
     if (this.servers.length === 0) {
-      log.warn(
-        'No servers configured; executor will not be accessible.'
-      )
+      log.warn('No servers configured; executor will not be accessible.')
       return
     }
 
@@ -492,13 +491,14 @@ export class Executor implements Interface {
    * (currently `CodeChunk` and `CodeExpression`).
    *
    * @param node The node to execute
+   * @param session The session to execute the node within
    */
-  public execute(node: Node): Promise<Node> {
+  public execute(node: Node, session?: SoftwareSession): Promise<Node> {
     return this.walk(node, node => {
       switch (nodeType(node)) {
         case 'CodeChunk':
         case 'CodeExpression':
-          return this.delegate(Method.execute, { node }, () =>
+          return this.delegate(Method.execute, { node, session }, () =>
             Promise.resolve({
               ...(node as object),
               errors: [
@@ -543,7 +543,7 @@ export class Executor implements Interface {
       case Method.build:
         return this.build(params.node)
       case Method.execute:
-        return this.execute(params.node)
+        return this.execute(params.node, params.session)
     }
   }
 
