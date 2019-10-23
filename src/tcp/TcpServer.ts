@@ -61,16 +61,23 @@ export class TcpServer extends StreamServer {
 
   public async stop(): Promise<void> {
     if (this.server !== undefined) {
-      log.info(`Stopping server ${this.address.toString()}`)
+      const url = this.address.toString()
+      log.info(`Stopping server ${url}`)
 
       this.clients.forEach(client => client.destroy())
       this.clients = []
 
-      this.server.close(() => {
-        if (this.server !== undefined) this.server.unref()
+      return new Promise(resolve => {
+        if (this.server !== undefined)
+          this.server.close(() => {
+            if (this.server !== undefined) {
+              this.server.unref()
+              this.server = undefined
+            }
+            log.info(`Stopped server ${url}`)
+            resolve()
+          })
       })
-      this.server = undefined
-      return Promise.resolve()
     }
   }
 }

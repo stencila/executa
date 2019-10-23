@@ -120,6 +120,8 @@ export class HttpServer extends TcpServer {
     log.info(`Starting server: ${url}`)
     return new Promise(resolve =>
       this.app.listen(this.port, this.host, () => {
+        // Set server property to use `TcpServer.stop()`
+        this.server = this.app.server
         log.info(
           `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
         )
