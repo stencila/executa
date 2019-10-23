@@ -1,14 +1,14 @@
 import fetch from 'cross-fetch'
-import Client from '../base/Client'
-import JsonRpcError from '../base/JsonRpcError'
-import JsonRpcRequest from '../base/JsonRpcRequest'
-import JsonRpcResponse from '../base/JsonRpcResponse'
+import { Client } from '../base/Client'
+import { JsonRpcError } from '../base/JsonRpcError'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
 
 /**
  * A `Client` using HTTP/S for communication.
  */
-export default class HttpClient extends Client {
+export class HttpClient extends Client {
   public readonly url: string
 
   private readonly jwt?: string

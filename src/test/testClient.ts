@@ -1,4 +1,4 @@
-import Client from '../base/Client'
+import { Client } from '../base/Client'
 
 /**
  * Test that the methods of a client (that is connected to a server)

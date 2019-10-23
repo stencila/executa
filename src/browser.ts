@@ -20,11 +20,9 @@
 
 import { ClientType } from './base/Client'
 import { Executor } from './base/Executor'
-import discoverHttp from './http/discover'
-import HttpClient from './http/HttpClient'
-// import discoverTcp from './tcp/discover'
-// import TcpClient from './tcp/TcpClient'
-import WSClient from './ws/WebSocketClient'
+import { discover as discoverHttp } from './http/discover'
+import { HttpClient } from './http/HttpClient'
+import { WebSocketClient } from './ws/WebSocketClient'
 
 const red = '\u001b[31;1m'
 const blue = '\u001b[34;1m'
@@ -41,7 +39,7 @@ window.process = {
   // Create executor (no need to start it, since it has no servers)
   const executor = new Executor(
     [discoverHttp],
-    [HttpClient as ClientType, WSClient as ClientType]
+    [HttpClient as ClientType, WebSocketClient as ClientType]
   )
 
   const makeCodeChunk = async (text: string): Promise<string> =>

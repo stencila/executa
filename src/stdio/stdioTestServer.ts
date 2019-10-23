@@ -8,7 +8,7 @@
  * - `crash-on-request`
  */
 
-import StdioServer from './StdioServer'
+import { StdioServer } from './StdioServer'
 
 const server = new StdioServer()
 

@@ -1,13 +1,13 @@
 import WebSocket from 'isomorphic-ws'
 
-import Client from '../base/Client'
-import JsonRpcRequest from '../base/JsonRpcRequest'
+import { Client } from '../base/Client'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { WebSocketAddress } from '../base/Transports'
 
 /**
  * A `Client` using the WebSockets API for communication.
  */
-export default class WebSocketClient extends Client {
+export class WebSocketClient extends Client {
   /**
    * A `WebSocket` instance
    */

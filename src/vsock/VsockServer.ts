@@ -3,11 +3,11 @@ import { ChildProcess, spawn } from 'child_process'
 import path from 'path'
 import { Executor } from '../base/Executor'
 import { VsockAddress } from '../base/Transports'
-import StreamServer from '../stream/StreamServer'
+import { StreamServer } from '../stream/StreamServer'
 
 const log = getLogger('executa:vsock:server')
 
-export default class VsockServer extends StreamServer {
+export class VsockServer extends StreamServer {
   public readonly port: number
 
   private server?: ChildProcess

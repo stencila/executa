@@ -1,12 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import net from 'net'
 import { VsockAddress } from '../base/Transports'
-import StreamClient from '../stream/StreamClient'
+import { StreamClient } from '../stream/StreamClient'
 import { InternalError } from '../base/InternalError'
 
 const log = getLogger('executa:vsock:client')
 
-export default class VsockFirecrackerClient extends StreamClient {
+export class VsockFirecrackerClient extends StreamClient {
   private socket: net.Socket
 
   public constructor(address: VsockAddress = new VsockAddress()) {

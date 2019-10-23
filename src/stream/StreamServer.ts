@@ -2,8 +2,8 @@
 import * as lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Executor } from '../base/Executor'
-import Server from '../base/Server'
-export default abstract class StreamServer extends Server {
+import { Server } from '../base/Server'
+export abstract class StreamServer extends Server {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */

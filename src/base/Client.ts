@@ -1,8 +1,8 @@
 import { Node, SoftwareSession } from '@stencila/schema'
 import { Interface, Manifest, Method } from './Executor'
-import JsonRpcError, { JsonRpcErrorCode } from './JsonRpcError'
-import JsonRpcRequest from './JsonRpcRequest'
-import JsonRpcResponse from './JsonRpcResponse'
+import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
+import { JsonRpcRequest } from './JsonRpcRequest'
+import { JsonRpcResponse } from './JsonRpcResponse'
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -10,7 +10,7 @@ import JsonRpcResponse from './JsonRpcResponse'
  * Implements asynchronous, methods for `Executor` methods `compile`, `build`, `execute`, etc.
  * which send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
-export default abstract class Client implements Interface {
+export abstract class Client implements Interface {
   /**
    * A map of requests to which responses can be paired against
    */

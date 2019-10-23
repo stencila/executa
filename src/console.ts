@@ -29,8 +29,8 @@ import minimist from 'minimist'
 import * as readline from 'readline'
 import { ClientType } from './base/Client'
 import { Executor } from './base/Executor'
-import discoverTcp from './tcp/discover'
-import TcpClient from './tcp/TcpClient'
+import { discover as discoverTcp } from './tcp/discover'
+import { TcpClient } from './tcp/TcpClient'
 
 const { _, ...options } = minimist(process.argv.slice(2))
 

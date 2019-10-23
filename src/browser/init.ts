@@ -9,9 +9,9 @@ import {
 import { ClientType } from '../base/Client'
 import { Executor } from '../base/Executor'
 import { HttpAddress } from '../base/Transports'
-import discover from '../http/discover'
-import { default as HttpClient } from '../http/HttpClient'
-import { default as WSClient } from '../ws/WebSocketClient'
+import { discover } from '../http/discover'
+import { HttpClient } from '../http/HttpClient'
+import { WebSocketClient } from '../ws/WebSocketClient'
 
 let executor: Executor
 let sessionRef: null | SoftwareSession = null
@@ -35,6 +35,7 @@ const executeHandler = (text: string): Promise<void> =>
 const setCodeChunkProps = (): void => {
   const codeChunks = document.querySelectorAll('stencila-code-chunk')
   codeChunks.forEach(chunk => {
+    // @ts-ignore executeHandler is not a property of Element
     chunk.executeHandler = executeHandler
   })
 }
@@ -48,7 +49,7 @@ export const init = (options: Partial<InitOptions> = defaultOptions): void => {
 
   executor = new Executor(
     [() => discover(new HttpAddress({ host, port }, path))],
-    [HttpClient as ClientType, WSClient as ClientType]
+    [HttpClient as ClientType, WebSocketClient as ClientType]
   )
 
   if (document.readyState === 'loading') {

@@ -1,9 +1,9 @@
-import Client from '../base/Client'
-import JsonRpcRequest from '../base/JsonRpcRequest'
-import Server from '../base/Server'
+import { Client } from '../base/Client'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { Server } from '../base/Server'
 import { DirectAddress } from '../base/Transports'
 
-export default class DirectClient extends Client {
+export class DirectClient extends Client {
   private server: Server
 
   public constructor(address: Omit<DirectAddress, 'type'>) {

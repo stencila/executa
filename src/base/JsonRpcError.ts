@@ -37,7 +37,7 @@ export enum JsonRpcErrorCode {
   ServerError = -32000
 }
 
-export default class JsonRpcError {
+export class JsonRpcError {
   /**
    * A Number that indicates the error type that occurred.
    * This MUST be an integer.

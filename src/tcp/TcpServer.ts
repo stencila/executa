@@ -2,11 +2,11 @@ import { getLogger } from '@stencila/logga'
 import { createServer, Server, Socket } from 'net'
 import { Executor } from '../base/Executor'
 import { TcpAddress } from '../base/Transports'
-import StreamServer from '../stream/StreamServer'
+import { StreamServer } from '../stream/StreamServer'
 
 const log = getLogger('executa:tcp:server')
 
-export default class TcpServer extends StreamServer {
+export class TcpServer extends StreamServer {
   protected readonly host: string
 
   protected readonly port: number

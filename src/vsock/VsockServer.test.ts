@@ -1,4 +1,4 @@
-import VsockServer from './VsockServer'
+import { VsockServer } from './VsockServer'
 
 test('VsockServer', async () => {
   const server = new VsockServer()

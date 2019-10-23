@@ -12,7 +12,7 @@ const log = getLogger('executa:serve')
 
 const EXECUTORS_DIR_NAME = 'executors'
 
-export default async function discover(): Promise<Manifest[]> {
+export async function discover(): Promise<Manifest[]> {
   let stencilaHome: string
 
   switch (os.platform()) {

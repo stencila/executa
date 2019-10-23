@@ -4,7 +4,7 @@ import Ajv from 'ajv'
 import { JSONSchema7Definition } from 'json-schema'
 import { ClientType } from './Client'
 import { InternalError } from './InternalError'
-import Server from './Server'
+import { Server } from './Server'
 import { Address, Transport } from './Transports'
 
 const log = getLogger('executa:executor')
