@@ -5,4 +5,4 @@
 
 # Change into the current directory of this script so it can be run from anywhere
 cd "$(dirname "$0")"
-npm run cli -- "$@"
+npm run cli:dev -- "$@"

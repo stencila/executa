@@ -1,9 +1,9 @@
 import fetch from 'cross-fetch'
 import Client from '../base/Client'
-import JsonRpcRequest from '../base/JsonRpcRequest'
-import { HttpAddress } from '../base/Transports'
-import JsonRpcResponse from '../base/JsonRpcResponse'
 import JsonRpcError from '../base/JsonRpcError'
+import JsonRpcRequest from '../base/JsonRpcRequest'
+import JsonRpcResponse from '../base/JsonRpcResponse'
+import { HttpAddress } from '../base/Transports'
 
 /**
  * A `Client` using HTTP/S for communication.
@@ -48,6 +48,7 @@ export default class HttpClient extends Client {
       .then((response: JsonRpcResponse) => {
         this.receive(response)
       })
+      .catch(err => console.error(err))
   }
 
   // Additional methods for getting and posting to server

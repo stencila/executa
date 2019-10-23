@@ -1,65 +1,56 @@
 import '@stencila/components'
+import {
+  codeChunk,
+  environment,
+  Node,
+  softwareSession,
+  SoftwareSession
+} from '@stencila/schema'
+import { ClientType } from '../base/Client'
 import { Executor } from '../base/Executor'
+import { HttpAddress } from '../base/Transports'
 import discover from '../http/discover'
 import { default as HttpClient } from '../http/HttpClient'
 import { default as WSClient } from '../ws/WebSocketClient'
-import { ClientType } from '../base/Client'
-import { codeChunk, SoftwareSession } from '@stencila/schema'
 
-const jwt =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1NzE3ODA0NDd9.Q33AWdLDiJJQrWFfVkFgOT94dipKCXEzSPze0OS49C0'
+let executor: Executor
+let sessionRef: null | SoftwareSession = null
 
-const discoverStub = [
-  async () => [
-    {
-      addresses: {
-        ws: {
-          type: 'ws',
-          host: '127.0.0.1',
-          port: '9000',
-          jwt
-        }
-      },
-      capabilities: {
-        execute: true
-      }
-    }
-  ]
-]
-
-// @ts-ignore
-const executor = new Executor(discoverStub, [
-  HttpClient as ClientType,
-  WSClient as ClientType
-])
-
-let sessionRef: undefined | SoftwareSession
-
-const makeCodeChunk = async (text: string): Promise<string> => {
+const executeCodeChunk = async (text: string): Promise<Node> => {
   const code = codeChunk(text, { programmingLanguage: 'python' })
-  // @ts-ignore
-  console.log(JSON.stringify(code, null, 2))
-  // TODO: Check for session, if not executor.begin().then(session => seessionRef = session; executor.execute(code, session))
-  // return executor.execute(code, sessionRef)
-  return executor.execute(code)
+
+  if (sessionRef === null) {
+    const session = softwareSession(environment('stencila/sparkla-ubuntu'))
+    sessionRef = (await executor.begin(session)) as SoftwareSession
+  }
+
+  return executor.execute(code, sessionRef)
 }
 
-const executeHandler = (text: string) => makeCodeChunk(text).then(console.log)
+const executeHandler = (text: string): Promise<void> =>
+  executeCodeChunk(text)
+    .then(res => console.log(res))
+    .catch(err => console.error(err))
 
-const setCodeChunkProps = () => {
+const setCodeChunkProps = (): void => {
   const codeChunks = document.querySelectorAll('stencila-code-chunk')
   codeChunks.forEach(chunk => {
-    // @ts-ignore
     chunk.executeHandler = executeHandler
   })
 }
 
 const onReadyHandler = (): void => {
   setCodeChunkProps()
-  // TODO: Store session info
 }
 
-export const init = (): void => {
+export const init = (options: Partial<InitOptions> = defaultOptions): void => {
+  const { host, path, port } = { ...defaultOptions, ...options }
+
+  executor = new Executor(
+    [() => discover(new HttpAddress({ host, port }, path))],
+    [HttpClient as ClientType, WSClient as ClientType]
+  )
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', onReadyHandler)
   } else {
@@ -67,4 +58,31 @@ export const init = (): void => {
   }
 }
 
-init()
+interface InitOptions {
+  host: string
+  port: number
+  path: string
+}
+
+const host: string = window.location.hostname.includes('localhost')
+  ? 'localhost'
+  : 'hub.stenci.la'
+
+const defaultOptions: InitOptions = {
+  host,
+  path: '',
+  port: 9000
+}
+
+const executa = {
+  init
+}
+
+const Stencila = {
+  // @ts-ignore
+  ...(window.Stencila !== undefined ? window.Stencila : {}),
+  executa
+}
+
+// @ts-ignore
+window.Stencila = Stencila

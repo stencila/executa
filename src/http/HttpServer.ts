@@ -5,11 +5,11 @@ import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
 import { InternalError } from '../base/InternalError'
+import { JsonRpcErrorCode } from '../base/JsonRpcError'
 import JsonRpcRequest from '../base/JsonRpcRequest'
 import JsonRpcResponse from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
 import TcpServer from '../tcp/TcpServer'
-import { JsonRpcErrorCode } from '../base/JsonRpcError'
 
 const log = getLogger('executa:http:server')
 
@@ -50,6 +50,9 @@ export default class HttpServer extends TcpServer {
       secret
     })
     app.addHook('onRequest', async (request, reply) => {
+      // In development do not require a JWT for /mainfest (so the clinet can obtain a JWT!;)
+      if (process.env.NODE_ENV === 'development') return
+      // In all other cases, a valid JWT is required
       try {
         await request.jwtVerify()
       } catch (err) {
