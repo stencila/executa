@@ -455,7 +455,7 @@ export class Executor implements Interface {
   /**
    * Get a map of server addresses for this executor.
    */
-  protected addresses(): Addresses {
+  public addresses(): Addresses {
     return this.servers
       .map(server => server.address)
       .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
