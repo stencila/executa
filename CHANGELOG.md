@@ -1,3 +1,18 @@
+# [0.4.0](https://github.com/stencila/executa/compare/v0.3.1...v0.4.0) (2019-10-23)
+
+
+### Bug Fixes
+
+* **Browser:** Do not rely on default exports ([295fa60](https://github.com/stencila/executa/commit/295fa6074801b23d6cd8d038fb17e96031008942))
+* **CLI:** Remove env var setting ([b9eb0f6](https://github.com/stencila/executa/commit/b9eb0f69ad0716fe32da391488a6f70fb18593a3))
+
+
+### Features
+
+* **Browser:** Auto fetch manifest & allow setting Executa options ([5c583fb](https://github.com/stencila/executa/commit/5c583fbc6c2ccfe67f75d9676c4b6e55aa33e7f3))
+* **Executa:** Add session parameter to execute functions ([7cf0513](https://github.com/stencila/executa/commit/7cf05130e26d2481be1cf72f542e64a6958500ec))
+* **TCP & WebSocket severs:** Add onConnected and onDisconnected methods ([f891e53](https://github.com/stencila/executa/commit/f891e536ece4874b5a6dc9bcb72a550023bc70fd))
+
 ## [0.3.1](https://github.com/stencila/executa/compare/v0.3.0...v0.3.1) (2019-10-22)
 
 
