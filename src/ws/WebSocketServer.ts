@@ -38,8 +38,9 @@ export class WebSocketServer extends HttpServer {
         socket.on('message', async (message: string) => {
           socket.send(await this.receive(message))
         })
-        // Register connection
-        this.onConnection(connection)
+        // Register connection and disconnection handler
+        this.onConnected(connection)
+        socket.on('close', () => this.onDisconnected(connection))
       },
       options: {
         verifyClient: authorize

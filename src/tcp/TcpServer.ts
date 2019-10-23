@@ -30,11 +30,12 @@ export class TcpServer extends StreamServer {
     })
   }
 
-  protected onConnection(client: Socket): void {
+  protected onConnected(client: Socket): void {
     this.clients.push(client)
-    client.on('close', () => {
-      this.clients.splice(this.clients.indexOf(client), 1)
-    })
+  }
+
+  protected onDisconnected(client: Socket): void {
+    this.clients.splice(this.clients.indexOf(client), 1)
   }
 
   public async start(executor?: Executor): Promise<void> {
@@ -48,7 +49,10 @@ export class TcpServer extends StreamServer {
           )
         })
       }))
-      server.on('connection', client => this.onConnection(client))
+      server.on('connection', client => {
+        this.onConnected(client)
+        client.on('close', () => this.onDisconnected(client))
+      })
 
       const { host, port } = this.address
       return new Promise(resolve => server.listen(port, host, () => resolve()))
