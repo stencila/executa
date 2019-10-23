@@ -1,3 +1,15 @@
+# [0.5.0](https://github.com/stencila/executa/compare/v0.4.0...v0.5.0) (2019-10-23)
+
+
+### Bug Fixes
+
+* **TcpServer & HttpServer:** Improve stop method ([cde5711](https://github.com/stencila/executa/commit/cde57114d861bfdedee1e791f5d5908da4ba9509))
+
+
+### Features
+
+* **WebSocketClient:** Add stop method ([9fa1f93](https://github.com/stencila/executa/commit/9fa1f937782ef6d6050995a0558b1ba648dc917d))
+
 # [0.4.0](https://github.com/stencila/executa/compare/v0.3.1...v0.4.0) (2019-10-23)
 
 
