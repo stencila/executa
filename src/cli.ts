@@ -9,20 +9,20 @@ import {
 import minimist from 'minimist'
 import { ClientType } from './base/Client'
 import { Executor } from './base/Executor'
-import Server from './base/Server'
-import discoverStdio from './stdio/discover'
-import StdioClient from './stdio/StdioClient'
-import HttpServer from './http/HttpServer'
-import TcpServer from './tcp/TcpServer'
-import WebSocketServer from './ws/WebSocketServer'
+import { Server } from './base/Server'
+import { discover as discoverStdio } from './stdio/discover'
+import { StdioClient } from './stdio/StdioClient'
+import { HttpServer } from './http/HttpServer'
+import { TcpServer } from './tcp/TcpServer'
+import { WebSocketServer } from './ws/WebSocketServer'
 import {
   HttpAddress,
   TcpAddress,
   WebSocketAddress,
   VsockAddress
 } from './base/Transports'
-import VsockServer from './vsock/VsockServer'
-import StdioServer from './stdio/StdioServer'
+import { VsockServer } from './vsock/VsockServer'
+import { StdioServer } from './stdio/StdioServer'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 

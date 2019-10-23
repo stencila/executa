@@ -3,7 +3,7 @@
  *
  * @see {@link https://www.jsonrpc.org/specification#request_object}
  */
-export default class JsonRpcRequest {
+export class JsonRpcRequest {
   /**
    * A string specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
    */

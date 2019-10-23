@@ -1,5 +1,5 @@
-import TcpClient from './TcpClient'
-import TcpServer from './TcpServer'
+import { TcpClient } from './TcpClient'
+import { TcpServer } from './TcpServer'
 import { testClient } from '../test/testClient'
 
 test('TcpClient and TcpServer', async () => {

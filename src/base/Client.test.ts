@@ -1,6 +1,6 @@
-import Client from './Client'
-import JsonRpcRequest from './JsonRpcRequest'
-import JsonRpcResponse from './JsonRpcResponse'
+import { Client } from './Client'
+import { JsonRpcRequest } from './JsonRpcRequest'
+import { JsonRpcResponse } from './JsonRpcResponse'
 
 /**
  * Simple test client that implements the

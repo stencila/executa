@@ -1,10 +1,10 @@
 import { Readable, Writable } from 'stream'
 // @ts-ignore
 import * as lps from 'length-prefixed-stream'
-import Client from '../base/Client'
-import JsonRpcRequest from '../base/JsonRpcRequest'
+import { Client } from '../base/Client'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
 
-export default abstract class StreamClient extends Client {
+export abstract class StreamClient extends Client {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */

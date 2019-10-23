@@ -1,4 +1,4 @@
-import Client from '../base/Client'
+import { Client } from '../base/Client'
 
 /**
  * Test that the methods of a client (that is connected to a server)
@@ -19,4 +19,13 @@ export const testClient = async (client: Client) => {
   )
 
   expect(await client.execute({ type: 'Entity' })).toEqual({ type: 'Entity' })
+  expect(
+    await client.execute(
+      { type: 'Entity' },
+      {
+        type: 'SoftwareSession',
+        environment: { type: 'Environment', name: 'anything' }
+      }
+    )
+  ).toEqual({ type: 'Entity' })
 }

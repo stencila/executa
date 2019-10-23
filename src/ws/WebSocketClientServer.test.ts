@@ -1,7 +1,6 @@
 import { testClient } from '../test/testClient'
-import WebSocketClient from './WebSocketClient'
-import WebSocketServer from './WebSocketServer'
-import { WebSocketAddress } from '../base/Transports'
+import { WebSocketClient } from './WebSocketClient'
+import { WebSocketServer } from './WebSocketServer'
 
 beforeAll(() => {
   process.env.JWT_SECRET = 'not-a-secret-at-all'

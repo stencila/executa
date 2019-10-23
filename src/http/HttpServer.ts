@@ -5,18 +5,18 @@ import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
 import { InternalError } from '../base/InternalError'
-import JsonRpcRequest from '../base/JsonRpcRequest'
-import JsonRpcResponse from '../base/JsonRpcResponse'
-import { HttpAddress } from '../base/Transports'
-import TcpServer from '../tcp/TcpServer'
 import { JsonRpcErrorCode } from '../base/JsonRpcError'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { HttpAddress } from '../base/Transports'
+import { TcpServer } from '../tcp/TcpServer'
+import { JsonRpcResponse } from '../base/JsonRpcResponse'
 
 const log = getLogger('executa:http:server')
 
 /**
  * A `Server` using HTTP for communication.
  */
-export default class HttpServer extends TcpServer {
+export class HttpServer extends TcpServer {
   /**
    * The Fastify application
    *
@@ -50,6 +50,9 @@ export default class HttpServer extends TcpServer {
       secret
     })
     app.addHook('onRequest', async (request, reply) => {
+      // In development do not require a JWT for /mainfest (so the clinet can obtain a JWT!;)
+      if (process.env.NODE_ENV === 'development') return
+      // In all other cases, a valid JWT is required
       try {
         await request.jwtVerify()
       } catch (err) {
@@ -75,13 +78,10 @@ export default class HttpServer extends TcpServer {
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
         const jsonRpcRequest = new JsonRpcRequest(method, request.body)
-        const jsonRpcResponse = (await this.receive(
-          jsonRpcRequest,
-          false
-        )) as JsonRpcResponse
+        const jsonRpcResponse = await this.receive(jsonRpcRequest, false)
 
         reply.header('Content-Type', 'application/json')
-        const { result, error } = jsonRpcResponse
+        const { result, error } = jsonRpcResponse as JsonRpcResponse
         if (error !== undefined)
           reply
             .status(error.code < JsonRpcErrorCode.InternalError ? 400 : 500)

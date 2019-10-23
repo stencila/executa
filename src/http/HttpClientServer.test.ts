@@ -1,6 +1,6 @@
 import { testClient } from '../test/testClient'
-import HttpClient from './HttpClient'
-import HttpServer from './HttpServer'
+import { HttpClient } from './HttpClient'
+import { HttpServer } from './HttpServer'
 
 beforeAll(() => {
   process.env.JWT_SECRET = 'not-a-secret-at-all'

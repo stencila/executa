@@ -4,14 +4,14 @@ import fastifyWebsocket from 'fastify-websocket'
 import jwt from 'jsonwebtoken'
 import { InternalError } from '../base/InternalError'
 import { WebSocketAddress } from '../base/Transports'
-import HttpServer from '../http/HttpServer'
+import { HttpServer } from '../http/HttpServer'
 
 const log = getLogger('executa:ws:server')
 
 /**
  * A `Server` using WebSockets for communication.
  */
-export default class WebSocketServer extends HttpServer {
+export class WebSocketServer extends HttpServer {
   public constructor(address: WebSocketAddress = new WebSocketAddress()) {
     super(address)
 
@@ -38,8 +38,9 @@ export default class WebSocketServer extends HttpServer {
         socket.on('message', async (message: string) => {
           socket.send(await this.receive(message))
         })
-        // Register connection
-        this.onConnection(connection)
+        // Register connection and disconnection handler
+        this.onConnected(connection)
+        socket.on('close', () => this.onDisconnected(connection))
       },
       options: {
         verifyClient: authorize

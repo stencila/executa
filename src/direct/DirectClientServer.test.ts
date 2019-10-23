@@ -1,6 +1,6 @@
 import * as stencila from '@stencila/schema'
-import DirectClient from './DirectClient'
-import DirectServer from './DirectServer'
+import { DirectClient } from './DirectClient'
+import { DirectServer } from './DirectServer'
 import { Executor } from '../base/Executor'
 
 test('DirectClient and DirectServer', async () => {

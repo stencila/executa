@@ -1,10 +1,10 @@
 import { spawn, ChildProcess } from 'child_process'
-import StreamClient from '../stream/StreamClient'
+import { StreamClient } from '../stream/StreamClient'
 import { StdioAddress } from '../base/Transports'
 import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:stdio:client')
-export default class StdioClient extends StreamClient {
+export class StdioClient extends StreamClient {
   private child: ChildProcess
 
   public constructor(address: string | Omit<StdioAddress, 'type'>) {

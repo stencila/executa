@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "cli": "ts-node src/cli.ts",
-    "cli:dev": "ts-node-dev src/cli.ts",
+    "cli:dev": "JWT_SECRET=not-a-secret ts-node-dev src/cli.ts --debug",
     "console": "ts-node src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",

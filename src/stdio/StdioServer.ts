@@ -1,7 +1,7 @@
-import StreamServer from '../stream/StreamServer'
+import { StreamServer } from '../stream/StreamServer'
 import { StdioAddress, Transport } from '../base/Transports'
 
-export default class StdioServer extends StreamServer {
+export class StdioServer extends StreamServer {
   public get address(): StdioAddress {
     return {
       type: Transport.stdio,

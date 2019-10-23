@@ -1,4 +1,5 @@
 export { Executor } from './base/Executor'
-export { default as discoverHttp } from './http/discover'
-export { default as HttpClient } from './http/HttpClient'
-export { default as WebSocketClient } from './ws/WebSocketClient'
+export { init } from './browser/init'
+export { discover as discoverHttp } from './http/discover'
+export { HttpClient } from './http/HttpClient'
+export { WebSocketClient } from './ws/WebSocketClient'

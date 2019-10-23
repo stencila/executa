@@ -1,5 +1,5 @@
 import path from 'path'
-import StdioClient from './StdioClient'
+import { StdioClient } from './StdioClient'
 import { testClient } from '../test/testClient'
 
 jest.setTimeout(30 * 1000)

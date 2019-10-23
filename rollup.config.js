@@ -1,7 +1,7 @@
 import babel from 'rollup-plugin-babel'
-import builtins from 'rollup-plugin-node-builtins'
 import commonjs from 'rollup-plugin-commonjs'
 import json from 'rollup-plugin-json'
+import builtins from 'rollup-plugin-node-builtins'
 import resolve from 'rollup-plugin-node-resolve'
 import typescript from 'rollup-plugin-typescript2'
 
@@ -16,7 +16,13 @@ export default [
       commonjs({
         extensions: ['.js', '.ts'],
         namedExports: {
-          '@stencila/schema': ['nodeType', 'isPrimitive']
+          '@stencila/schema': [
+            'nodeType',
+            'isPrimitive',
+            'codeChunk',
+            'environment',
+            'softwareSession'
+          ]
         }
       }),
       json(),
