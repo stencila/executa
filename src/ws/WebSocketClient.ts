@@ -32,4 +32,8 @@ export class WebSocketClient extends Client {
     }
     this.socket.send(JSON.stringify(request))
   }
+
+  public stop() {
+    this.socket.close()
+  }
 }
