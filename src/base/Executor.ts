@@ -404,26 +404,25 @@ export class Executor implements Interface {
     // has without needing to delegate
     const capabilities: Capabilities = {
       decode: [
+        // Can decode string content of JSON format
         {
           properties: {
             content: { type: 'string' },
-            format: { enum: ['json'] }
+            format: { const: 'json' }
           },
           required: ['content']
         }
       ],
       encode: [
+        // Can encode any node to JSON format
         {
           properties: {
             node: true,
-            format: { enum: ['json'] }
+            format: { const: 'json' }
           },
           required: ['node']
         }
-      ],
-      compile: [],
-      build: [],
-      execute: []
+      ]
     }
 
     // Do peer discovery if not yet done
