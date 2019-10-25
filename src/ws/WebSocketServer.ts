@@ -19,7 +19,7 @@ export class WebSocketServer extends HttpServer {
     const secret = process.env.JWT_SECRET
     if (secret === undefined)
       throw new InternalError('Environment variable JWT_SECRET must be set')
-    const authorize = (info: any, next: (ok: boolean) => void) => {
+    const authorize = (info: any, next: (ok: boolean) => void): void => {
       const token = info.req.headers['sec-websocket-protocol']
       if (token !== undefined) {
         try {

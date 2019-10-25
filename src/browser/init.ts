@@ -21,7 +21,7 @@ const executeCodeChunk = async (text: string): Promise<Node> => {
 
   if (sessionRef === null) {
     const session = softwareSession(environment('stencila/sparkla-ubuntu'))
-    sessionRef = (await executor.begin(session)) as SoftwareSession
+    sessionRef = await executor.begin(session)
   }
 
   return executor.execute(code, sessionRef)
