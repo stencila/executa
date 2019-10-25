@@ -25,11 +25,14 @@ export abstract class Server {
    * Handle a request
    *
    * @param request A JSON-RPC request from a client
+   * @param user An object representing the user and their rights,
+   *             usually a JWT payload
    * @param stringify Should the response be stringified?
    * @returns A JSON-RPC response as an object or string (default)
    */
   protected async receive(
     request: string | JsonRpcRequest,
+    user: any = {},
     stringify = true
   ): Promise<string | JsonRpcResponse> {
     if (this.executor === undefined)
@@ -116,7 +119,9 @@ export abstract class Server {
         case 'begin':
           result = await this.executor[request.method](
             param(request, 0, 'node'),
-            param(request, 1, 'limits', false)
+            // Any `limits` parameter requested are ignored and instead
+            // the session limits from the user token are applied
+            user.session !== undefined ? user.session : {}
           )
           break
         case 'compile':

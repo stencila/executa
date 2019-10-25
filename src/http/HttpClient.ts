@@ -4,7 +4,7 @@ import { JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
-import { getLogger } from '@stencila/logga';
+import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:http:client')
 

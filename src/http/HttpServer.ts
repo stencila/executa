@@ -51,7 +51,7 @@ export class HttpServer extends TcpServer {
       secret
     })
     app.addHook('onRequest', async (request, reply) => {
-      // In development do not require a JWT for /mainfest (so the clinet can obtain a JWT!;)
+      // In development do not require a JWT (so the client can obtain a JWT!;)
       if (process.env.NODE_ENV === 'development') return
       // In all other cases, a valid JWT is required
       try {
@@ -69,7 +69,9 @@ export class HttpServer extends TcpServer {
     // in the bodies.
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
-      reply.send(await this.receive(request.body, false))
+      // @ts-ignore that user does not exist on request
+      const { body, user = {} } = request
+      reply.send(await this.receive(body, user, false))
     })
 
     // JSON-RPC wrapped in HTTP for other clients
@@ -78,8 +80,10 @@ export class HttpServer extends TcpServer {
     // and HTTP error codes
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
-        const jsonRpcRequest = new JsonRpcRequest(method, request.body)
-        const jsonRpcResponse = await this.receive(jsonRpcRequest, false)
+        // @ts-ignore that user does not exist on request
+        const { body, user = {} } = request
+        const jsonRpcRequest = new JsonRpcRequest(method, body)
+        const jsonRpcResponse = await this.receive(jsonRpcRequest, user, false)
 
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse as JsonRpcResponse
