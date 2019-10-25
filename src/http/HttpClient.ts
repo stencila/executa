@@ -4,6 +4,9 @@ import { JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { HttpAddress } from '../base/Transports'
+import { getLogger } from '@stencila/logga';
+
+const log = getLogger('executa:http:client')
 
 /**
  * A `Client` using HTTP/S for communication.
@@ -48,7 +51,7 @@ export class HttpClient extends Client {
       .then((response: JsonRpcResponse) => {
         this.receive(response)
       })
-      .catch(err => console.error(err))
+      .catch(err => log.error(err))
   }
 
   // Additional methods for getting and posting to server
