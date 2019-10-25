@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@stencila/logga": "^1.4.0",
-    "@stencila/schema": "^0.29.0",
+    "@stencila/schema": "^0.30.4",
     "@types/ws": "^6.0.3",
     "ajv": "^6.10.2",
     "cross-fetch": "^3.0.4",
