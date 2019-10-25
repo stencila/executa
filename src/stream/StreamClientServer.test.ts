@@ -12,7 +12,6 @@ describe('StreamClient and StreamServer', () => {
   const serverOutgoing = new PassThrough()
   server.start(executor, serverIncoming, serverOutgoing)
 
-  // @ts-ignore Ignore the fact that this is an abstract class
   const client = new StreamClient(serverIncoming, serverOutgoing)
 
   test('calling manifest', async () => {

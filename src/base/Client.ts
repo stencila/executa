@@ -132,6 +132,15 @@ export abstract class Client implements Interface {
     resolve(response)
     delete this.requests[response.id]
   }
+
+  /**
+   * Stop the client
+   *
+   * Derived classes may override this method.
+   */
+  public stop(): Promise<void> {
+    return Promise.resolve()
+  }
 }
 
 export interface ClientType {

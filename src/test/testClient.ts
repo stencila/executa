@@ -7,7 +7,7 @@ import { Client } from '../base/Client'
  *
  * @param client An instance of a `Client`
  */
-export const testClient = async (client: Client) => {
+export const testClient = async (client: Client): Promise<void> => {
   expect(await client.decode('3.14')).toEqual(3.14)
   expect(await client.decode('{"type":"Entity"}', 'json')).toEqual({
     type: 'Entity'

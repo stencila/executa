@@ -11,6 +11,6 @@ import { TcpClient } from './TcpClient'
 export async function discover(address?: TcpAddress): Promise<Manifest[]> {
   const client = new TcpClient(address)
   const manifest = await client.manifest()
-  client.stop()
+  await client.stop()
   return [manifest]
 }
