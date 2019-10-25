@@ -1,4 +1,4 @@
-export { Executor } from './base/Executor'
+export { BaseExecutor } from './base/BaseExecutor'
 export { init } from './browser/init'
 export { discover as discoverHttp } from './http/discover'
 export { HttpClient } from './http/HttpClient'

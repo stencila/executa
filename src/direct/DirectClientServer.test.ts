@@ -1,11 +1,11 @@
 import * as stencila from '@stencila/schema'
 import { DirectClient } from './DirectClient'
 import { DirectServer } from './DirectServer'
-import { Executor } from '../base/Executor'
+import { BaseExecutor } from '../base/BaseExecutor'
 
 test('DirectClient and DirectServer', async () => {
   const server = new DirectServer()
-  const executor = new Executor()
+  const executor = new BaseExecutor()
   await server.start(executor)
   const client = new DirectClient(server.address)
 

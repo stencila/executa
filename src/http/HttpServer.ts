@@ -4,6 +4,7 @@ import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
+import { BaseExecutor } from '../base/BaseExecutor'
 import { InternalError } from '../base/InternalError'
 import { JsonRpcErrorCode } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
@@ -113,7 +114,7 @@ export class HttpServer extends TcpServer {
   }
 
   public async start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new Executor()
+    if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
 
     const url = this.address.toString()

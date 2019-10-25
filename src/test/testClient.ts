@@ -24,7 +24,7 @@ export const testClient = async (client: Client): Promise<void> => {
       { type: 'Entity' },
       {
         type: 'SoftwareSession',
-        environment: { type: 'Environment', name: 'anything' }
+        environment: { type: 'SoftwareEnvironment', name: 'anything' }
       }
     )
   ).toEqual({ type: 'Entity' })

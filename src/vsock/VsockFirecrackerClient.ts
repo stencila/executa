@@ -30,7 +30,8 @@ export class VsockFirecrackerClient extends StreamClient {
     this.socket = socket
   }
 
-  public stop(): void {
+  public stop(): Promise<void> {
     this.socket.destroy()
+    return Promise.resolve()
   }
 }

@@ -19,14 +19,10 @@
  */
 
 import { ClientType } from './base/Client'
-import { Executor } from './base/Executor'
+import { BaseExecutor } from './base/BaseExecutor'
 import { discover as discoverHttp } from './http/discover'
 import { HttpClient } from './http/HttpClient'
 import { WebSocketClient } from './ws/WebSocketClient'
-
-const red = '\u001b[31;1m'
-const blue = '\u001b[34;1m'
-const reset = '\u001b[0m'
 
 // @ts-ignore
 window.process = {
@@ -37,12 +33,12 @@ window.process = {
 // eslint-disable-next-line
 ;(async () => {
   // Create executor (no need to start it, since it has no servers)
-  const executor = new Executor(
+  const executor = new BaseExecutor(
     [discoverHttp],
     [HttpClient as ClientType, WebSocketClient as ClientType]
   )
 
-  const makeCodeChunk = async (text: string): Promise<string> =>
+  const makeCodeChunk = (text: string): Promise<string> =>
     executor.encode({
       type: 'CodeChunk',
       programmingLanguage: 'python',

@@ -4,6 +4,7 @@ import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
+import { BaseExecutor } from './BaseExecutor'
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -112,9 +113,14 @@ export abstract class Server {
             param(request, 1, 'session', false)
           )
           break
+        case 'begin':
+          result = await this.executor[request.method](
+            param(request, 0, 'node'),
+            param(request, 1, 'limits', false)
+          )
+          break
         case 'compile':
         case 'build':
-        case 'begin':
         case 'end':
           result = await this.executor[request.method](
             param(request, 0, 'node')
@@ -150,7 +156,7 @@ export abstract class Server {
    * call this method, or ensure that `executor` is set themselves.
    */
   public start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new Executor()
+    if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
     return Promise.resolve()
   }

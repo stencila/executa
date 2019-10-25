@@ -1,26 +1,28 @@
 import '@stencila/components'
 import {
   codeChunk,
-  environment,
   Node,
+  softwareEnvironment,
   softwareSession,
   SoftwareSession
 } from '@stencila/schema'
 import { ClientType } from '../base/Client'
-import { Executor } from '../base/Executor'
+import { BaseExecutor } from '../base/BaseExecutor'
 import { HttpAddress } from '../base/Transports'
 import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
 
-let executor: Executor
+let executor: BaseExecutor
 let sessionRef: null | SoftwareSession = null
 
 const executeCodeChunk = async (text: string): Promise<Node> => {
   const code = codeChunk(text, { programmingLanguage: 'python' })
 
   if (sessionRef === null) {
-    const session = softwareSession(environment('stencila/sparkla-ubuntu'))
+    const session = softwareSession(
+      softwareEnvironment('stencila/sparkla-ubuntu')
+    )
     sessionRef = await executor.begin(session)
   }
 
@@ -47,7 +49,7 @@ const onReadyHandler = (): void => {
 export const init = (options: Partial<InitOptions> = defaultOptions): void => {
   const { host, path, port } = { ...defaultOptions, ...options }
 
-  executor = new Executor(
+  executor = new BaseExecutor(
     [() => discover(new HttpAddress({ host, port }, path))],
     [HttpClient as ClientType, WebSocketClient as ClientType]
   )

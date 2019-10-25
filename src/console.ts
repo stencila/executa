@@ -28,7 +28,7 @@ import { CodeChunk } from '@stencila/schema'
 import minimist from 'minimist'
 import * as readline from 'readline'
 import { ClientType } from './base/Client'
-import { Executor } from './base/Executor'
+import { BaseExecutor } from './base/BaseExecutor'
 import { discover as discoverTcp } from './tcp/discover'
 import { TcpClient } from './tcp/TcpClient'
 
@@ -55,7 +55,7 @@ replaceHandlers(data => {
 // eslint-disable-next-line
 ;(async () => {
   // Create executor (no need to start it, since it has no servers)
-  const executor = new Executor([discoverTcp], [TcpClient as ClientType])
+  const executor = new BaseExecutor([discoverTcp], [TcpClient as ClientType])
 
   // Create the REPL with the starting prompt
   const repl = readline.createInterface({

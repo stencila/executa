@@ -20,7 +20,7 @@ export default [
             'nodeType',
             'isPrimitive',
             'codeChunk',
-            'environment',
+            'softwareEnvironment',
             'softwareSession'
           ]
         }

@@ -7,22 +7,22 @@ import {
   replaceHandlers
 } from '@stencila/logga'
 import minimist from 'minimist'
+import { BaseExecutor } from './base/BaseExecutor'
 import { ClientType } from './base/Client'
-import { Executor } from './base/Executor'
 import { Server } from './base/Server'
-import { discover as discoverStdio } from './stdio/discover'
-import { StdioClient } from './stdio/StdioClient'
-import { HttpServer } from './http/HttpServer'
-import { TcpServer } from './tcp/TcpServer'
-import { WebSocketServer } from './ws/WebSocketServer'
 import {
   HttpAddress,
   TcpAddress,
-  WebSocketAddress,
-  VsockAddress
+  VsockAddress,
+  WebSocketAddress
 } from './base/Transports'
-import { VsockServer } from './vsock/VsockServer'
+import { HttpServer } from './http/HttpServer'
+import { discover as discoverStdio } from './stdio/discover'
+import { StdioClient } from './stdio/StdioClient'
 import { StdioServer } from './stdio/StdioServer'
+import { TcpServer } from './tcp/TcpServer'
+import { VsockServer } from './vsock/VsockServer'
+import { WebSocketServer } from './ws/WebSocketServer'
 
 const { _: args, ...options } = minimist(process.argv.slice(2))
 
@@ -79,7 +79,7 @@ const main = async () => {
     )
   }
 
-  const executor = new Executor(
+  const executor = new BaseExecutor(
     [discoverStdio],
     [StdioClient as ClientType],
     servers
@@ -97,14 +97,14 @@ const main = async () => {
 /**
  * Serve the executor
  */
-const serve = async (executor: Executor) => {
+const serve = async (executor: BaseExecutor) => {
   await executor.start()
 }
 
 /**
  * Convert a document
  */
-const convert = async (executor: Executor): Promise<void> => {
+const convert = async (executor: BaseExecutor): Promise<void> => {
   const input = args[1]
   const output = args[2] !== undefined ? args[2] : '-'
 
@@ -115,7 +115,7 @@ const convert = async (executor: Executor): Promise<void> => {
 /**
  * Execute a document
  */
-const execute = async (executor: Executor): Promise<void> => {
+const execute = async (executor: BaseExecutor): Promise<void> => {
   const input = args[1]
   const output = args[2] !== undefined ? args[2] : input
 
