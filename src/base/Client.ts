@@ -1,5 +1,5 @@
 import { Node, SoftwareSession } from '@stencila/schema'
-import { Interface, Manifest, Method } from './Executor'
+import { Executor, Manifest, Method } from './Executor'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
@@ -10,7 +10,7 @@ import { JsonRpcResponse } from './JsonRpcResponse'
  * Implements asynchronous, methods for `Executor` methods `compile`, `build`, `execute`, etc.
  * which send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
-export abstract class Client implements Interface {
+export abstract class Client implements Executor {
   /**
    * A map of requests to which responses can be paired against
    */
@@ -40,36 +40,44 @@ export abstract class Client implements Interface {
   /**
    * Call the remote `Executor`'s `compile` method
    */
-  public async compile(node: Node): Promise<Node> {
-    return this.call<Node>(Method.compile, { node })
+  public async compile<NodeType extends Node>(
+    node: NodeType
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.compile, { node })
   }
 
   /**
    * Call the remote `Executor`'s `build` method
    */
-  public async build(node: Node): Promise<Node> {
-    return this.call<Node>(Method.build, { node })
+  public async build<NodeType extends Node>(node: NodeType): Promise<NodeType> {
+    return this.call<NodeType>(Method.build, { node })
   }
 
   /**
    * Call the remote `Executor`'s `execute` method
    */
-  public async execute(node: Node, session?: SoftwareSession): Promise<Node> {
-    return this.call<Node>(Method.execute, { node, session })
+  public async execute<NodeType extends Node>(
+    node: NodeType,
+    session?: SoftwareSession
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.execute, { node, session })
   }
 
   /**
    * Call the remote `Executor`'s `begin` method
    */
-  public async begin(node: Node): Promise<Node> {
-    return this.call<Node>(Method.begin, { node })
+  public async begin<NodeType extends Node>(
+    node: NodeType,
+    limits?: SoftwareSession
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.begin, { node, limits })
   }
 
   /**
    * Call the remote `Executor`'s `end` method
    */
-  public async end(node: Node): Promise<Node> {
-    return this.call<Node>(Method.end, { node })
+  public async end<NodeType extends Node>(node: NodeType): Promise<NodeType> {
+    return this.call<NodeType>(Method.end, { node })
   }
 
   /**
@@ -131,6 +139,15 @@ export abstract class Client implements Interface {
       )
     resolve(response)
     delete this.requests[response.id]
+  }
+
+  /**
+   * Stop the client
+   *
+   * Derived classes may override this method.
+   */
+  public stop(): Promise<void> {
+    return Promise.resolve()
   }
 }
 

@@ -22,7 +22,8 @@ export class TcpClient extends StreamClient {
     this.socket = socket
   }
 
-  public stop() {
+  public stop(): Promise<void> {
     this.socket.destroy()
+    return Promise.resolve()
   }
 }

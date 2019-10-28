@@ -3,7 +3,8 @@ import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
 import { ClientType } from './Client'
-import { Capabilities, Executor, Manifest, Method, Peer } from './Executor'
+import { Capabilities, Manifest, Method } from './Executor'
+import { BaseExecutor, Peer } from './BaseExecutor'
 import { Transport } from './Transports'
 
 describe('Peer', () => {
@@ -229,7 +230,7 @@ describe('Peer', () => {
 /**
  * An executor class that gives the answer to life.
  */
-class DeepThought extends Executor {
+class DeepThought extends BaseExecutor {
   public static readonly question: string =
     'the answer to life the universe and everything'
 
@@ -252,7 +253,9 @@ class DeepThought extends Executor {
     })
   }
 
-  public async execute(node: Node): Promise<Node> {
+  public async execute<NodeType extends Node>(
+    node: NodeType
+  ): Promise<NodeType> {
     if (isA('CodeChunk', node) && node.text === DeepThought.question) {
       return Promise.resolve({ ...node, outputs: [42] })
     }
@@ -261,9 +264,9 @@ class DeepThought extends Executor {
 }
 
 /**
- * An executor class that actslike a simple Javascript calculator.
+ * An executor class that acts like a simple Javascript calculator.
  */
-class Calculator extends Executor {
+class Calculator extends BaseExecutor {
   public async capabilities(): Promise<Capabilities> {
     return Promise.resolve({
       execute: {
@@ -284,7 +287,9 @@ class Calculator extends Executor {
     })
   }
 
-  public async execute(node: Node): Promise<Node> {
+  public async execute<NodeType extends Node>(
+    node: NodeType
+  ): Promise<NodeType> {
     if (isA('CodeExpression', node)) {
       // eslint-disable-next-line no-eval
       return Promise.resolve({ ...node, output: eval(node.text) })
@@ -293,7 +298,7 @@ class Calculator extends Executor {
   }
 }
 
-describe('Executor', () => {
+describe('BaseExecutor', () => {
   /**
    * Test that delegation, without JSON-RPC or transport layer,
    * works OK.
@@ -302,7 +307,7 @@ describe('Executor', () => {
     const deepThought = new DeepThought()
     const calculator = new Calculator()
 
-    const executor = new Executor([
+    const executor = new BaseExecutor([
       async () => [
         {
           executor: deepThought,
@@ -366,7 +371,7 @@ describe('Executor', () => {
         }
       ]
     }
-    const executed = (await executor.execute(article)) as Article
+    const executed = await executor.execute(article)
     expect(executed.type).toEqual('Article')
     // @ts-ignore
     expect(executed.content[0].content[1].output).toEqual(84)
@@ -387,7 +392,7 @@ describe('Executor', () => {
     const calculatorServer = new DirectServer()
     await calculatorServer.start(calculator)
 
-    const executor = new Executor(
+    const executor = new BaseExecutor(
       [
         async () => [
           {

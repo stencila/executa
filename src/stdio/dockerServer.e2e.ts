@@ -8,5 +8,5 @@ test('run a StdioServer inside a Docker container', async () => {
   // Also means that the container stops when the client is stopped.
   const client = new StdioClient(`docker run --interactive stencila/executa`)
   await testClient(client)
-  client.stop()
+  await client.stop()
 })

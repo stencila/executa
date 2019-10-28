@@ -3,6 +3,9 @@ import WebSocket from 'isomorphic-ws'
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { WebSocketAddress } from '../base/Transports'
+import { getLogger } from '@stencila/logga'
+
+const log = getLogger('executa:ws:client')
 
 /**
  * A `Client` using the WebSockets API for communication.
@@ -18,7 +21,10 @@ export class WebSocketClient extends Client {
 
     const { host = '127.0.1.1', port = '9000', path = '', jwt } = address
     const url = `ws://${host}:${port}${path}`
-    this.socket = new WebSocket(url, jwt)
+    const socket = (this.socket = new WebSocket(url, jwt))
+
+    socket.on('error', error => log.error(error))
+
     this.socket.addEventListener('message', event => {
       this.receive(event.data)
     })
@@ -30,10 +36,14 @@ export class WebSocketClient extends Client {
         this.socket.onopen = () => resolve()
       })
     }
-    this.socket.send(JSON.stringify(request))
+    const json = JSON.stringify(request)
+    this.socket.send(json, error => {
+      if (error !== undefined) log.error(error)
+    })
   }
 
-  public stop() {
+  public stop(): Promise<void> {
     this.socket.close()
+    return Promise.resolve()
   }
 }

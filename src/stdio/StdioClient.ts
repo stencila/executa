@@ -39,9 +39,10 @@ export class StdioClient extends StreamClient {
   /**
    * Stop the child server process
    */
-  stop() {
+  public stop(): Promise<void> {
     // Avoid unnecessary log errors by removing listener
     this.child.removeAllListeners('exit')
     this.child.kill()
+    return Promise.resolve()
   }
 }

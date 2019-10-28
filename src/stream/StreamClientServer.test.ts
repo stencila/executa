@@ -2,17 +2,16 @@ import { PassThrough } from 'stream'
 import * as stencila from '@stencila/schema'
 import { StreamClient } from './StreamClient'
 import { StreamServer } from './StreamServer'
-import { Executor } from '../base/Executor'
+import { BaseExecutor } from '../base/BaseExecutor'
 
 describe('StreamClient and StreamServer', () => {
   // @ts-ignore Ignore the fact that this is an abstract class
   const server = new StreamServer()
-  const executor = new Executor()
+  const executor = new BaseExecutor()
   const serverIncoming = new PassThrough()
   const serverOutgoing = new PassThrough()
   server.start(executor, serverIncoming, serverOutgoing)
 
-  // @ts-ignore Ignore the fact that this is an abstract class
   const client = new StreamClient(serverIncoming, serverOutgoing)
 
   test('calling manifest', async () => {

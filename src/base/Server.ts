@@ -4,6 +4,7 @@ import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
+import { BaseExecutor } from './BaseExecutor'
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -24,11 +25,14 @@ export abstract class Server {
    * Handle a request
    *
    * @param request A JSON-RPC request from a client
+   * @param user An object representing the user and their rights,
+   *             usually a JWT payload
    * @param stringify Should the response be stringified?
    * @returns A JSON-RPC response as an object or string (default)
    */
   protected async receive(
     request: string | JsonRpcRequest,
+    user: any = {},
     stringify = true
   ): Promise<string | JsonRpcResponse> {
     if (this.executor === undefined)
@@ -112,9 +116,16 @@ export abstract class Server {
             param(request, 1, 'session', false)
           )
           break
+        case 'begin':
+          result = await this.executor[request.method](
+            param(request, 0, 'node'),
+            // Any `limits` parameter requested are ignored and instead
+            // the session limits from the user token are applied
+            user.session !== undefined ? user.session : {}
+          )
+          break
         case 'compile':
         case 'build':
-        case 'begin':
         case 'end':
           result = await this.executor[request.method](
             param(request, 0, 'node')
@@ -150,7 +161,7 @@ export abstract class Server {
    * call this method, or ensure that `executor` is set themselves.
    */
   public start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new Executor()
+    if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
     return Promise.resolve()
   }

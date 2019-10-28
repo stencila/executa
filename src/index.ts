@@ -1,4 +1,8 @@
 export { Executor } from './base/Executor'
+export { BaseExecutor } from './base/BaseExecutor'
+
+export { StreamClient } from './stream/StreamClient'
+export { StreamServer } from './stream/StreamServer'
 
 export { StdioAddress } from './base/Transports'
 export { discover as stdioDiscover } from './stdio/discover'
