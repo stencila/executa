@@ -14,19 +14,16 @@ import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
 
 let executor: BaseExecutor
-let sessionRef: null | SoftwareSession = null
+let session: null | SoftwareSession = null
 
 const executeCodeChunk = async (text: string): Promise<Node> => {
   const code = codeChunk(text, { programmingLanguage: 'python' })
 
-  if (sessionRef === null) {
-    const session = softwareSession(
-      softwareEnvironment('stencila/sparkla-ubuntu')
-    )
-    sessionRef = await executor.begin(session)
+  if (session === null) {
+    session = await executor.begin(softwareSession())
   }
 
-  return executor.execute(code, sessionRef)
+  return executor.execute(code, session)
 }
 
 const executeHandler = (text: string): Promise<void> =>

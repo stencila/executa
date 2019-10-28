@@ -33,14 +33,13 @@ test('WebSocketClient and WebSocketServer', async () => {
 
   {
     // JWT with session limits to be used for begin() method
-    const sessionRequests = softwareSession(
-      softwareEnvironment('some-eviron'),
-      {
-        cpuRequested: 4,
-        memoryRequested: 5
-      }
-    )
-    const sessionLimits = softwareSession(softwareEnvironment('some-eviron'), {
+    const sessionRequests = softwareSession({
+      environment: softwareEnvironment('some-eviron'),
+      cpuRequested: 4,
+      memoryRequested: 5
+    })
+    const sessionLimits = softwareSession({
+      environment: softwareEnvironment('some-eviron'),
       cpuLimit: 2,
       memoryLimit: 2
     })
