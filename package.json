@@ -28,7 +28,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-typescript": "7.6.0",
-    "@gerrit0/typedoc": "0.15.7",
+    "@gerrit0/typedoc": "0.15.8",
     "@stencila/dev-config": "1.2.2",
     "@types/jest": "24.0.19",
     "@types/json-schema": "7.0.3",
