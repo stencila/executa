@@ -1,3 +1,16 @@
+# [0.6.0](https://github.com/stencila/executa/compare/v0.5.0...v0.6.0) (2019-10-28)
+
+
+### Bug Fixes
+
+* **Dependencies:** Upgrade Schema and make adjustments accordingly ([8f64e32](https://github.com/stencila/executa/commit/8f64e32099b169905e1a5d29e84f8b76a56dae61))
+* **HttpClient:** Use logga log ([70d3d83](https://github.com/stencila/executa/commit/70d3d832c457eadb6477f5d18cad21a3619817e1))
+
+
+### Features
+
+* **HTTP and Websocket servers:** Pass JWT payloads to executor's receive method ([75b2a29](https://github.com/stencila/executa/commit/75b2a29d76d2f4a489b25e309fe5e1cd55f02f14))
+
 # [0.5.0](https://github.com/stencila/executa/compare/v0.4.0...v0.5.0) (2019-10-23)
 
 
