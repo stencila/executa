@@ -113,6 +113,7 @@ export class HttpServer extends TcpServer {
         port: this.port
       },
       '',
+      'jsonrpc',
       this.defaultJwt
     )
   }

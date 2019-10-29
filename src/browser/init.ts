@@ -39,10 +39,10 @@ const onReadyHandler = (): void => {
 }
 
 export const init = (options: Partial<InitOptions> = defaultOptions): void => {
-  const { host, path, port } = { ...defaultOptions, ...options }
+  const { host, port, path, protocol } = { ...defaultOptions, ...options }
 
   executor = new BaseExecutor(
-    [() => discover(new HttpAddress({ host, port }, path))],
+    [() => discover(new HttpAddress({ host, port }, path, protocol))],
     [HttpClient as ClientType, WebSocketClient as ClientType]
   )
 
@@ -54,19 +54,19 @@ export const init = (options: Partial<InitOptions> = defaultOptions): void => {
 }
 
 interface InitOptions {
-  host: string
-  port: number
-  path: string
+  host: HttpAddress['host']
+  port: HttpAddress['port']
+  path: HttpAddress['path']
+  protocol: HttpAddress['protocol']
 }
 
-const host: string = window.location.hostname.includes('localhost')
-  ? 'localhost'
-  : 'hub.stenci.la'
-
 const defaultOptions: InitOptions = {
-  host,
+  host: window.location.hostname.includes('localhost')
+    ? 'localhost'
+    : 'hub.stenci.la',
   path: '',
-  port: 9000
+  port: 9000,
+  protocol: 'jsonrpc'
 }
 
 const executa = {

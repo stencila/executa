@@ -143,9 +143,22 @@ export class HttpAddress extends TcpAddress {
    */
   public readonly jwt?: string
 
+  /**
+   * The API protocol to use.
+   *
+   * When `jsonrpc`, then all requests and responses should be within
+   * a JSON-RPC envelope with `id`, `method`, `params` etc.
+   *
+   * When `restful`, then the HTTP path is the method (e.g. `/manifest`)
+   * and the body is the `params` object. (This isn't really RESTful,
+   * but the API calls are stylistically similar ¯\_(ツ)_/¯)
+   */
+  public readonly protocol: 'jsonrpc' | 'restful'
+
   public constructor(
     address?: TcpAddressInitializer,
     path = '',
+    protocol: 'jsonrpc' | 'restful' = 'jsonrpc',
     jwt?: string,
     defaults: TcpAddressDefaults = {
       host: '127.0.0.1',
@@ -154,6 +167,7 @@ export class HttpAddress extends TcpAddress {
   ) {
     super(address, defaults)
     this.path = path
+    this.protocol = protocol
     this.jwt = jwt
   }
 
@@ -166,7 +180,7 @@ export class WebSocketAddress extends HttpAddress {
   public readonly type: Transport.ws = Transport.ws
 
   public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
-    super(address, path, jwt, {
+    super(address, path, 'jsonrpc', jwt, {
       host: '127.0.0.1',
       port: 9000
     })
