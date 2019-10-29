@@ -1,3 +1,12 @@
+## [0.6.1](https://github.com/stencila/executa/compare/v0.6.0...v0.6.1) (2019-10-29)
+
+
+### Bug Fixes
+
+* **Browser:** Update browser execute function ([ebac2a3](https://github.com/stencila/executa/commit/ebac2a3333fe1a26a26457439da987cec8bbb5b0))
+* **HttpClient:** Allow use of JSON-RPC of RESTful API protocol ([0422318](https://github.com/stencila/executa/commit/042231812b460b062e4dd2fe2ea64d496097321c))
+* **WebSocketClient:** Use browser comatible API ([0d14842](https://github.com/stencila/executa/commit/0d1484258f1e9e80ab7cac72645e357df9ad9a5b))
+
 # [0.6.0](https://github.com/stencila/executa/compare/v0.5.0...v0.6.0) (2019-10-28)
 
 
