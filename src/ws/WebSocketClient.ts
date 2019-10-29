@@ -1,4 +1,4 @@
-import WebSocket from 'isomorphic-ws'
+import WebSocket, { ErrorEvent, MessageEvent } from 'isomorphic-ws'
 
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
@@ -11,8 +11,12 @@ const log = getLogger('executa:ws:client')
  * A `Client` using the WebSockets API for communication.
  */
 export class WebSocketClient extends Client {
+
   /**
    * A `WebSocket` instance
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/WebSocket for
+   * properties and methods.
    */
   private socket: WebSocket
 
@@ -23,11 +27,8 @@ export class WebSocketClient extends Client {
     const url = `ws://${host}:${port}${path}`
     const socket = (this.socket = new WebSocket(url, jwt))
 
-    socket.on('error', error => log.error(error))
-
-    this.socket.addEventListener('message', event => {
-      this.receive(event.data)
-    })
+    socket.onerror = (error: ErrorEvent) => log.error(error.message)
+    socket.onmessage = (event: MessageEvent) => this.receive(event.data.toString())
   }
 
   protected async send(request: JsonRpcRequest): Promise<void> {
@@ -37,9 +38,7 @@ export class WebSocketClient extends Client {
       })
     }
     const json = JSON.stringify(request)
-    this.socket.send(json, error => {
-      if (error !== undefined) log.error(error)
-    })
+    this.socket.send(json)
   }
 
   public stop(): Promise<void> {
