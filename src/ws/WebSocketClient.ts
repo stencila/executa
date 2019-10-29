@@ -11,7 +11,6 @@ const log = getLogger('executa:ws:client')
  * A `Client` using the WebSockets API for communication.
  */
 export class WebSocketClient extends Client {
-
   /**
    * A `WebSocket` instance
    *
@@ -28,7 +27,8 @@ export class WebSocketClient extends Client {
     const socket = (this.socket = new WebSocket(url, jwt))
 
     socket.onerror = (error: ErrorEvent) => log.error(error.message)
-    socket.onmessage = (event: MessageEvent) => this.receive(event.data.toString())
+    socket.onmessage = (event: MessageEvent) =>
+      this.receive(event.data.toString())
   }
 
   protected async send(request: JsonRpcRequest): Promise<void> {
