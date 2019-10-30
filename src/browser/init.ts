@@ -6,6 +6,9 @@ import { HttpAddress } from '../base/Transports'
 import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
+import { getLogger } from '@stencila/logga';
+
+const log = getLogger('executa:browser')
 
 let executor: BaseExecutor
 let session: null | SoftwareSession = null
@@ -14,23 +17,19 @@ const executeCodeChunk = async (codeChunk: CodeChunk): Promise<CodeChunk> => {
   if (session === null) {
     session = await executor.begin(softwareSession())
   }
-
-  return executor.execute(codeChunk)
+  try {
+    return executor.execute(codeChunk, session)
+  } catch (error) {
+    log.error(error)
+    return codeChunk
+  }
 }
-
-const executeHandler = (codeChunk: CodeChunk): Promise<CodeChunk> =>
-  executeCodeChunk(codeChunk)
-    .then(res => res)
-    .catch(err => {
-      console.error(err)
-      return codeChunk
-    })
 
 const setCodeChunkProps = (): void => {
   const codeChunks = document.querySelectorAll('stencila-code-chunk')
   codeChunks.forEach(chunk => {
     // @ts-ignore executeHandler is not a property of Element
-    chunk.executeHandler = executeHandler
+    chunk.executeHandler = executeCodeChunk
   })
 }
 
