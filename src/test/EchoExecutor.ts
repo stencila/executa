@@ -1,5 +1,6 @@
 import { BaseExecutor } from '../base/BaseExecutor'
-import { Node, SoftwareSession } from '@stencila/schema'
+import { Node } from '@stencila/schema'
+import { User } from '../base/Executor'
 
 /**
  * A test `Executor` which echos back the arguments
@@ -9,9 +10,9 @@ import { Node, SoftwareSession } from '@stencila/schema'
 export class EchoExecutor extends BaseExecutor {
   begin<NodeType extends Node>(
     node: NodeType,
-    limits?: SoftwareSession
+    user: User = {}
   ): Promise<NodeType> {
     // This intentionally breaks contract to return the same node type as received
-    return Promise.resolve(({ node, limits } as unknown) as NodeType)
+    return Promise.resolve(({ node, user } as unknown) as NodeType)
   }
 }

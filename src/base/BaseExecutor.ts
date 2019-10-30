@@ -5,7 +5,14 @@ import { ClientType } from './Client'
 import { InternalError } from './InternalError'
 import { Server } from './Server'
 import { Transport } from './Transports'
-import { Executor, Method, Manifest, Capabilities, Addresses } from './Executor'
+import {
+  Executor,
+  Method,
+  Manifest,
+  Capabilities,
+  Addresses,
+  User
+} from './Executor'
 
 const log = getLogger('executa:executor')
 
@@ -383,9 +390,9 @@ export class BaseExecutor implements Executor {
    */
   public begin<NodeType extends Node>(
     node: NodeType,
-    limits?: SoftwareSession
+    user: User = {}
   ): Promise<NodeType> {
-    return this.delegate(Method.begin, { node, limits }, () =>
+    return this.delegate(Method.begin, { node, user }, () =>
       Promise.resolve(node)
     )
   }

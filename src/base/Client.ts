@@ -66,11 +66,8 @@ export abstract class Client implements Executor {
   /**
    * Call the remote `Executor`'s `begin` method
    */
-  public async begin<NodeType extends Node>(
-    node: NodeType,
-    limits?: SoftwareSession
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.begin, { node, limits })
+  public async begin<NodeType extends Node>(node: NodeType): Promise<NodeType> {
+    return this.call<NodeType>(Method.begin, { node })
   }
 
   /**

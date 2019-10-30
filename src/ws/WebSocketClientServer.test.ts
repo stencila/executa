@@ -1,10 +1,11 @@
+import { addHandler, LogData } from '@stencila/logga'
+import { softwareEnvironment, softwareSession } from '@stencila/schema'
+import JWT from 'jsonwebtoken'
+import { User } from '../base/Executor'
+import { EchoExecutor } from '../test/EchoExecutor'
 import { testClient } from '../test/testClient'
 import { WebSocketClient } from './WebSocketClient'
 import { WebSocketServer } from './WebSocketServer'
-import { addHandler, LogData } from '@stencila/logga'
-import JWT from 'jsonwebtoken'
-import { EchoExecutor } from '../test/EchoExecutor'
-import { softwareSession, softwareEnvironment } from '@stencila/schema'
 
 const JWT_SECRET = 'not-a-secret-at-all'
 
@@ -38,18 +39,21 @@ test('WebSocketClient and WebSocketServer', async () => {
       cpuRequested: 4,
       memoryRequested: 5
     })
-    const sessionLimits = softwareSession({
-      environment: softwareEnvironment('some-eviron'),
-      cpuLimit: 2,
-      memoryLimit: 2
-    })
-    const jwt = JWT.sign({ session: sessionLimits }, JWT_SECRET)
+    const user: User = {
+      session: softwareSession({
+        environment: softwareEnvironment('some-eviron'),
+        cpuLimit: 2,
+        memoryLimit: 2
+      })
+    }
+    const jwt = JWT.sign(user, JWT_SECRET)
     const client = new WebSocketClient({ ...server.address, jwt })
-    const echoed = await client.begin(sessionRequests)
-    expect(echoed).toEqual({
-      node: sessionRequests,
-      limits: sessionLimits
-    })
+    const echoed = (await client.begin(sessionRequests)) as any
+    expect(echoed.node).toEqual(sessionRequests)
+
+    const userclient = echoed.user.client
+    expect(userclient.type).toEqual('ws')
+    expect(userclient).toHaveProperty('id')
   }
 
   {

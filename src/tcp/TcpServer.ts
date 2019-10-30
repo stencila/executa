@@ -1,10 +1,24 @@
 import { getLogger } from '@stencila/logga'
+import crypto from 'crypto'
 import { createServer, Server, Socket } from 'net'
 import { Executor } from '../base/Executor'
 import { TcpAddress } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 
 const log = getLogger('executa:tcp:server')
+
+export type TcpServerClient = Socket & { id: string }
+
+/**
+ * Transform a `net.Socket` into a `TcpServerClient` by adding a unique id
+ *
+ * @param socket The socket to transform
+ */
+export const tcpServerClient = (socket: Socket): TcpServerClient => {
+  // @ts-ignore that Socket does not have an id
+  socket.id = crypto.randomBytes(32).toString('hex')
+  return socket as TcpServerClient
+}
 
 export class TcpServer extends StreamServer {
   protected readonly host: string
@@ -13,7 +27,7 @@ export class TcpServer extends StreamServer {
 
   protected server?: Server
 
-  protected clients: Socket[] = []
+  protected clients: TcpServerClient[] = []
 
   public constructor(address: TcpAddress = new TcpAddress()) {
     super()
@@ -30,11 +44,11 @@ export class TcpServer extends StreamServer {
     })
   }
 
-  protected onConnected(client: Socket): void {
+  protected onConnected(client: TcpServerClient): void {
     this.clients.push(client)
   }
 
-  protected onDisconnected(client: Socket): void {
+  protected onDisconnected(client: TcpServerClient): void {
     this.clients.splice(this.clients.indexOf(client), 1)
   }
 
@@ -49,7 +63,8 @@ export class TcpServer extends StreamServer {
           )
         })
       }))
-      server.on('connection', client => {
+      server.on('connection', (socket: Socket) => {
+        const client = tcpServerClient(socket)
         this.onConnected(client)
         client.on('close', () => this.onDisconnected(client))
       })

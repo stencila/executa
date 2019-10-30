@@ -1,4 +1,4 @@
-export { Executor } from './base/Executor'
+export { Executor, User } from './base/Executor'
 export { BaseExecutor } from './base/BaseExecutor'
 
 export { StreamClient } from './stream/StreamClient'
@@ -16,7 +16,7 @@ export { VsockServer } from './vsock/VsockServer'
 export { TcpAddress } from './base/Transports'
 export { discover as tcpDiscover } from './tcp/discover'
 export { TcpClient } from './tcp/TcpClient'
-export { TcpServer } from './tcp/TcpServer'
+export { TcpServer, TcpServerClient } from './tcp/TcpServer'
 
 export { HttpAddress } from './base/Transports'
 export { discover as httpDiscover } from './http/discover'

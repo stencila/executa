@@ -1,4 +1,4 @@
-import { Executor } from './Executor'
+import { Executor, User } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
@@ -32,7 +32,7 @@ export abstract class Server {
    */
   protected async receive(
     request: string | JsonRpcRequest,
-    user: any = {},
+    user: User = {},
     stringify = true
   ): Promise<string | JsonRpcResponse> {
     if (this.executor === undefined)
@@ -117,16 +117,16 @@ export abstract class Server {
           )
           break
         case 'begin':
+        case 'end':
           result = await this.executor[request.method](
             param(request, 0, 'node'),
-            // Any `limits` parameter requested are ignored and instead
-            // the session limits from the user token are applied
-            user.session !== undefined ? user.session : {}
+            // Any `user` parameter requested is ignored and instead
+            // the user from the server (e.g. based on a JWT) is applied
+            user
           )
           break
         case 'compile':
         case 'build':
-        case 'end':
           result = await this.executor[request.method](
             param(request, 0, 'node')
           )

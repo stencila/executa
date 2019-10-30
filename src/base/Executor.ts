@@ -1,5 +1,5 @@
 import { JSONSchema7Definition } from 'json-schema'
-import { Address } from './Transports'
+import { Address, Transport } from './Transports'
 import { Node, SoftwareSession } from '@stencila/schema'
 
 /**
@@ -58,6 +58,20 @@ export interface Manifest {
    * to communicate with the executor
    */
   addresses?: Addresses
+}
+
+/**
+ * User information used in some methods for
+ * authorization (e.g. limiting the number of
+ * session that a user can have)
+ */
+export interface User {
+  id?: string
+  client?: {
+    type: Transport
+    id: string
+  }
+  session?: SoftwareSession
 }
 
 /**
@@ -134,21 +148,25 @@ export abstract class Executor {
    * `session` property, or default session if that property is missing.
    *
    * @param node The node to run, usually but not necessarily, a `SoftwareSession`
-   * @param limits The limits on the `SoftwareSession` to be started, described as a `SoftwareSession`.
+   * @param user The `User` making the request
    * @returns The node, with updated properties, after it has begun running
    */
   abstract async begin<NodeType extends Node>(
     node: NodeType,
-    limits?: SoftwareSession
+    user?: User
   ): Promise<NodeType>
 
   /**
    * End running a `Node`.
    *
    * @param node The running node, usually but not necessarily, a `SoftwareSession`
+   * @param user The `User` making the request
    * @returns The node, with updated properties, after it has ended running
    */
-  abstract async end<NodeType extends Node>(node: NodeType): Promise<NodeType>
+  abstract async end<NodeType extends Node>(
+    node: NodeType,
+    user?: User
+  ): Promise<NodeType>
 
   /**
    * Call one of the above methods.

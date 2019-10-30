@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import { InternalError } from '../base/InternalError'
 import { WebSocketAddress } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
-import { Socket } from 'net'
+import { TcpServerClient, tcpServerClient } from '../tcp/TcpServer'
 
 const log = getLogger('executa:ws:server')
 
@@ -57,12 +57,21 @@ export class WebSocketServer extends HttpServer {
         }
 
         // Register connection and disconnection handler
-        this.onConnected(connection)
-        socket.on('close', () => this.onDisconnected(connection, token))
+        const client = tcpServerClient(connection)
+        this.onConnected(client)
+        socket.on('close', () => this.onDisconnected(client, token))
 
         // Handle messages from connection
         socket.on('message', async (message: string) => {
-          const response = await this.receive(message, user)
+          const response = await this.receive(message, {
+            // The `user` argument is a merging of the JWT
+            // payload and client identification info.
+            ...user,
+            client: {
+              id: client.id,
+              type: 'ws'
+            }
+          })
           socket.send(response)
         })
       },
@@ -90,7 +99,8 @@ export class WebSocketServer extends HttpServer {
    * @param client The client socket
    * @param token The JWT token
    */
-  protected onDisconnected(client: Socket, token?: string) {
+  protected onDisconnected(client: TcpServerClient, token?: string): void {
+    super.onDisconnected(client)
     if (token !== undefined) delete this.users[token]
   }
 }
