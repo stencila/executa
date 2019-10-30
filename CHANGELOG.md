@@ -1,3 +1,10 @@
+## [0.7.1](https://github.com/stencila/executa/compare/v0.7.0...v0.7.1) (2019-10-30)
+
+
+### Bug Fixes
+
+* **Browser:** Fix init function so that session is passed on execute ([364ac2a](https://github.com/stencila/executa/commit/364ac2a1f1d7f1278b66623ecdcf1a85962487f9))
+
 # [0.7.0](https://github.com/stencila/executa/compare/v0.6.1...v0.7.0) (2019-10-30)
 
 
