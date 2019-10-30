@@ -1,3 +1,5 @@
+import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
+
 /**
  * A JSON-RPC 2.0 request
  *
@@ -16,7 +18,7 @@ export class JsonRpcRequest {
    * parts. The Server MUST reply with the same value in the Response object if included.
    * This member is used to correlate the context between the two objects.
    */
-  public readonly id: number
+  public readonly id?: number
 
   /**
    * A string containing the name of the method to be invoked.
@@ -40,10 +42,98 @@ export class JsonRpcRequest {
    */
   private static counter = 0
 
-  public constructor(method?: string, params?: { [key: string]: any } | any[]) {
-    JsonRpcRequest.counter += 1
-    this.id = JsonRpcRequest.counter
+  /**
+   * Create a JSON-RPC request
+   *
+   * @param method The name of the method to call
+   * @param params Values for the methods parameters (i.e. arguments)
+   * @param id The request id. If `false`, then the request is a
+   *           notification (i.e. no response expected). If
+   *           `undefined` then a new id will be generated.
+   */
+  public constructor(
+    method?: string,
+    params?: { [key: string]: any } | any[],
+    id?: number | false
+  ) {
+    if (id !== undefined && id !== false) {
+      this.id = id
+    } else if (id === undefined) {
+      JsonRpcRequest.counter += 1
+      this.id = JsonRpcRequest.counter
+    }
     this.method = method
     this.params = params
+  }
+
+  public static create(source: unknown): JsonRpcRequest {
+    if (typeof source === 'string') return JsonRpcRequest.parse(source)
+
+    if (source !== null && typeof source === 'object' && !Array.isArray(source))
+      // @ts-ignore TS doesn't know this is now not a null
+      return JsonRpcRequest.hydrate(source)
+
+    throw new JsonRpcError(
+      JsonRpcErrorCode.InvalidRequest,
+      `Invalid request type: ${typeof source}`
+    )
+  }
+
+  /**
+   * Hydrate a Javascript object into an instance
+   *
+   * @param obj A plain object representing a request
+   */
+  public static hydrate(obj: { [key: string]: unknown }): JsonRpcRequest {
+    const { method, params, id } = obj
+    // TODO: Add checking of types of method, params and id
+    // @ts-ignore possibly incorrect argument types
+    return new JsonRpcRequest(method, params, id === undefined ? false : id)
+  }
+
+  /**
+   * Parse a JSON into an instance
+   *
+   * @param json The JSON representation of the request
+   */
+  public static parse(json: string): JsonRpcRequest {
+    let obj
+    try {
+      obj = JSON.parse(json)
+    } catch (err) {
+      throw new JsonRpcError(
+        JsonRpcErrorCode.ParseError,
+        `Parse error: ${err.message}`
+      )
+    }
+    return JsonRpcRequest.hydrate(obj)
+  }
+
+  /**
+   * Extract a parameter value from `params`.
+   *
+   * Because `params` can be an `array` or an `object`, this
+   * method requires specifying both the parameter name and index
+   * so that it can handle both cases.
+   *
+   * @param index The index of the parameter. A non negative number.
+   * @param name The name of the parameter
+   * @param required Is the parameter required?
+   */
+  public param(index: number, name: string, required = true): any {
+    if (this.params === undefined)
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InvalidRequest,
+        'Invalid request: missing "params" property'
+      )
+    const value = Array.isArray(this.params)
+      ? this.params[index]
+      : this.params[name]
+    if (required && value === undefined)
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InvalidParams,
+        `Invalid params: "${name}" is missing`
+      )
+    return value
   }
 }

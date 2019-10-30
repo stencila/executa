@@ -3,6 +3,7 @@ import { Executor, Manifest, Method } from './Executor'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
+import { InternalError } from './InternalError'
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -14,7 +15,7 @@ export abstract class Client implements Executor {
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: { [key: number]: (response: JsonRpcRequest) => void } = {}
+  private requests: { [key: number]: (response: JsonRpcResponse) => void } = {}
 
   /**
    * Call the remote `Executor`'s `manifest` method
@@ -88,6 +89,10 @@ export abstract class Client implements Executor {
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     const request = new JsonRpcRequest(method, params)
+    const id = request.id
+    if (id === undefined)
+      throw new InternalError('Request should have id defined')
+
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: JsonRpcResponse) => {
         const { result, error } = response

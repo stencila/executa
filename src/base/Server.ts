@@ -41,52 +41,12 @@ export abstract class Server {
     if (this.executor === undefined)
       throw new InternalError('Executor has not been initialized')
 
-    let id = -1
+    let id
     let result
     let error
 
-    // Extract a parameter by name from Object or by index from Array
-    function param(
-      request: JsonRpcRequest,
-      index: number,
-      name: string,
-      required = true
-    ): any {
-      if (request.params === undefined)
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidRequest,
-          'Invalid request: missing "params" property'
-        )
-      const value = Array.isArray(request.params)
-        ? request.params[index]
-        : request.params[name]
-      if (required && value === undefined)
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidParams,
-          `Invalid params: "${name}" is missing`
-        )
-      return value
-    }
-
     try {
-      if (request === null) {
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidRequest,
-          `Invalid request`
-        )
-      }
-
-      if (typeof request === 'string') {
-        // Parse JSON into a request
-        try {
-          request = JSON.parse(request) as JsonRpcRequest
-        } catch (err) {
-          throw new JsonRpcError(
-            JsonRpcErrorCode.ParseError,
-            `Parse error: ${err.message}`
-          )
-        }
-      }
+      request = JsonRpcRequest.create(request)
 
       // Response id is same as the request id
       id = request.id
@@ -103,26 +63,26 @@ export abstract class Server {
           break
         case 'decode':
           result = await this.executor.decode(
-            param(request, 0, 'content'),
-            param(request, 1, 'format', false)
+            request.param(0, 'content'),
+            request.param(1, 'format', false)
           )
           break
         case 'encode':
           result = await this.executor.encode(
-            param(request, 0, 'node'),
-            param(request, 1, 'format', false)
+            request.param(0, 'node'),
+            request.param(1, 'format', false)
           )
           break
         case 'execute':
           result = await this.executor.execute(
-            param(request, 0, 'node'),
-            param(request, 1, 'session', false)
+            request.param(0, 'node'),
+            request.param(1, 'session', false)
           )
           break
         case 'begin':
         case 'end':
           result = await this.executor[request.method](
-            param(request, 0, 'node'),
+            request.param(0, 'node'),
             // Any `user` parameter requested is ignored and instead
             // the user from the server (e.g. based on a JWT) is applied
             user
@@ -130,9 +90,7 @@ export abstract class Server {
           break
         case 'compile':
         case 'build':
-          result = await this.executor[request.method](
-            param(request, 0, 'node')
-          )
+          result = await this.executor[request.method](request.param(0, 'node'))
           break
         default:
           throw new JsonRpcError(
