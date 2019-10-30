@@ -1,3 +1,10 @@
+# [0.7.0](https://github.com/stencila/executa/compare/v0.6.1...v0.7.0) (2019-10-30)
+
+
+### Features
+
+* **Executor:** Pass the user to begin() and end() methods ([30b6714](https://github.com/stencila/executa/commit/30b6714bf1d4f297b2ef1d49e8460bd8afffd2f9))
+
 ## [0.6.1](https://github.com/stencila/executa/compare/v0.6.0...v0.6.1) (2019-10-29)
 
 
