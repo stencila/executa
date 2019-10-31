@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/stencila/executa/compare/v0.7.1...v0.8.0) (2019-10-31)
+
+
+### Features
+
+* **Addresses:** Allow for addresses to be initialised in various ways ([64301a8](https://github.com/stencila/executa/commit/64301a8ebbff1b31fa693445700ceed22e12fe4b))
+
 ## [0.7.1](https://github.com/stencila/executa/compare/v0.7.0...v0.7.1) (2019-10-30)
 
 
