@@ -181,7 +181,6 @@ describe('Peer', () => {
         capabilities: {},
         addresses: {
           http: {
-            type: Transport.http,
             host: '127.0.0.1',
             port: 8000
           }
@@ -202,10 +201,7 @@ describe('Peer', () => {
           type: Transport.direct,
           server: directServer
         },
-        stdio: {
-          type: Transport.stdio,
-          command: 'echo'
-        }
+        stdio: 'echo'
       }
     }
     const peer1 = new Peer(manifest, [

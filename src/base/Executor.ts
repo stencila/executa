@@ -1,6 +1,15 @@
-import { JSONSchema7Definition } from 'json-schema'
-import { Address, Transport } from './Transports'
 import { Node, SoftwareSession } from '@stencila/schema'
+import { JSONSchema7Definition } from 'json-schema'
+import {
+  DirectAddress,
+  HttpAddressInitializer,
+  StdioAddressInitializer,
+  TcpAddressInitializer,
+  Transport,
+  UdsAddress,
+  VsockAddress,
+  WebSocketAddressInitializer
+} from './Transports'
 
 /**
  * The methods of an `Executor` class.
@@ -33,7 +42,13 @@ export interface Capabilities {
  * The addresses of an `Executor`.
  */
 export interface Addresses {
-  [key: string]: Address
+  direct?: DirectAddress
+  stdio?: StdioAddressInitializer
+  uds?: UdsAddress
+  vsock?: VsockAddress
+  tcp?: TcpAddressInitializer
+  http?: HttpAddressInitializer
+  ws?: WebSocketAddressInitializer
 }
 
 /**

@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
 import { createServer, Server, Socket } from 'net'
 import { Executor } from '../base/Executor'
-import { TcpAddress } from '../base/Transports'
+import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 
 const log = getLogger('executa:tcp:server')
@@ -29,12 +29,12 @@ export class TcpServer extends StreamServer {
 
   protected clients: TcpServerClient[] = []
 
-  public constructor(address: TcpAddress = new TcpAddress()) {
+  public constructor(address: TcpAddressInitializer = new TcpAddress()) {
     super()
 
-    const { host, port } = address
-    this.host = host
-    this.port = port
+    const tcpAddress = new TcpAddress(address)
+    this.host = tcpAddress.host
+    this.port = tcpAddress.port
   }
 
   public get address(): TcpAddress {
@@ -54,13 +54,11 @@ export class TcpServer extends StreamServer {
 
   public async start(executor?: Executor): Promise<void> {
     if (this.server === undefined) {
-      log.info(`Starting server: ${this.address.toString()}`)
+      log.info(`Starting server: ${this.address.url()}`)
 
       const server = (this.server = createServer(socket => {
         super.start(executor, socket, socket).catch(e => {
-          log.error(
-            `Failed to start server: ${this.address.toString()}\n\n${e}`
-          )
+          log.error(`Failed to start server: ${this.address.url()}\n\n${e}`)
         })
       }))
       server.on('connection', (socket: Socket) => {
@@ -76,7 +74,7 @@ export class TcpServer extends StreamServer {
 
   public async stop(): Promise<void> {
     if (this.server !== undefined) {
-      const url = this.address.toString()
+      const url = this.address.url()
       log.info(`Stopping server ${url}`)
 
       this.clients.forEach(client => client.destroy())

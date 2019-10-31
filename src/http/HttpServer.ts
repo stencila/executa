@@ -8,7 +8,7 @@ import { BaseExecutor } from '../base/BaseExecutor'
 import { InternalError } from '../base/InternalError'
 import { JsonRpcErrorCode } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { HttpAddress } from '../base/Transports'
+import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
 import { TcpServer } from '../tcp/TcpServer'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 
@@ -34,7 +34,9 @@ export class HttpServer extends TcpServer {
    */
   protected defaultJwt: string
 
-  public constructor(address: HttpAddress = new HttpAddress()) {
+  public constructor(
+    address: HttpAddressInitializer = new HttpAddress({ port: 8000 })
+  ) {
     super(address)
 
     // Define the routes
@@ -107,22 +109,18 @@ export class HttpServer extends TcpServer {
   }
 
   public get address(): HttpAddress {
-    return new HttpAddress(
-      {
-        host: this.host,
-        port: this.port
-      },
-      '',
-      'jsonrpc',
-      this.defaultJwt
-    )
+    return new HttpAddress({
+      host: this.host,
+      port: this.port,
+      jwt: this.defaultJwt
+    })
   }
 
   public async start(executor?: Executor): Promise<void> {
     if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
 
-    const url = this.address.toString()
+    const url = this.address.url()
     log.info(`Starting server: ${url}`)
     return new Promise(resolve =>
       this.app.listen(this.port, this.host, () => {

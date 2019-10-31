@@ -3,10 +3,9 @@ import { StdioAddress, Transport } from '../base/Transports'
 
 export class StdioServer extends StreamServer {
   public get address(): StdioAddress {
-    return {
-      type: Transport.stdio,
+    return new StdioAddress({
       command: process.argv[0],
       args: process.argv.slice(1)
-    }
+    })
   }
 }
