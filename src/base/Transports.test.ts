@@ -1,4 +1,4 @@
-import { TcpAddress, HttpAddress } from './Transports'
+import { HttpAddress, TcpAddress, Transport } from './Transports'
 
 describe('TcpAddress', () => {
   const defaults = {
@@ -53,5 +53,20 @@ describe('HttpAddress', () => {
     expect(new HttpAddress(undefined, '/some/path').toString()).toEqual(
       'http://127.0.0.1:8000/some/path'
     )
+  })
+
+  test('Setting https type for transport', () => {
+    expect(
+      new HttpAddress(
+        {
+          host: 'www.example.com',
+          port: 443
+        },
+        '/some/path',
+        undefined,
+        undefined,
+        Transport.https
+      ).toString()
+    ).toEqual('https://www.example.com:443/some/path')
   })
 })

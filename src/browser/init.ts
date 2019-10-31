@@ -2,11 +2,11 @@ import '@stencila/components'
 import { CodeChunk, softwareSession, SoftwareSession } from '@stencila/schema'
 import { BaseExecutor } from '../base/BaseExecutor'
 import { ClientType } from '../base/Client'
-import { HttpAddress } from '../base/Transports'
+import { HttpAddress, Transport } from '../base/Transports'
 import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
-import { getLogger } from '@stencila/logga';
+import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:browser')
 
@@ -38,10 +38,15 @@ const onReadyHandler = (): void => {
 }
 
 export const init = (options: Partial<InitOptions> = defaultOptions): void => {
-  const { host, port, path, protocol } = { ...defaultOptions, ...options }
+  const { host, port, path, protocol, transport } = {
+    ...defaultOptions,
+    ...options
+  }
 
   executor = new BaseExecutor(
-    [() => discover(new HttpAddress({ host, port }, path, protocol))],
+    [
+      () => discover(new HttpAddress({ host, port }, path, protocol, transport))
+    ],
     [HttpClient as ClientType, WebSocketClient as ClientType]
   )
 
@@ -57,6 +62,7 @@ interface InitOptions {
   port: HttpAddress['port']
   path: HttpAddress['path']
   protocol: HttpAddress['protocol']
+  transport: HttpAddress['type']
 }
 
 const defaultOptions: InitOptions = {
@@ -65,7 +71,9 @@ const defaultOptions: InitOptions = {
     : 'hub.stenci.la',
   path: '',
   port: 9000,
-  protocol: 'jsonrpc'
+  protocol: 'jsonrpc',
+  transport:
+    window.location.protocol === 'https' ? Transport.https : Transport.http
 }
 
 const executa = {

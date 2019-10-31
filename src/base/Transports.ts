@@ -5,6 +5,7 @@ export enum Transport {
   vsock = 'vsock',
   tcp = 'tcp',
   http = 'http',
+  https = 'https',
   ws = 'ws'
 }
 
@@ -74,8 +75,11 @@ export type TcpAddressInitializer =
 export type TcpAddressDefaults = { host: string; port: number }
 
 export class TcpAddress {
-  public readonly type: Transport.tcp | Transport.http | Transport.ws =
-    Transport.tcp
+  public readonly type:
+    | Transport.tcp
+    | Transport.http
+    | Transport.https
+    | Transport.ws = Transport.tcp
 
   public readonly host: string
 
@@ -128,7 +132,8 @@ export class TcpAddress {
  * @see https://www.w3.org/Addressing/HTTPAddressing.html
  */
 export class HttpAddress extends TcpAddress {
-  public readonly type: Transport.http | Transport.ws = Transport.http
+  public readonly type: Transport.http | Transport.ws | Transport.https =
+    Transport.http
 
   /**
    * The path for the address.
@@ -160,6 +165,7 @@ export class HttpAddress extends TcpAddress {
     path = '',
     protocol: 'jsonrpc' | 'restful' = 'jsonrpc',
     jwt?: string,
+    type: Transport.http | Transport.https | Transport.ws = Transport.http,
     defaults: TcpAddressDefaults = {
       host: '127.0.0.1',
       port: 8000
@@ -169,6 +175,7 @@ export class HttpAddress extends TcpAddress {
     this.path = path
     this.protocol = protocol
     this.jwt = jwt
+    this.type = type
   }
 
   public toString(): string {
@@ -180,7 +187,7 @@ export class WebSocketAddress extends HttpAddress {
   public readonly type: Transport.ws = Transport.ws
 
   public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
-    super(address, path, 'jsonrpc', jwt, {
+    super(address, path, 'jsonrpc', jwt, Transport.ws, {
       host: '127.0.0.1',
       port: 9000
     })
