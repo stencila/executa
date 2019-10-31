@@ -2,7 +2,10 @@ import WebSocket, { ErrorEvent, MessageEvent } from 'isomorphic-ws'
 
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { WebSocketAddress } from '../base/Transports'
+import {
+  WebSocketAddress,
+  WebSocketAddressInitializer
+} from '../base/Transports'
 import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:ws:client')
@@ -19,12 +22,13 @@ export class WebSocketClient extends Client {
    */
   private socket: WebSocket
 
-  public constructor(address: WebSocketAddress = new WebSocketAddress()) {
+  public constructor(
+    address: WebSocketAddressInitializer = new WebSocketAddress()
+  ) {
     super()
 
-    const { host = '127.0.1.1', port = '9000', path = '', jwt } = address
-    const url = `ws://${host}:${port}${path}`
-    const socket = (this.socket = new WebSocket(url, jwt))
+    const wsAddress = new WebSocketAddress(address)
+    const socket = (this.socket = new WebSocket(wsAddress.url(), wsAddress.jwt))
 
     socket.onerror = (error: ErrorEvent) => log.error(error.message)
     socket.onmessage = (event: MessageEvent) =>

@@ -7,7 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="dist/browser/index.js"></script>
     <script>
-      window.Stencila.executa.init()
+      window.Stencila.executa.init({
+        host: window.location.hostname,
+        port: 9000
+      })
     </script>
     <script
       type="module"

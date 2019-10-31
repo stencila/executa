@@ -1,3 +1,5 @@
+import { InternalError } from './InternalError'
+
 export enum Transport {
   direct = 'direct',
   stdio = 'stdio',
@@ -8,16 +10,40 @@ export enum Transport {
   ws = 'ws'
 }
 
-export interface DirectAddress {
-  type: Transport.direct
-  server: any
+export type Address =
+  | DirectAddress
+  | StdioAddress
+  | UdsAddress
+  | VsockAddress
+  | TcpAddress
+  | HttpAddress
+  | WebSocketAddress
+
+export class DirectAddress {
+  public readonly type: Transport.direct = Transport.direct
+  public readonly server: any
 }
 
-export interface StdioAddress {
-  type: Transport.stdio
-  command: string
-  args?: string[]
-  cwd?: string
+export type StdioAddressInitializer =
+  | string
+  | Pick<StdioAddress, 'command' | 'args' | 'cwd'>
+export class StdioAddress {
+  public readonly type: Transport.stdio = Transport.stdio
+  public readonly command: string
+  public readonly args?: string[]
+  public readonly cwd?: string
+
+  public constructor(address: StdioAddressInitializer) {
+    if (typeof address === 'string') {
+      const parts = address.split(/\s/)
+      this.command = parts[0]
+      this.args = parts.slice(1)
+    } else {
+      this.command = address.command
+      this.args = address.args
+      this.cwd = address.cwd
+    }
+  }
 }
 
 /**
@@ -66,16 +92,22 @@ export class VsockAddress {
   }
 }
 
+export interface TcpAddressProperties {
+  scheme: string
+  host: string
+  port: number
+}
+
 export type TcpAddressInitializer =
   | number
   | string
-  | { host: string; port: number }
-
-export type TcpAddressDefaults = { host: string; port: number }
+  | Partial<TcpAddressProperties>
 
 export class TcpAddress {
   public readonly type: Transport.tcp | Transport.http | Transport.ws =
     Transport.tcp
+
+  public readonly scheme: string
 
   public readonly host: string
 
@@ -83,44 +115,33 @@ export class TcpAddress {
 
   public constructor(
     address?: TcpAddressInitializer,
-    defaults: TcpAddressDefaults = {
+    defaults: TcpAddressProperties = {
+      scheme: 'tcp',
       host: '127.0.0.1',
       port: 7000
     }
   ) {
-    const { host, port } = (function() {
-      if (address === undefined) {
-        return defaults
-      } else if (typeof address === 'string') {
-        const parts = address.split(':')
-        if (parts.length === 1) {
-          return {
-            host: defaults.host,
-            port: parseInt(parts[0])
-          }
-        } else if (parts.length >= 2) {
-          return {
-            host: parts[0],
-            port: parseInt(parts[1])
-          }
-        } else {
-          return defaults
-        }
-      } else if (typeof address === 'number') {
-        return { host: defaults.host, port: address }
-      } else {
-        const { host = defaults.host, port = defaults.port } = address
-        return { host, port }
-      }
-    })()
+    const { scheme, host, port } = parseAddress(address, defaults)
+    this.scheme = scheme
     this.host = host
     this.port = port
   }
 
-  public toString(): string {
-    return `${this.type}://${this.host}:${this.port}`
+  public url(): string {
+    return `${this.scheme}://${this.host}:${this.port}`
   }
 }
+
+export interface HttpAddressProperties extends TcpAddressProperties {
+  path?: string
+  jwt?: string
+  protocol?: 'jsonrpc' | 'restful'
+}
+
+export type HttpAddressInitializer =
+  | number
+  | string
+  | Partial<HttpAddressProperties>
 
 /**
  * An address in the HTTP address family
@@ -135,7 +156,7 @@ export class HttpAddress extends TcpAddress {
    *
    * Should begin with a forward slash e.g. `/some/route`
    */
-  public readonly path: string
+  public readonly path?: string
 
   /**
    * The JSON Web Token (JWT) to use add to requests
@@ -153,44 +174,91 @@ export class HttpAddress extends TcpAddress {
    * and the body is the `params` object. (This isn't really RESTful,
    * but the API calls are stylistically similar ¯\_(ツ)_/¯)
    */
-  public readonly protocol: 'jsonrpc' | 'restful'
+  public readonly protocol?: 'jsonrpc' | 'restful'
 
   public constructor(
-    address?: TcpAddressInitializer,
-    path = '',
-    protocol: 'jsonrpc' | 'restful' = 'jsonrpc',
-    jwt?: string,
-    defaults: TcpAddressDefaults = {
+    address?: HttpAddressInitializer,
+    defaults: HttpAddressProperties = {
+      scheme: 'http',
       host: '127.0.0.1',
-      port: 8000
+      port: 80
     }
   ) {
     super(address, defaults)
+    const { path } = parseAddress(address, defaults)
     this.path = path
-    this.protocol = protocol
-    this.jwt = jwt
+    if (typeof address === 'object') {
+      const { protocol, jwt } = address
+      this.protocol = protocol
+      this.jwt = jwt
+    }
   }
 
-  public toString(): string {
-    return `${super.toString()}${this.path}`
+  public url(): string {
+    const { scheme, host, port, path } = this
+    let url = `${scheme}://${host}`
+    if (
+      ((scheme === 'http' || scheme === 'ws') && port !== 80) ||
+      ((scheme === 'https' || scheme === 'wss') && port !== 443)
+    )
+      url += `:${port}`
+    if (path !== undefined) {
+      if (!path.startsWith('/')) url += '/'
+      url += path
+    }
+    return url
   }
 }
+
+export type WebSocketAddressInitializer = HttpAddressInitializer
 
 export class WebSocketAddress extends HttpAddress {
   public readonly type: Transport.ws = Transport.ws
 
-  public constructor(address?: TcpAddressInitializer, path = '', jwt?: string) {
-    super(address, path, 'jsonrpc', jwt, {
+  public constructor(address?: WebSocketAddressInitializer) {
+    super(address, {
+      scheme: 'ws',
       host: '127.0.0.1',
-      port: 9000
+      port: 80
     })
   }
 }
 
-export type Address =
-  | DirectAddress
-  | StdioAddress
-  | VsockAddress
-  | TcpAddress
-  | HttpAddress
-  | WebSocketAddress
+export function parseAddress(
+  address: undefined | TcpAddressInitializer | HttpAddressInitializer,
+  defaults: TcpAddressProperties | HttpAddressProperties
+): Pick<HttpAddressProperties, 'scheme' | 'host' | 'port' | 'path'> {
+  let { scheme, host, path } = { path: undefined, ...defaults }
+  let port
+  if (typeof address === 'string') {
+    // Parse as string of port number (useful for C)
+    const match = /^[0-9]{2,5}$/.exec(address)
+    if (match !== null) {
+      port = parseInt(match[0])
+    } else {
+      // Parse string to extract parts
+      const match = /(([a-z]{2,5}):\/\/)?([^:/]+)(:(\d+))?(\/(.+))?$/.exec(
+        address
+      )
+      if (match === null)
+        throw new InternalError(`Could not parse address "${address}"`)
+      if (match[2] !== undefined) scheme = match[2]
+      if (match[3] !== undefined) host = match[3]
+      if (match[5] !== undefined) port = parseInt(match[5])
+      if (match[7] !== undefined) path = match[7]
+    }
+  } else if (typeof address === 'number') {
+    // Port number provided only
+    port = address
+  } else {
+    // Merge address object over the top of defaults
+    ;({ scheme, host, port, path } = { scheme, host, port, path, ...address })
+  }
+  // If port is still undefined then infer it from scheme, or apply default
+  if (port === undefined) {
+    if (scheme === 'http' || scheme === 'ws') port = 80
+    else if (scheme === 'https' || scheme === 'wss') port = 443
+    else port = defaults.port
+  }
+  return { scheme, host, port, path }
+}

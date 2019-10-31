@@ -3,7 +3,7 @@ import { Client } from '../base/Client'
 import { JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
-import { HttpAddress } from '../base/Transports'
+import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
 import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:http:client')
@@ -14,23 +14,17 @@ const log = getLogger('executa:http:client')
 export class HttpClient extends Client {
   public readonly url: string
 
-  private readonly jwt?: string
+  private readonly jwt: HttpAddress['jwt']
 
-  public readonly protocol: 'jsonrpc' | 'restful'
+  public readonly protocol: HttpAddress['protocol']
 
-  public constructor(address: HttpAddress = new HttpAddress()) {
+  public constructor(address: HttpAddressInitializer = new HttpAddress()) {
     super()
 
-    const {
-      host = '127.0.1.1',
-      port = '8000',
-      path = '',
-      jwt,
-      protocol
-    } = address
-    this.url = `http://${host}:${port}${path.startsWith('/') ? '' : '/'}${path}`
-    this.jwt = jwt
-    this.protocol = protocol
+    const httpAddress = new HttpAddress(address)
+    this.url = httpAddress.url()
+    this.jwt = httpAddress.jwt
+    this.protocol = httpAddress.protocol
   }
 
   protected send(request: JsonRpcRequest): Promise<void> {
@@ -38,12 +32,12 @@ export class HttpClient extends Client {
 
     let url
     let body
-    if (this.protocol === 'jsonrpc') {
-      url = this.url
-      body = request
-    } else {
+    if (this.protocol === 'restful') {
       url = `${this.url}${this.url.endsWith('/') ? '' : '/'}${method}`
       body = params
+    } else {
+      url = this.url
+      body = request
     }
 
     return fetch(url, {
@@ -67,8 +61,9 @@ export class HttpClient extends Client {
           const error = new JsonRpcError(-32600, message)
           return new JsonRpcResponse(id, undefined, error)
         }
-        if (this.protocol === 'jsonrpc') return reply.json()
-        else return new JsonRpcResponse(id, reply.json())
+        if (this.protocol === 'restful')
+          return new JsonRpcResponse(id, reply.json())
+        else return reply.json()
       })
       .then((response: JsonRpcResponse) => {
         this.receive(response)

@@ -2,11 +2,11 @@ import '@stencila/components'
 import { CodeChunk, softwareSession, SoftwareSession } from '@stencila/schema'
 import { BaseExecutor } from '../base/BaseExecutor'
 import { ClientType } from '../base/Client'
-import { HttpAddress } from '../base/Transports'
+import { HttpAddressInitializer } from '../base/Transports'
 import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
-import { getLogger } from '@stencila/logga';
+import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:browser')
 
@@ -37,12 +37,10 @@ const onReadyHandler = (): void => {
   setCodeChunkProps()
 }
 
-export const init = (options: Partial<InitOptions> = defaultOptions): void => {
-  const { host, port, path, protocol } = { ...defaultOptions, ...options }
-
+export const init = (address: HttpAddressInitializer): void => {
   executor = new BaseExecutor(
-    [() => discover(new HttpAddress({ host, port }, path, protocol))],
-    [HttpClient as ClientType, WebSocketClient as ClientType]
+    [() => discover(address)],
+    [HttpClient, WebSocketClient]
   )
 
   if (document.readyState === 'loading') {
@@ -50,22 +48,6 @@ export const init = (options: Partial<InitOptions> = defaultOptions): void => {
   } else {
     onReadyHandler()
   }
-}
-
-interface InitOptions {
-  host: HttpAddress['host']
-  port: HttpAddress['port']
-  path: HttpAddress['path']
-  protocol: HttpAddress['protocol']
-}
-
-const defaultOptions: InitOptions = {
-  host: window.location.hostname.includes('localhost')
-    ? 'localhost'
-    : 'hub.stenci.la',
-  path: '',
-  port: 9000,
-  protocol: 'jsonrpc'
 }
 
 const executa = {

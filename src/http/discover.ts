@@ -1,5 +1,5 @@
 import { Manifest } from '../base/Executor'
-import { HttpAddress } from '../base/Transports'
+import { HttpAddressInitializer } from '../base/Transports'
 import { HttpClient } from './HttpClient'
 
 /**
@@ -7,7 +7,9 @@ import { HttpClient } from './HttpClient'
  *
  * Currently just fetches a `Manifest` from a single `HttpAddress`.
  */
-export async function discover(address?: HttpAddress): Promise<Manifest[]> {
+export async function discover(
+  address?: HttpAddressInitializer
+): Promise<Manifest[]> {
   const client = new HttpClient(address)
   const manifest = await client.manifest()
   return [manifest]

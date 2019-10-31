@@ -46,7 +46,7 @@ const main = async () => {
     servers.push(
       new VsockServer(
         new VsockAddress(
-          typeof options.vsock === 'boolean' ? undefined : options.vsock
+          typeof options.vsock === 'boolean' ? 6000 : options.vsock
         )
       )
     )
@@ -54,18 +54,14 @@ const main = async () => {
   if (options.tcp !== undefined) {
     servers.push(
       new TcpServer(
-        new TcpAddress(
-          typeof options.tcp === 'boolean' ? undefined : options.tcp
-        )
+        new TcpAddress(typeof options.tcp === 'boolean' ? 7000 : options.tcp)
       )
     )
   }
   if (options.http !== undefined) {
     servers.push(
       new HttpServer(
-        new HttpAddress(
-          typeof options.http === 'boolean' ? undefined : options.http
-        )
+        new HttpAddress(typeof options.http === 'boolean' ? 8000 : options.http)
       )
     )
   }
@@ -73,7 +69,7 @@ const main = async () => {
     servers.push(
       new WebSocketServer(
         new WebSocketAddress(
-          typeof options.ws === 'boolean' ? undefined : options.ws
+          typeof options.ws === 'boolean' ? 9000 : options.ws
         )
       )
     )

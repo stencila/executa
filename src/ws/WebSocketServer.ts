@@ -3,7 +3,10 @@ import { getLogger } from '@stencila/logga'
 import fastifyWebsocket from 'fastify-websocket'
 import jwt from 'jsonwebtoken'
 import { InternalError } from '../base/InternalError'
-import { WebSocketAddress } from '../base/Transports'
+import {
+  WebSocketAddress,
+  WebSocketAddressInitializer
+} from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { TcpServerClient, tcpServerClient } from '../tcp/TcpServer'
 
@@ -24,8 +27,12 @@ export class WebSocketServer extends HttpServer {
    */
   users: { [key: string]: any } = {}
 
-  public constructor(address: WebSocketAddress = new WebSocketAddress()) {
+  public constructor(
+    address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
+  ) {
     super(address)
+    console.log(address)
+    console.log(this.address.url())
 
     // Verify the JWT for each connection and store
     // it's payload so it can be used against each
@@ -82,14 +89,11 @@ export class WebSocketServer extends HttpServer {
   }
 
   public get address(): WebSocketAddress {
-    return new WebSocketAddress(
-      {
-        host: this.host,
-        port: this.port
-      },
-      '',
-      this.defaultJwt
-    )
+    return new WebSocketAddress({
+      host: this.host,
+      port: this.port,
+      jwt: this.defaultJwt
+    })
   }
 
   /**
