@@ -4,6 +4,11 @@ import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { InternalError } from './InternalError'
+import { getLogger } from '@stencila/logga'
+
+const log = getLogger('executa:client')
+
+const notifications = getLogger('executa:client:notifs')
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -132,24 +137,46 @@ export abstract class Client implements Executor {
    * when a response is returned. Uses the `id` of the response to match it to the corresponding
    * request and resolve it's promise.
    *
-   * @param response The JSON-RPC response
+   * @param message A JSON-RPC response (to a request) or a notification.
    */
-  protected receive(response: string | JsonRpcResponse): void {
-    if (typeof response === 'string')
-      response = JSON.parse(response) as JsonRpcResponse
-    if (response.id < 0)
+  protected receive(message: string | JsonRpcResponse | JsonRpcRequest): void {
+    if (typeof message === 'string')
+      message = JSON.parse(message) as JsonRpcResponse | JsonRpcRequest
+    const { id } = message
+
+    if (id === undefined) {
+      // A notification request
+      const { method, params = [] } = message as JsonRpcRequest
+      const msg = Object.values(params)[0]
+      switch (method) {
+        case 'debug':
+        case 'info':
+        case 'warn':
+        case 'error':
+          notifications[method](msg)
+          return
+        default:
+          notifications.info(`${method}:${msg}`)
+          return
+      }
+    }
+
+    // Must be a response....
+    message = message as JsonRpcResponse
+    if (id < 0)
+      // A response with accidentally missing id
       throw new JsonRpcError(
         JsonRpcErrorCode.InternalError,
-        `Response is missing id: ${response}`
+        `Response is missing id: ${message}`
       )
-    const resolve = this.requests[response.id]
+    const resolve = this.requests[id]
     if (resolve === undefined)
       throw new JsonRpcError(
         JsonRpcErrorCode.InternalError,
-        `No request found for response with id: ${response.id}`
+        `No request found for response with id: ${id}`
       )
-    resolve(response)
-    delete this.requests[response.id]
+    resolve(message)
+    delete this.requests[id]
   }
 
   /**

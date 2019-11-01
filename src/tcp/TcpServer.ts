@@ -5,8 +5,7 @@ import { Executor, User } from '../base/Executor'
 import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
-import { JsonRpcResponse } from '../base/JsonRpcResponse'
-import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { Connection } from '../base/Connection'
 
 const log = getLogger('executa:tcp:server')
 
@@ -40,21 +39,6 @@ export class TcpConnection extends StreamServer implements Connection {
    */
   public get address(): TcpAddress {
     return new TcpAddress()
-  }
-
-  public start(executor?: Executor): Promise<void> {
-    return super.start(executor, this.socket, this.socket)
-  }
-
-  /**
-   * Send a notification to the client.
-   *
-   * This method has the same signature as `Executor.notify`
-   * and a similar implementation to `Client.notify`.
-   */
-  public notify(subject: string, message: string): void {
-    const notification = new JsonRpcRequest(subject, { message }, false)
-    this.send(notification)
   }
 
   public stop(): Promise<void> {
@@ -108,11 +92,21 @@ export class TcpServer extends Server {
         socket.on('close', () => this.onDisconnected(connection))
 
         // Handle messages from connection
-        connection.start(executor).catch(error => log.error(error))
+        connection
+          .start(executor, socket, socket)
+          .catch(error => log.error(error))
       })
 
       const { host, port } = this.address
       return new Promise(resolve => server.listen(port, host, () => resolve()))
+    }
+  }
+
+  public notify(subject: string, message: string, clients?: string[]): void {
+    if (clients === undefined) clients = Object.keys(this.connections)
+    for (const client of clients) {
+      const connection = this.connections[client]
+      if (connection !== undefined) connection.notify(subject, message)
     }
   }
 

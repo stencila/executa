@@ -25,6 +25,20 @@ export abstract class Server {
   public abstract get address(): Address
 
   /**
+   * Send a notification to one or all clients.
+   *
+   * @param subject The notification subject
+   * @param message The notification message
+   * @param clients The clients to send the notification to
+   *
+   * @see Executor#notify
+   * @see Client#notify
+   */
+  public notify(subject: string, message: string, clients?: string[]): void {
+    // Only servers that have persistent connections can implement this
+  }
+
+  /**
    * Receive a request or notification
    *
    * @param request A JSON-RPC request from a client

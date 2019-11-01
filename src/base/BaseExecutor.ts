@@ -15,7 +15,6 @@ import {
 } from './Executor'
 
 const log = getLogger('executa:base-executor')
-const notifications = getLogger('executa:notifications')
 
 const ajv = new Ajv()
 
@@ -424,7 +423,7 @@ export class BaseExecutor implements Executor {
   }
 
   /**
-   * @inheritdoc
+   * @override
    *
    * Implementation of `Executor.notify` which performs a
    * notification. Currently by calling a method of `log`.
@@ -435,7 +434,7 @@ export class BaseExecutor implements Executor {
       case 'info':
       case 'warn':
       case 'error':
-        notifications[subject](message)
+        log[subject](message)
     }
   }
 

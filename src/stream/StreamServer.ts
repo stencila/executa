@@ -34,4 +34,9 @@ export abstract class StreamServer extends Server {
     if (typeof data !== 'string') data = JSON.stringify(data)
     this.encoder.write(data)
   }
+
+  public notify(subject: string, message: string): void {
+    const notification = new JsonRpcRequest(subject, { message }, false)
+    this.send(notification)
+  }
 }
