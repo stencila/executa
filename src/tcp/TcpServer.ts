@@ -1,33 +1,76 @@
 import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
-import { createServer, Server, Socket } from 'net'
-import { Executor } from '../base/Executor'
+import net from 'net'
+import { Executor, User } from '../base/Executor'
 import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
+import { Server } from '../base/Server'
+import { JsonRpcResponse } from '../base/JsonRpcResponse'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
 
 const log = getLogger('executa:tcp:server')
 
-export type TcpServerClient = Socket & { id: string }
-
 /**
- * Transform a `net.Socket` into a `TcpServerClient` by adding a unique id
+ * A TCP connection.
  *
- * @param socket The socket to transform
+ * Each connection acts as a `StreamServer`, sending and receving
+ * length-prexied messages over the TCP stream.
  */
-export const tcpServerClient = (socket: Socket): TcpServerClient => {
-  // @ts-ignore that Socket does not have an id
-  socket.id = crypto.randomBytes(32).toString('hex')
-  return socket as TcpServerClient
+export class TcpConnection extends StreamServer implements Connection {
+  /**
+   * @inheritdoc
+   */
+  id: string = crypto.randomBytes(32).toString('hex')
+
+  /**
+   * The socket used by this connection
+   */
+  socket: net.Socket
+
+  constructor(socket: net.Socket) {
+    super()
+    this.socket = socket
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * It is necessary to override this method, so just return a
+   * default address.
+   */
+  public get address(): TcpAddress {
+    return new TcpAddress()
+  }
+
+  public start(executor?: Executor): Promise<void> {
+    return super.start(executor, this.socket, this.socket)
+  }
+
+  /**
+   * Send a notification to the client.
+   *
+   * This method has the same signature as `Executor.notify`
+   * and a similar implementation to `Client.notify`.
+   */
+  public notify(subject: string, message: string): void {
+    const notification = new JsonRpcRequest(subject, { message }, false)
+    this.send(notification)
+  }
+
+  public stop(): Promise<void> {
+    this.socket.destroy()
+    return Promise.resolve()
+  }
 }
 
-export class TcpServer extends StreamServer {
+export class TcpServer extends Server {
   protected readonly host: string
 
   protected readonly port: number
 
-  protected server?: Server
+  protected server?: net.Server
 
-  protected clients: TcpServerClient[] = []
+  protected connections: { [key: string]: Connection } = {}
 
   public constructor(address: TcpAddressInitializer = new TcpAddress()) {
     super()
@@ -44,27 +87,28 @@ export class TcpServer extends StreamServer {
     })
   }
 
-  protected onConnected(client: TcpServerClient): void {
-    this.clients.push(client)
+  protected onConnected(connection: Connection): void {
+    this.connections[connection.id] = connection
   }
 
-  protected onDisconnected(client: TcpServerClient): void {
-    this.clients.splice(this.clients.indexOf(client), 1)
+  protected onDisconnected(connection: Connection): void {
+    delete this.connections[connection.id]
   }
 
   public async start(executor?: Executor): Promise<void> {
     if (this.server === undefined) {
       log.info(`Starting server: ${this.address.url()}`)
 
-      const server = (this.server = createServer(socket => {
-        super.start(executor, socket, socket).catch(e => {
-          log.error(`Failed to start server: ${this.address.url()}\n\n${e}`)
-        })
-      }))
-      server.on('connection', (socket: Socket) => {
-        const client = tcpServerClient(socket)
-        this.onConnected(client)
-        client.on('close', () => this.onDisconnected(client))
+      const server = (this.server = net.createServer())
+
+      server.on('connection', (socket: net.Socket): void => {
+        // Register connection and disconnection handler
+        const connection = new TcpConnection(socket)
+        this.onConnected(connection)
+        socket.on('close', () => this.onDisconnected(connection))
+
+        // Handle messages from connection
+        connection.start(executor).catch(error => log.error(error))
       })
 
       const { host, port } = this.address
@@ -77,8 +121,10 @@ export class TcpServer extends StreamServer {
       const url = this.address.url()
       log.info(`Stopping server ${url}`)
 
-      this.clients.forEach(client => client.destroy())
-      this.clients = []
+      Object.values(this.connections).forEach(connection => {
+        connection.stop().catch(error => log.error(error))
+      })
+      this.connections = {}
 
       return new Promise(resolve => {
         if (this.server !== undefined)
