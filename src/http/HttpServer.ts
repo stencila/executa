@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
 import { BaseExecutor } from '../base/BaseExecutor'
 import { InternalError } from '../base/InternalError'
-import { JsonRpcErrorCode } from '../base/JsonRpcError'
+import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
 import { TcpServer } from '../tcp/TcpServer'
@@ -15,7 +15,13 @@ import { JsonRpcResponse } from '../base/JsonRpcResponse'
 const log = getLogger('executa:http:server')
 
 /**
- * A `Server` using HTTP for communication.
+ * A `Server` for the HTTP transport.
+ *
+ * This server class performs JSON-RPC over HTTP.
+ *
+ * For the `/` endpoint, the request body should be
+ * an JSON-RPC request and the response body will be
+ * a JSON-RPC request.
  */
 export class HttpServer extends TcpServer {
   /**
@@ -60,12 +66,32 @@ export class HttpServer extends TcpServer {
         await request.jwtVerify()
       } catch (err) {
         log.warn(`JWT verification failed`)
-        reply.status(403).send('JSON Web Token verification failed')
+        reply
+          .status(403)
+          .send(
+            jsonRpcErrorResponse(
+              JsonRpcErrorCode.InvalidRequest,
+              'JWT verification failed'
+            )
+          )
       }
     })
     this.defaultJwt = jwt.sign({}, secret)
 
-    // JSON-RPC over HTTP used by `HttpClient`
+    // Custom error handler to return a JSON-RPC response with an error
+    app.setErrorHandler((error, request, reply) => {
+      const { statusCode, message } = error
+      reply
+        .status(statusCode !== undefined ? statusCode : 500)
+        .send(
+          jsonRpcErrorResponse(
+            JsonRpcErrorCode.ServerError,
+            `Server error: "${message}"`
+          )
+        )
+    })
+
+    // JSON-RPC over HTTP
     // No wrapping/unwrapping of the request/response or
     // special handling of errors. Just JSON-RPC requests and responses
     // in the bodies.
@@ -76,10 +102,10 @@ export class HttpServer extends TcpServer {
       reply.send(await this.receive(body, user, false))
     })
 
-    // JSON-RPC wrapped in HTTP for other clients
-    // Unwrap the HTTP request into a JSON-RPC request and
-    // unwrap the JSON-RPC response as HTTP with bare results
-    // and HTTP error codes
+    // RESTful-like JSON-RPC wrapped in HTTP
+    // Wrap the HTTP request into a JSON-RPC request and
+    // unwrap the JSON-RPC response as HTTP response with
+    // bare, unenveloped results and errors
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
         // @ts-ignore that user does not exist on request
@@ -89,11 +115,15 @@ export class HttpServer extends TcpServer {
 
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse as JsonRpcResponse
-        if (error !== undefined)
+        if (error !== undefined) {
+          // Send bare error
           reply
             .status(error.code < JsonRpcErrorCode.InternalError ? 400 : 500)
-            .send({ error: error })
-        else reply.send(result)
+            .send(error)
+        } else {
+          // Send bare result
+          reply.send(result)
+        }
       }
     }
     app.post('/manifest', wrap('manifest'))
@@ -104,6 +134,19 @@ export class HttpServer extends TcpServer {
     app.post('/execute', wrap('execute'))
     app.post('/begin', wrap('begin'))
     app.post('/end', wrap('end'))
+
+    // Custom 404 handler for RESTful-like routes that
+    // returns a bare JSON-RPC error
+    app.setNotFoundHandler((request, reply) => {
+      reply
+        .status(404)
+        .send(
+          new JsonRpcError(
+            JsonRpcErrorCode.InvalidRequest,
+            `Route not found: "${request.req.url}"`
+          )
+        )
+    })
 
     this.server = app.server
   }
@@ -133,4 +176,12 @@ export class HttpServer extends TcpServer {
       })
     )
   }
+}
+
+function jsonRpcErrorResponse(code: JsonRpcErrorCode, message: string) {
+  return new JsonRpcResponse(
+    undefined,
+    undefined,
+    new JsonRpcError(code, message)
+  )
 }

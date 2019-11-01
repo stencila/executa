@@ -55,15 +55,15 @@ export class HttpClient extends Client {
       body: JSON.stringify(body)
     })
       .then(async reply => {
-        if (reply.status >= 400) {
-          // Translate the HTTP error into JSON-RPC error
-          const message = await reply.text()
-          const error = new JsonRpcError(-32600, message)
-          return new JsonRpcResponse(id, undefined, error)
-        }
-        if (this.protocol === 'restful')
-          return new JsonRpcResponse(id, reply.json())
-        else return reply.json()
+        // Ensure that the response id is the same as
+        // the request id
+        const response = await reply.json()
+        if (this.protocol === 'restful') {
+          let result, error
+          if (reply.status >= 400) error = response
+          else result = response
+          return { id, result, error }
+        } else return { ...response, id }
       })
       .then((response: JsonRpcResponse) => {
         this.receive(response)

@@ -1,4 +1,7 @@
 import { Client } from '../base/Client'
+import { JsonRpcError, JsonRpcErrorCode } from '../base/JsonRpcError'
+import { Method } from '../base/Executor'
+import { HttpClient } from '../http/HttpClient'
 
 /**
  * Test that the methods of a client (that is connected to a server)
@@ -28,4 +31,28 @@ export const testClient = async (client: Client): Promise<void> => {
       }
     )
   ).toEqual({ type: 'Entity' })
+
+  /**
+   * Check that erroneous requests return a `JsonRpcError`.
+   */
+
+  const methodNotFound =
+    client instanceof HttpClient && client.protocol === 'restful'
+      ? new JsonRpcError(
+          JsonRpcErrorCode.InvalidRequest,
+          'Route not found: "/foo"'
+        )
+      : new JsonRpcError(
+          JsonRpcErrorCode.MethodNotFound,
+          'Method not found: "foo"'
+        )
+  // @ts-ignore unknown method
+  await expect(client.call('foo')).rejects.toEqual(methodNotFound)
+
+  await expect(client.call(Method.execute)).rejects.toEqual(
+    new JsonRpcError(
+      JsonRpcErrorCode.InvalidParams,
+      'Invalid params: "node" is missing'
+    )
+  )
 }
