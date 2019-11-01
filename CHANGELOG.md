@@ -1,3 +1,11 @@
+## [0.8.1](https://github.com/stencila/executa/compare/v0.8.0...v0.8.1) (2019-11-01)
+
+
+### Bug Fixes
+
+* **Errors:** Improve logging and reporting of errors ([3a9691c](https://github.com/stencila/executa/commit/3a9691c8b9b4b4bd6714898ea32fd21269863b54))
+* **HTTP Server and Client:** Improve error generation and handling ([f756619](https://github.com/stencila/executa/commit/f75661904f5a23a0b31db5f4d00476c1357a4066))
+
 # [0.8.0](https://github.com/stencila/executa/compare/v0.7.1...v0.8.0) (2019-10-31)
 
 
