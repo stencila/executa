@@ -90,11 +90,9 @@ export abstract class Client implements Executor {
     const request = new JsonRpcRequest(method, params)
     const promise = new Promise<Type>((resolve, reject) => {
       this.requests[request.id] = (response: JsonRpcResponse) => {
-        if (response.error !== undefined)
-          // This is a plain `Error` because it is intended for the caller and
-          // is not a JSON-RPC or internal error
-          return reject(new Error(response.error.message))
-        resolve(response.result)
+        const { result, error } = response
+        if (error !== undefined) reject(error)
+        else resolve(result)
       }
     })
     this.send(request)

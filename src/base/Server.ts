@@ -5,6 +5,9 @@ import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
 import { BaseExecutor } from './BaseExecutor'
+import { getLogger } from '@stencila/logga'
+
+const log = getLogger('executa:server')
 
 /**
  * A base server class that passes JSON-RPC requests
@@ -138,16 +141,22 @@ export abstract class Server {
           )
       }
     } catch (exc) {
-      error =
-        exc instanceof JsonRpcError
-          ? exc
-          : new JsonRpcError(
-              JsonRpcErrorCode.ServerError,
-              `Internal error: ${exc.message}`,
-              {
-                trace: exc.stack
-              }
-            )
+      if (exc instanceof JsonRpcError) {
+        // A JSON-RPC error (e.g. missing parameters), so
+        // no need to log it, just return it to the client
+        error = exc
+      } else {
+        // Some sort of internal error, so log it and wrap
+        // it into a JSON RPC error to send to the client.
+        log.error(exc)
+        error = new JsonRpcError(
+          JsonRpcErrorCode.ServerError,
+          `Internal error: ${exc.message}`,
+          {
+            trace: exc.stack
+          }
+        )
+      }
     }
 
     const response = new JsonRpcResponse(id, result, error)
