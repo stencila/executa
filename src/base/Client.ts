@@ -1,5 +1,5 @@
 import { Node, SoftwareSession } from '@stencila/schema'
-import { Executor, Manifest, Method } from './Executor'
+import { Executor, Manifest, Method, User } from './Executor'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
@@ -94,7 +94,7 @@ export abstract class Client implements Executor {
       throw new InternalError('Request should have id defined')
 
     const promise = new Promise<Type>((resolve, reject) => {
-      this.requests[request.id] = (response: JsonRpcResponse) => {
+      this.requests[id] = (response: JsonRpcResponse) => {
         const { result, error } = response
         if (error !== undefined) reject(error)
         else resolve(result)
@@ -102,6 +102,17 @@ export abstract class Client implements Executor {
     })
     this.send(request)
     return promise
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * Implementation of `Executor.notify` which sends a notification
+   * to the remote `Executor`.
+   */
+  public notify(subject: string, message: string) {
+    const notification = new JsonRpcRequest(subject, { message }, false)
+    this.send(notification)
   }
 
   /**

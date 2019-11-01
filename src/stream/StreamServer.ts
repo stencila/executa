@@ -21,7 +21,7 @@ export abstract class StreamServer extends Server {
     decoder.on('data', async (data: Buffer) => {
       const json = data.toString()
       const response = await this.receive(json)
-      this.encoder.write(response)
+      if (response !== undefined) this.encoder.write(response)
     })
 
     this.encoder = lps.encode()

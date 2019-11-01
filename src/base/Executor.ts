@@ -193,4 +193,14 @@ export abstract class Executor {
     method: Method,
     params: { [key: string]: any }
   ): Promise<Type>
+
+  /**
+   * Notify an entity (a person or machine).
+   *
+   * @param subject The subject of notification e.g. `info`, `error`
+   * @param message The notification message
+   * @param user The user on whose behalf the notification was sent
+   *             (only applies to client sent notifications)
+   */
+  abstract notify(subject: string, message: string, user?: User): void
 }

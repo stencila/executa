@@ -26,7 +26,7 @@ export class JsonRpcRequest {
    * (U+002E or ASCII 46) are reserved for rpc-internal methods and extensions and
    * MUST NOT be used for anything else.
    */
-  public readonly method?: string
+  public readonly method: string
 
   /**
    * A structured value that holds the parameter values to be used during the
@@ -52,7 +52,7 @@ export class JsonRpcRequest {
    *           `undefined` then a new id will be generated.
    */
   public constructor(
-    method?: string,
+    method: string,
     params?: { [key: string]: any } | any[],
     id?: number | false
   ) {
@@ -86,7 +86,17 @@ export class JsonRpcRequest {
    */
   public static hydrate(obj: { [key: string]: unknown }): JsonRpcRequest {
     const { method, params, id } = obj
-    // TODO: Add checking of types of method, params and id
+    if (method === undefined)
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InvalidRequest,
+        'Invalid request: missing property: "method"'
+      )
+    if (typeof method !== 'string')
+      throw new JsonRpcError(
+        JsonRpcErrorCode.InvalidRequest,
+        `Invalid request: incorrect type for "method": ${typeof method}`
+      )
+    // TODO: Add checking of types of params and id
     // @ts-ignore possibly incorrect argument types
     return new JsonRpcRequest(method, params, id === undefined ? false : id)
   }

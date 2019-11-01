@@ -14,6 +14,8 @@ export class DirectClient extends Client {
   protected send(request: JsonRpcRequest): void {
     // @ts-ignore server.receive is private
     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-    this.server.receive(request).then(response => this.receive(response))
+    this.server.receive(request).then(response => {
+      if (response !== undefined) this.receive(response)
+    })
   }
 }

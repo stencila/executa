@@ -31,8 +31,6 @@ export class WebSocketServer extends HttpServer {
     address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
   ) {
     super(address)
-    console.log(address)
-    console.log(this.address.url())
 
     // Verify the JWT for each connection and store
     // it's payload so it can be used against each
@@ -79,7 +77,7 @@ export class WebSocketServer extends HttpServer {
               type: 'ws'
             }
           })
-          socket.send(response)
+          if (response !== undefined) socket.send(response)
         })
       },
       options: {
