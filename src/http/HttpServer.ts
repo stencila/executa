@@ -59,22 +59,7 @@ export class HttpServer extends TcpServer {
       secret
     })
     app.addHook('onRequest', async (request, reply) => {
-      // In development do not require a JWT (so the client can obtain a JWT!;)
-      if (process.env.NODE_ENV === 'development') return
-      // In all other cases, a valid JWT is required
-      try {
-        await request.jwtVerify()
-      } catch (err) {
-        log.warn(`JWT verification failed`)
-        reply
-          .status(403)
-          .send(
-            jsonRpcErrorResponse(
-              JsonRpcErrorCode.InvalidRequest,
-              'JWT verification failed'
-            )
-          )
-      }
+      await this.jwtValidate(request, reply)
     })
     this.defaultJwt = jwt.sign({}, secret)
 
@@ -149,6 +134,28 @@ export class HttpServer extends TcpServer {
     })
 
     this.server = app.server
+  }
+
+  protected async jwtValidate(
+    request: FastifyRequest,
+    reply: FastifyReply<any>
+  ): Promise<void> {
+    // In development do not require a JWT (so the client can obtain a JWT!;)
+    if (process.env.NODE_ENV === 'development') return
+    // In all other cases, a valid JWT is required
+    try {
+      await request.jwtVerify()
+    } catch (err) {
+      log.warn(`JWT verification failed`)
+      reply
+        .status(403)
+        .send(
+          jsonRpcErrorResponse(
+            JsonRpcErrorCode.InvalidRequest,
+            'JWT verification failed'
+          )
+        )
+    }
   }
 
   public get address(): HttpAddress {
