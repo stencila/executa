@@ -1,5 +1,10 @@
 import { getLogger } from '@stencila/logga'
-import fastify, { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import fastify, {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  FastifyError
+} from 'fastify'
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import jwt from 'jsonwebtoken'
@@ -58,23 +63,16 @@ export class HttpServer extends TcpServer {
     app.register(fastifyJwt, {
       secret
     })
-    app.addHook('onRequest', async (request, reply) => {
-      await this.jwtValidate(request, reply)
-    })
     this.defaultJwt = jwt.sign({}, secret)
 
-    // Custom error handler to return a JSON-RPC response with an error
-    app.setErrorHandler((error, request, reply) => {
-      const { statusCode, message } = error
-      reply
-        .status(statusCode !== undefined ? statusCode : 500)
-        .send(
-          jsonRpcErrorResponse(
-            JsonRpcErrorCode.ServerError,
-            `Server error: "${message}"`
-          )
-        )
-    })
+    // Set custom, override-able, hooks and handlers
+    app.addHook('onRequest', (request, reply) => this.onRequest(request, reply))
+    app.setErrorHandler((error, request, reply) =>
+      this.errorHandler(error, request, reply)
+    )
+    app.setNotFoundHandler((request, reply) =>
+      this.notFoundHandler(request, reply)
+    )
 
     // JSON-RPC over HTTP
     // No wrapping/unwrapping of the request/response or
@@ -120,28 +118,19 @@ export class HttpServer extends TcpServer {
     app.post('/begin', wrap('begin'))
     app.post('/end', wrap('end'))
 
-    // Custom 404 handler for RESTful-like routes that
-    // returns a bare JSON-RPC error
-    app.setNotFoundHandler((request, reply) => {
-      reply
-        .status(404)
-        .send(
-          new JsonRpcError(
-            JsonRpcErrorCode.InvalidRequest,
-            `Route not found: "${request.req.url}"`
-          )
-        )
-    })
-
     this.server = app.server
   }
 
-  protected async jwtValidate(
+  /**
+   * Hook that performs JWT verification on each request
+   */
+  protected async onRequest(
     request: FastifyRequest,
     reply: FastifyReply<any>
   ): Promise<void> {
     // In development do not require a JWT (so the client can obtain a JWT!;)
     if (process.env.NODE_ENV === 'development') return
+
     // In all other cases, a valid JWT is required
     try {
       await request.jwtVerify()
@@ -156,6 +145,45 @@ export class HttpServer extends TcpServer {
           )
         )
     }
+  }
+
+  /**
+   * Custom 404 handler which returns a JSON-RPC error
+   * (not wrapped in a JSON-RPC response) intended as a reply
+   * to wrong RESTful-like routes e.g. `/exec` instead of `/execute`
+   */
+  protected notFoundHandler(
+    request: FastifyRequest,
+    reply: FastifyReply<any>
+  ): void {
+    reply
+      .status(404)
+      .send(
+        new JsonRpcError(
+          JsonRpcErrorCode.InvalidRequest,
+          `Route not found: "${request.req.url}"`
+        )
+      )
+  }
+
+  /**
+   * Custom error handler to return a JSON-RPC response
+   * with an `error` property.
+   */
+  protected errorHandler(
+    error: FastifyError,
+    request: FastifyRequest,
+    reply: FastifyReply<any>
+  ): void {
+    const { statusCode, message } = error
+    reply
+      .status(statusCode !== undefined ? statusCode : 500)
+      .send(
+        jsonRpcErrorResponse(
+          JsonRpcErrorCode.ServerError,
+          `Server error: "${message}"`
+        )
+      )
   }
 
   public get address(): HttpAddress {
