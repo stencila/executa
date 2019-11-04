@@ -1,3 +1,11 @@
+# [0.9.0](https://github.com/stencila/executa/compare/v0.8.1...v0.9.0) (2019-11-04)
+
+
+### Features
+
+* **Client notifications:** Allow a client to notify a remote executor ([f371de6](https://github.com/stencila/executa/commit/f371de631c9c7c1b2ccfb00496e9210f080bab6e))
+* **Server notifs:** Add server sent notifications ([6bbdc46](https://github.com/stencila/executa/commit/6bbdc4673388350fa81ef91423a47a846f049a4d))
+
 ## [0.8.1](https://github.com/stencila/executa/compare/v0.8.0...v0.8.1) (2019-11-01)
 
 
