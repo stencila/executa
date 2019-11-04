@@ -14,7 +14,7 @@ import {
   User
 } from './Executor'
 
-const log = getLogger('executa:executor')
+const log = getLogger('executa:base-executor')
 
 const ajv = new Ajv()
 
@@ -419,6 +419,22 @@ export class BaseExecutor implements Executor {
         return this.build(params.node)
       case Method.execute:
         return this.execute(params.node, params.session)
+    }
+  }
+
+  /**
+   * @override
+   *
+   * Implementation of `Executor.notify` which performs a
+   * notification. Currently by calling a method of `log`.
+   */
+  public notify(subject: string, message: string, user?: User): void {
+    switch (subject) {
+      case 'debug':
+      case 'info':
+      case 'warn':
+      case 'error':
+        log[subject](message)
     }
   }
 

@@ -1,11 +1,11 @@
+import { getLogger } from '@stencila/logga'
+import { BaseExecutor } from './BaseExecutor'
 import { Executor, User } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
-import { BaseExecutor } from './BaseExecutor'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:server')
 
@@ -25,104 +25,80 @@ export abstract class Server {
   public abstract get address(): Address
 
   /**
-   * Handle a request
+   * Send a notification to one or all clients.
+   *
+   * @param subject The notification subject
+   * @param message The notification message
+   * @param clients The clients to send the notification to
+   *
+   * @see Executor#notify
+   * @see Client#notify
+   */
+  public notify(subject: string, message: string, clients?: string[]): void {
+    // Only servers that have persistent connections can implement this
+  }
+
+  /**
+   * Receive a request or notification
    *
    * @param request A JSON-RPC request from a client
    * @param user An object representing the user and their rights,
    *             usually a JWT payload
    * @param stringify Should the response be stringified?
-   * @returns A JSON-RPC response as an object or string (default)
+   * @returns If receiving a request then a JSON-RPC response as an
+   *          object or string (default).
+   *          If receiving a notification then nothing is returned.
    */
   protected async receive(
     request: string | JsonRpcRequest,
     user: User = {},
     stringify = true
-  ): Promise<string | JsonRpcResponse> {
+  ): Promise<string | JsonRpcResponse | void> {
     if (this.executor === undefined)
       throw new InternalError('Executor has not been initialized')
 
-    let id = -1
+    let id: number | undefined
     let result
-    let error
-
-    // Extract a parameter by name from Object or by index from Array
-    function param(
-      request: JsonRpcRequest,
-      index: number,
-      name: string,
-      required = true
-    ): any {
-      if (request.params === undefined)
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidRequest,
-          'Invalid request: missing "params" property'
-        )
-      const value = Array.isArray(request.params)
-        ? request.params[index]
-        : request.params[name]
-      if (required && value === undefined)
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidParams,
-          `Invalid params: "${name}" is missing`
-        )
-      return value
-    }
+    let error: JsonRpcError | undefined
 
     try {
-      if (request === null) {
-        throw new JsonRpcError(
-          JsonRpcErrorCode.InvalidRequest,
-          `Invalid request`
-        )
-      }
-
-      if (typeof request === 'string') {
-        // Parse JSON into a request
-        try {
-          request = JSON.parse(request) as JsonRpcRequest
-        } catch (err) {
-          throw new JsonRpcError(
-            JsonRpcErrorCode.ParseError,
-            `Parse error: ${err.message}`
-          )
-        }
-      }
-
-      // Response id is same as the request id
+      request = JsonRpcRequest.create(request)
       id = request.id
+      const { method } = request
 
-      if (request.method === undefined)
-        throw new JsonRpcError(
-          JsonRpcErrorCode.MethodNotFound,
-          'Invalid request: missing "method" property'
-        )
+      // Notification: pass on to executor and do not return anything
+      if (id === undefined) {
+        this.executor.notify(method, request.param(0, 'message'), user)
+        return
+      }
 
-      switch (request.method) {
+      // Method call request: return result or any error
+      switch (method) {
         case 'manifest':
           result = await this.executor.manifest()
           break
         case 'decode':
           result = await this.executor.decode(
-            param(request, 0, 'content'),
-            param(request, 1, 'format', false)
+            request.param(0, 'content'),
+            request.param(1, 'format', false)
           )
           break
         case 'encode':
           result = await this.executor.encode(
-            param(request, 0, 'node'),
-            param(request, 1, 'format', false)
+            request.param(0, 'node'),
+            request.param(1, 'format', false)
           )
           break
         case 'execute':
           result = await this.executor.execute(
-            param(request, 0, 'node'),
-            param(request, 1, 'session', false)
+            request.param(0, 'node'),
+            request.param(1, 'session', false)
           )
           break
         case 'begin':
         case 'end':
-          result = await this.executor[request.method](
-            param(request, 0, 'node'),
+          result = await this.executor[method](
+            request.param(0, 'node'),
             // Any `user` parameter requested is ignored and instead
             // the user from the server (e.g. based on a JWT) is applied
             user
@@ -130,9 +106,7 @@ export abstract class Server {
           break
         case 'compile':
         case 'build':
-          result = await this.executor[request.method](
-            param(request, 0, 'node')
-          )
+          result = await this.executor[method](request.param(0, 'node'))
           break
         default:
           throw new JsonRpcError(
@@ -141,21 +115,28 @@ export abstract class Server {
           )
       }
     } catch (exc) {
-      if (exc instanceof JsonRpcError) {
-        // A JSON-RPC error (e.g. missing parameters), so
-        // no need to log it, just return it to the client
-        error = exc
-      } else {
-        // Some sort of internal error, so log it and wrap
-        // it into a JSON RPC error to send to the client.
+      if (id === undefined) {
+        // Received a notification which generated an error
+        // so log it here.
         log.error(exc)
-        error = new JsonRpcError(
-          JsonRpcErrorCode.ServerError,
-          `Internal error: ${exc.message}`,
-          {
-            trace: exc.stack
-          }
-        )
+      } else {
+        if (exc instanceof JsonRpcError) {
+          // A JSON-RPC error (e.g. missing parameters), so
+          // log it as a warning and send to the client.
+          log.warn(exc)
+          error = exc
+        } else {
+          // Some sort of internal error, so log it and wrap
+          // it into a JSON RPC error to send to the client.
+          log.error(exc)
+          error = new JsonRpcError(
+            JsonRpcErrorCode.ServerError,
+            `Internal error: ${exc.message}`,
+            {
+              trace: exc.stack
+            }
+          )
+        }
       }
     }
 

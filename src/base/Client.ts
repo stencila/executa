@@ -1,8 +1,14 @@
 import { Node, SoftwareSession } from '@stencila/schema'
-import { Executor, Manifest, Method } from './Executor'
+import { Executor, Manifest, Method, User } from './Executor'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
+import { InternalError } from './InternalError'
+import { getLogger } from '@stencila/logga'
+
+const log = getLogger('executa:client')
+
+const notifications = getLogger('executa:client:notifs')
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -14,7 +20,7 @@ export abstract class Client implements Executor {
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: { [key: number]: (response: JsonRpcRequest) => void } = {}
+  private requests: { [key: number]: (response: JsonRpcResponse) => void } = {}
 
   /**
    * Call the remote `Executor`'s `manifest` method
@@ -88,8 +94,12 @@ export abstract class Client implements Executor {
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     const request = new JsonRpcRequest(method, params)
+    const id = request.id
+    if (id === undefined)
+      throw new InternalError('Request should have id defined')
+
     const promise = new Promise<Type>((resolve, reject) => {
-      this.requests[request.id] = (response: JsonRpcResponse) => {
+      this.requests[id] = (response: JsonRpcResponse) => {
         const { result, error } = response
         if (error !== undefined) reject(error)
         else resolve(result)
@@ -97,6 +107,17 @@ export abstract class Client implements Executor {
     })
     this.send(request)
     return promise
+  }
+
+  /**
+   * @inheritdoc
+   *
+   * Implementation of `Executor.notify` which sends a notification
+   * to the remote `Executor`.
+   */
+  public notify(subject: string, message: string) {
+    const notification = new JsonRpcRequest(subject, { message }, false)
+    this.send(notification)
   }
 
   /**
@@ -116,24 +137,46 @@ export abstract class Client implements Executor {
    * when a response is returned. Uses the `id` of the response to match it to the corresponding
    * request and resolve it's promise.
    *
-   * @param response The JSON-RPC response
+   * @param message A JSON-RPC response (to a request) or a notification.
    */
-  protected receive(response: string | JsonRpcResponse): void {
-    if (typeof response === 'string')
-      response = JSON.parse(response) as JsonRpcResponse
-    if (response.id < 0)
+  protected receive(message: string | JsonRpcResponse | JsonRpcRequest): void {
+    if (typeof message === 'string')
+      message = JSON.parse(message) as JsonRpcResponse | JsonRpcRequest
+    const { id } = message
+
+    if (id === undefined) {
+      // A notification request
+      const { method, params = [] } = message as JsonRpcRequest
+      const msg = Object.values(params)[0]
+      switch (method) {
+        case 'debug':
+        case 'info':
+        case 'warn':
+        case 'error':
+          notifications[method](msg)
+          return
+        default:
+          notifications.info(`${method}:${msg}`)
+          return
+      }
+    }
+
+    // Must be a response....
+    message = message as JsonRpcResponse
+    if (id < 0)
+      // A response with accidentally missing id
       throw new JsonRpcError(
         JsonRpcErrorCode.InternalError,
-        `Response is missing id: ${response}`
+        `Response is missing id: ${message}`
       )
-    const resolve = this.requests[response.id]
+    const resolve = this.requests[id]
     if (resolve === undefined)
       throw new JsonRpcError(
         JsonRpcErrorCode.InternalError,
-        `No request found for response with id: ${response.id}`
+        `No request found for response with id: ${id}`
       )
-    resolve(response)
-    delete this.requests[response.id]
+    resolve(message)
+    delete this.requests[id]
   }
 
   /**

@@ -55,4 +55,11 @@ export const testClient = async (client: Client): Promise<void> => {
       'Invalid params: "node" is missing'
     )
   )
+
+  /**
+   * Send notifications to the server.
+   */
+
+  await client.notify('info', 'Here is some information')
+  await client.notify('warn', 'Here is a warning!')
 }

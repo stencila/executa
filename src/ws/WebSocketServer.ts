@@ -1,4 +1,5 @@
 import { getLogger } from '@stencila/logga'
+import crypto from 'crypto'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
 import jwt from 'jsonwebtoken'
@@ -8,12 +9,49 @@ import {
   WebSocketAddressInitializer
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
-import { TcpServerClient, tcpServerClient } from '../tcp/TcpServer'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { Connection } from '../base/Connection'
 
 const log = getLogger('executa:ws:server')
 
 /**
- * A `Server` using WebSockets for communication.
+ * A WebSocket connection.
+ */
+export class WebSocketConnection implements Connection {
+  /**
+   * @override
+   */
+  id: string = crypto.randomBytes(32).toString('hex')
+
+  /**
+   * The WebSocket used by this connection
+   */
+  socket: WebSocket
+
+  constructor(socket: WebSocket) {
+    this.socket = socket
+  }
+
+  /**
+   * @override
+   */
+  public notify(subject: string, message: string): void {
+    const notification = new JsonRpcRequest(subject, { message }, false)
+    const json = JSON.stringify(notification)
+    this.socket.send(json)
+  }
+
+  /**
+   * @override
+   */
+  public stop(): Promise<void> {
+    this.socket.close()
+    return Promise.resolve()
+  }
+}
+
+/**
+ * A `Server` using WebSockets as the transport protocol.
  */
 export class WebSocketServer extends HttpServer {
   /**
@@ -31,8 +69,6 @@ export class WebSocketServer extends HttpServer {
     address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
   ) {
     super(address)
-    console.log(address)
-    console.log(this.address.url())
 
     // Verify the JWT for each connection and store
     // it's payload so it can be used against each
@@ -64,9 +100,12 @@ export class WebSocketServer extends HttpServer {
         }
 
         // Register connection and disconnection handler
-        const client = tcpServerClient(connection)
-        this.onConnected(client)
-        socket.on('close', () => this.onDisconnected(client, token))
+        const wsconnection = new WebSocketConnection(socket)
+        this.onConnected(wsconnection)
+        socket.on('close', () => {
+          this.onDisconnected(wsconnection)
+          delete this.users[token]
+        })
 
         // Handle messages from connection
         socket.on('message', async (message: string) => {
@@ -75,11 +114,11 @@ export class WebSocketServer extends HttpServer {
             // payload and client identification info.
             ...user,
             client: {
-              id: client.id,
-              type: 'ws'
+              type: 'ws',
+              id: wsconnection.id
             }
           })
-          socket.send(response)
+          if (response !== undefined) socket.send(response)
         })
       },
       options: {
@@ -94,17 +133,5 @@ export class WebSocketServer extends HttpServer {
       port: this.port,
       jwt: this.defaultJwt
     })
-  }
-
-  /**
-   * When a client disconnects, remove it's payload
-   * from `this.users`.
-   *
-   * @param client The client socket
-   * @param token The JWT token
-   */
-  protected onDisconnected(client: TcpServerClient, token?: string): void {
-    super.onDisconnected(client)
-    if (token !== undefined) delete this.users[token]
   }
 }

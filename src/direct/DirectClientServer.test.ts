@@ -31,4 +31,10 @@ test('DirectClient and DirectServer', async () => {
   // There should be no more requests waiting for a response
   // @ts-ignore that client.requests is private
   expect(Object.keys(client.requests).length).toEqual(0)
+
+  // Notify the server
+  client.notify('info', 'A message from client to server')
+
+  // Notify the client
+  server.notify('info', 'A message from server to client')
 })

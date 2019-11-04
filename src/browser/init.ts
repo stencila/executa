@@ -1,12 +1,11 @@
 import '@stencila/components'
+import { getLogger } from '@stencila/logga'
 import { CodeChunk, softwareSession, SoftwareSession } from '@stencila/schema'
 import { BaseExecutor } from '../base/BaseExecutor'
-import { ClientType } from '../base/Client'
 import { HttpAddressInitializer } from '../base/Transports'
 import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:browser')
 
