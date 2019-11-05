@@ -1,3 +1,10 @@
+# [0.10.0](https://github.com/stencila/executa/compare/v0.9.0...v0.10.0) (2019-11-05)
+
+
+### Features
+
+* **HTTP Server:** Get JWT from URL query ([ab61a99](https://github.com/stencila/executa/commit/ab61a99af2225167db09e5aee1dad71bc5bcb41e))
+
 # [0.9.0](https://github.com/stencila/executa/compare/v0.8.1...v0.9.0) (2019-11-04)
 
 
