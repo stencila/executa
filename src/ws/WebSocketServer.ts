@@ -2,8 +2,6 @@ import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
-import jwt from 'jsonwebtoken'
-import { InternalError } from '../base/InternalError'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer
@@ -70,24 +68,6 @@ export class WebSocketServer extends HttpServer {
   ) {
     super(address)
 
-    // Verify the JWT for each connection and store
-    // it's payload so it can be used against each
-    // subsequent request message.
-    const secret = process.env.JWT_SECRET
-    if (secret === undefined)
-      throw new InternalError('Environment variable JWT_SECRET must be set')
-    const authorize = (info: any, next: (ok: boolean) => void): void => {
-      const { headers } = info.req
-      const token = headers['sec-websocket-protocol']
-      if (token === undefined) return next(false)
-      try {
-        this.users[token] = jwt.verify(token, secret)
-        next(true)
-      } catch {
-        next(false)
-      }
-    }
-
     this.app.register(fastifyWebsocket, {
       handle: (connection: any) => {
         const { socket } = connection
@@ -122,7 +102,17 @@ export class WebSocketServer extends HttpServer {
         })
       },
       options: {
-        verifyClient: authorize
+        verifyClient: (info: any, next: (ok: boolean) => void): void => {
+          const { headers } = info.req
+          const token = headers['sec-websocket-protocol']
+          if (token === undefined) return next(false)
+          try {
+            this.users[token] = this.app.jwt.verify(token)
+            next(true)
+          } catch {
+            next(false)
+          }
+        }
       }
     })
   }

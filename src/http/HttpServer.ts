@@ -7,7 +7,6 @@ import fastify, {
 } from 'fastify'
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
-import jwt from 'jsonwebtoken'
 import { Executor } from '../base/Executor'
 import { BaseExecutor } from '../base/BaseExecutor'
 import { InternalError } from '../base/InternalError'
@@ -43,7 +42,7 @@ export class HttpServer extends TcpServer {
    * but holds no capabilities. Mainly used for
    * testing.
    */
-  protected defaultJwt: string
+  protected defaultJwt?: string
 
   public constructor(
     address: HttpAddressInitializer = new HttpAddress({ port: 8000 })
@@ -56,14 +55,13 @@ export class HttpServer extends TcpServer {
     // Register CORS plugin
     app.register(fastifyCors)
 
-    // Register JWT plugin for all routes
+    // Register JWT plugin
     const secret = process.env.JWT_SECRET
     if (secret === undefined)
       throw new InternalError('Environment variable JWT_SECRET must be set')
     app.register(fastifyJwt, {
       secret
     })
-    this.defaultJwt = jwt.sign({}, secret)
 
     // Set custom, override-able, hooks and handlers
     app.addHook('onRequest', (request, reply) => this.onRequest(request, reply))
@@ -128,14 +126,22 @@ export class HttpServer extends TcpServer {
     request: FastifyRequest,
     reply: FastifyReply<any>
   ): Promise<void> {
-    // In development do not require a JWT (so the client can obtain a JWT!;)
+    // In development do not require a JWT (so the client can obtain a JWT from manifest!)
     if (process.env.NODE_ENV === 'development') return
 
     // In all other cases, a valid JWT is required
+    // If there is no `Authorization` header and there is a `jwt` query parameter
+    // then use that
+    if (
+      request.headers.authorization === undefined &&
+      request.query.token !== undefined
+    ) {
+      request.headers.authorization = `Bearer ${request.query.token}`
+    }
     try {
       await request.jwtVerify()
     } catch (err) {
-      log.warn(`JWT verification failed`)
+      log.warn(`JWT verification failed: ${request.raw.url}`)
       reply
         .status(403)
         .send(
@@ -195,20 +201,27 @@ export class HttpServer extends TcpServer {
   }
 
   public async start(executor?: Executor): Promise<void> {
+    // Ensure a n executor pass requests to
     if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
 
     const url = this.address.url()
     log.info(`Starting server: ${url}`)
-    return new Promise(resolve =>
-      this.app.listen(this.port, this.host, () => {
-        // Set server property to use `TcpServer.stop()`
-        this.server = this.app.server
-        log.info(
-          `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
-        )
-        resolve()
-      })
+
+    const app = this.app
+
+    // Wait for plugins to be ready before using them
+    await app.ready()
+    this.defaultJwt = app.jwt.sign({})
+
+    // Start listening
+    await app.listen(this.port, this.host)
+
+    // Set server property to use `TcpServer.stop()`
+    this.server = app.server
+
+    log.info(
+      `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
     )
   }
 }
