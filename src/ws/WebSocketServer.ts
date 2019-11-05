@@ -36,7 +36,11 @@ export class WebSocketConnection implements Connection {
   public notify(subject: string, message: string): void {
     const notification = new JsonRpcRequest(subject, { message }, false)
     const json = JSON.stringify(notification)
-    this.socket.send(json)
+    try {
+      this.socket.send(json)
+    } catch {
+      // Ignore failures to send notification e.g. if client is already disconnected
+    }
   }
 
   /**
