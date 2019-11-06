@@ -1,4 +1,11 @@
-export { Executor, User } from './base/Executor'
+export {
+  Executor,
+  Method,
+  Manifest,
+  Addresses,
+  Capabilities,
+  User
+} from './base/Executor'
 export { BaseExecutor } from './base/BaseExecutor'
 
 export { StreamClient } from './stream/StreamClient'
