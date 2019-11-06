@@ -49,7 +49,7 @@ export class StdioAddress {
 /**
  * An address in the Unix Domain Socket (UDS) address family
  *
- * @see https://en.wikipedia.org/wiki/Unix_domain_socket
+ * @see {@link https://en.wikipedia.org/wiki/Unix_domain_socket Wikipedia}
  */
 export class UdsAddress {
   public readonly type: Transport.uds = Transport.uds
@@ -67,7 +67,7 @@ export class UdsAddress {
 /**
  * An address in the Linux VSOCK address family
  *
- * @see http://man7.org/linux/man-pages/man7/vsock.7.html
+ * @see {@link http://man7.org/linux/man-pages/man7/vsock.7.html Linux man page}
  */
 export class VsockAddress {
   public readonly type: Transport.vsock = Transport.vsock
@@ -146,7 +146,7 @@ export type HttpAddressInitializer =
 /**
  * An address in the HTTP address family
  *
- * @see https://www.w3.org/Addressing/HTTPAddressing.html
+ * @see {@link https://www.w3.org/Addressing/HTTPAddressing.html HTTP Addressing }
  */
 export class HttpAddress extends TcpAddress {
   public readonly type: Transport.http | Transport.ws = Transport.http

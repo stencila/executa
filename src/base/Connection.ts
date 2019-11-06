@@ -3,7 +3,7 @@ import { Node } from '@stencila/schema'
 /**
  * A `Server` side connection to a `Client`.
  *
- * This interface is used by server classes that
+ * This interface is implemented for use by server classes that
  * have more than one, persistent connections
  * (e.g. `TcpServer` and `WebSocketServer`).
  */
@@ -21,9 +21,9 @@ export interface Connection {
    * @param message The notification message
    * @param node The notification subject
    *
-   * @see Executor#notify
-   * @see Server#notify
-   * @see Client#notify
+   * @see {@link Executor.notify}
+   * @see {@link Client.notify}
+   * @see {@link Server.notify}
    */
   notify(level: string, message: string, node?: Node): void
 

@@ -96,8 +96,8 @@ export abstract class Executor {
   /**
    * Get the manifest of the executor
    *
-   * @see Capabilities
-   * @see Addresses
+   * @see {@link Capabilities}
+   * @see {@link Addresses}
    */
   abstract async manifest(): Promise<Manifest>
 

@@ -18,7 +18,8 @@ const log = getLogger('executa:ws:server')
  */
 export class WebSocketConnection implements Connection {
   /**
-   * @override
+   * @implements Implements {@link Connection.id} to provide
+   * a unique id for the WebSocket connection.
    */
   id: string = crypto.randomBytes(32).toString('hex')
 
@@ -32,7 +33,8 @@ export class WebSocketConnection implements Connection {
   }
 
   /**
-   * @override
+   * @implements Implements {@link Connection.notify} to send the
+   * notification over the WebSocket.
    */
   public notify(level: string, message: string, node: Node): void {
     const notification = new JsonRpcRequest(level, { message, node }, false)
@@ -45,7 +47,7 @@ export class WebSocketConnection implements Connection {
   }
 
   /**
-   * @override
+   * @implements Implements {@link Connection.stop} by closing the WebSocket.
    */
   public stop(): Promise<void> {
     this.socket.close()

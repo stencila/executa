@@ -33,8 +33,8 @@ export abstract class Server {
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    * @param clients The ids of the clients to send the notification to. If missing send to all clients.
    *
-   * @see Executor#notify
-   * @see Client#notify
+   * @see {@link Executor.notify}
+   * @see {@link Client.notify}
    */
   public notify(
     level: string,
