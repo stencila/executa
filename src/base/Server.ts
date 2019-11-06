@@ -1,4 +1,5 @@
 import { getLogger } from '@stencila/logga'
+import { Node } from '@stencila/schema'
 import { BaseExecutor } from './BaseExecutor'
 import { Executor, User } from './Executor'
 import { InternalError } from './InternalError'
@@ -25,16 +26,22 @@ export abstract class Server {
   public abstract get address(): Address
 
   /**
-   * Send a notification to one or all clients.
+   * Send a notification to one or more clients.
    *
-   * @param subject The notification subject
+   * @param level The notification level e.g. `info`, `error`
    * @param message The notification message
-   * @param clients The clients to send the notification to
+   * @param node The node to which this notification relates e.g. a `SoftwareSession`
+   * @param clients The ids of the clients to send the notification to. If missing send to all clients.
    *
    * @see Executor#notify
    * @see Client#notify
    */
-  public notify(subject: string, message: string, clients?: string[]): void {
+  public notify(
+    level: string,
+    message: string,
+    node?: Node,
+    clients?: string[]
+  ): void {
     // Only servers that have persistent connections can implement this
   }
 
@@ -68,7 +75,11 @@ export abstract class Server {
 
       // Notification: pass on to executor and do not return anything
       if (id === undefined) {
-        this.executor.notify(method, request.param(0, 'message'), user)
+        this.executor.notified(
+          method,
+          request.param(0, 'message'),
+          request.param(1, 'node', false)
+        )
         return
       }
 
@@ -92,7 +103,10 @@ export abstract class Server {
         case 'execute':
           result = await this.executor.execute(
             request.param(0, 'node'),
-            request.param(1, 'session', false)
+            request.param(1, 'session', false),
+            // Any `user` parameter requested is ignored and instead
+            // the user from the server (e.g. based on a JWT) is applied
+            user
           )
           break
         case 'begin':

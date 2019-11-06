@@ -9,6 +9,7 @@ import {
 import { HttpServer } from '../http/HttpServer'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { Connection } from '../base/Connection'
+import { Node } from '@stencila/schema'
 
 const log = getLogger('executa:ws:server')
 
@@ -33,8 +34,8 @@ export class WebSocketConnection implements Connection {
   /**
    * @override
    */
-  public notify(subject: string, message: string): void {
-    const notification = new JsonRpcRequest(subject, { message }, false)
+  public notify(level: string, message: string, node: Node): void {
+    const notification = new JsonRpcRequest(level, { message, node }, false)
     const json = JSON.stringify(notification)
     try {
       this.socket.send(json)
@@ -104,6 +105,9 @@ export class WebSocketServer extends HttpServer {
           })
           if (response !== undefined) socket.send(response)
         })
+
+        // Handle any errors
+        socket.on('error', (error: Error) => log.error(error))
       },
       options: {
         verifyClient: (info: any, next: (ok: boolean) => void): void => {

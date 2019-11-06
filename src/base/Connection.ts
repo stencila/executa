@@ -1,3 +1,5 @@
+import { Node } from '@stencila/schema'
+
 /**
  * A `Server` side connection to a `Client`.
  *
@@ -15,13 +17,15 @@ export interface Connection {
    * Send a notification to the client at the other
    * end of the connection.
    *
-   * @param subject The notification subject
+   * @param level The notification level
    * @param message The notification message
+   * @param node The notification subject
    *
    * @see Executor#notify
+   * @see Server#notify
    * @see Client#notify
    */
-  notify(subject: string, message: string): void
+  notify(level: string, message: string, node?: Node): void
 
   /**
    * Stop the connection.

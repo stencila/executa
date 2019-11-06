@@ -362,7 +362,8 @@ export class BaseExecutor implements Executor {
    */
   public execute<NodeType extends Node>(
     node: NodeType,
-    session?: SoftwareSession
+    session?: SoftwareSession,
+    user?: User
   ): Promise<NodeType> {
     return this.walk(node, node => {
       switch (nodeType(node)) {
@@ -423,18 +424,40 @@ export class BaseExecutor implements Executor {
   }
 
   /**
-   * @override
+   * @implements {Executor.notify}
    *
-   * Implementation of `Executor.notify` which performs a
-   * notification. Currently by calling a method of `log`.
+   * Send a notification to clients via each of this
+   * executor's servers
    */
-  public notify(subject: string, message: string, user?: User): void {
-    switch (subject) {
+  public notify(
+    level: string,
+    message: string,
+    node: Node,
+    clients: string[] = []
+  ) {
+    for (const server of this.servers)
+      server.notify(level, message, node, clients)
+  }
+
+  /**
+   * @implements {Executor.notified}
+   *
+   * Receive a notification from a client using one of this
+   * executor's servers.
+   *
+   * Just calls the appropriate method of `log`. Override this to
+   * provide more fancy notification to users.
+   */
+  public notified(level: string, message: string): void {
+    switch (level) {
       case 'debug':
       case 'info':
       case 'warn':
       case 'error':
-        log[subject](message)
+        log[level](message)
+        break
+      default:
+        log.info(message)
     }
   }
 
