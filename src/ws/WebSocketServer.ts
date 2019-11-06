@@ -35,14 +35,21 @@ export class WebSocketConnection implements Connection {
   /**
    * @implements Implements {@link Connection.notify} to send the
    * notification over the WebSocket.
+   *
+   * @description Will log an error if the send failed for a
+   * WebSocket that is still open (i.e. will ignore failures for
+   * connections that are closing or have closed).
    */
   public notify(level: string, message: string, node: Node): void {
     const notification = new JsonRpcRequest(level, { message, node }, false)
     const json = JSON.stringify(notification)
     try {
       this.socket.send(json)
-    } catch {
-      // Ignore failures to send notification e.g. if client is already disconnected
+    } catch (error) {
+      if (this.socket.readyState !== this.socket.OPEN)
+        log.warn(
+          `Failed to send notification to WebSocket connection: ${this.id}`
+        )
     }
   }
 

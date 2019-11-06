@@ -45,6 +45,15 @@ export class WebSocketClient extends Client {
     this.socket.send(json)
   }
 
+  /**
+   * @override Override of {@link Client.receive} to only
+   * accept messages if the WebSocket is open
+   */
+  protected receive(message: string) {
+    if (this.socket.readyState === WebSocket.OPEN) super.receive(message)
+    else log.warn(`Message received while socket was closing: ${message}`)
+  }
+
   public stop(): Promise<void> {
     this.socket.close()
     return Promise.resolve()
