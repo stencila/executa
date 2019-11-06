@@ -90,13 +90,13 @@ test('WebSocketClient and WebSocketServer', async () => {
     // Server notification to several clients
     server.notify('debug', 'To all clients')
     await delay(1)
-    expect(clientNotifs.length).toBe(4) // included global client
+    expect(clientNotifs.length).toBe(4) // includes global client
     clientNotifs = []
 
     // Server notification to some clients
     // @ts-ignore that connections is protected
     const clients = Object.keys(server.connections).slice(2)
-    server.notify('debug', 'To all clients', clients)
+    server.notify('debug', 'To all clients', undefined, clients)
     await delay(1)
     expect(clientNotifs.length).toBe(2)
     clientNotifs = []

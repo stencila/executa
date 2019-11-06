@@ -110,9 +110,8 @@ export abstract class Client implements Executor {
   }
 
   /**
-   * @implements {Executor.notify}
-   *
-   * Send a notification to the remote executor.
+   * @implements Implements {@link Executor.notify} to send a notification
+   * to the remote executor that this client is connected to.
    */
   public notify(level: string, message: string) {
     const notification = new JsonRpcRequest(level, { message }, false)
@@ -120,11 +119,12 @@ export abstract class Client implements Executor {
   }
 
   /**
-   * @implements {Executor.notified}
+   * @implements Implements {@link Executor.notified} to receive a notification
+   * from the remote executor that this client is connected to.
    *
-   * Receive a notification from the remote executor.
-   * Just calls the appropriate method of `log`. Override this to
-   * provide more fancy notification to users.
+   * @description Currently simply calls the appropriate method of
+   * the `notifications` log instance. Override this to provide more fancy
+   * notification to users.
    */
   public notified(level: string, message: string, node?: Node): void {
     switch (level) {
@@ -132,10 +132,10 @@ export abstract class Client implements Executor {
       case 'info':
       case 'warn':
       case 'error':
-        log[level](message)
+        notifications[level](message)
         break
       default:
-        log.info(message)
+        notifications.info(message)
     }
   }
 
