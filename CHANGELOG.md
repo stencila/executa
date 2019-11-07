@@ -1,3 +1,10 @@
+## [0.11.2](https://github.com/stencila/executa/compare/v0.11.1...v0.11.2) (2019-11-07)
+
+
+### Bug Fixes
+
+* **StreamServer:** Add a module declaration for lps. ([a42ee46](https://github.com/stencila/executa/commit/a42ee46ea3dd628bd4ad83100bfb7ca6062a1eba))
+
 ## [0.11.1](https://github.com/stencila/executa/compare/v0.11.0...v0.11.1) (2019-11-07)
 
 
