@@ -1,3 +1,11 @@
+## [0.11.1](https://github.com/stencila/executa/compare/v0.11.0...v0.11.1) (2019-11-07)
+
+
+### Bug Fixes
+
+* **StreamServer:** Fix issue with [@ts-ignore](https://github.com/ts-ignore) being ignored :/ ([45a4578](https://github.com/stencila/executa/commit/45a457871e0edce7b7c9758946b9cc941679b036))
+* **WebSockerServer:** Send responses more robustly ([ec0252c](https://github.com/stencila/executa/commit/ec0252cc40e3cf63c92edfd7555b1609e8ead8f2))
+
 # [0.11.0](https://github.com/stencila/executa/compare/v0.10.0...v0.11.0) (2019-11-07)
 
 
