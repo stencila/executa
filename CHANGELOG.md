@@ -1,3 +1,20 @@
+# [0.11.0](https://github.com/stencila/executa/compare/v0.10.0...v0.11.0) (2019-11-07)
+
+
+### Bug Fixes
+
+* **Client:** Send notifications to the `notifications` log ([21fc07d](https://github.com/stencila/executa/commit/21fc07dc25ef070d33e548fd5df72352d76da054))
+* **Dependencies:** Upgrade to Schema 0.31 ([603d5dc](https://github.com/stencila/executa/commit/603d5dc345d5bf17c25c9788abd1878d577e1353))
+* **Index:** Export more types ([f13e616](https://github.com/stencila/executa/commit/f13e6166d6bb6a07c77908e584255856658d5e5b))
+* **TcpConnection:** End, rather than destory, socket ([be0a065](https://github.com/stencila/executa/commit/be0a065e89c899f2e0904030bed3717ee7286e6d))
+* **WebSocker Server:** Ignore failures when sending notifications ([acc26da](https://github.com/stencila/executa/commit/acc26da297edf15b9ddd98b06d8f3c2bd697c3e2))
+* **WebSocket Client and Server:** Better handling of closing sockets ([b9775cf](https://github.com/stencila/executa/commit/b9775cf32d12bd635ce01280bdef24dba9b86c4b))
+
+
+### Features
+
+* **Notifications:** Improve notification protocol ([0223309](https://github.com/stencila/executa/commit/0223309db11ced2f8c41ec4c8801037ae2dc24cb))
+
 # [0.10.0](https://github.com/stencila/executa/compare/v0.9.0...v0.10.0) (2019-11-05)
 
 
