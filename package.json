@@ -3,15 +3,16 @@
   "version": "0.11.2",
   "description": "Execution delegator for various language backends.",
   "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
   "browser": "./dist/browser/index.js",
   "bin": "./dist/lib/cli.js",
   "files": [
     "dist"
   ],
   "scripts": {
-    "cli": "ts-node src/cli.ts",
-    "cli:dev": "JWT_SECRET=not-a-secret ts-node-dev src/cli.ts --debug",
-    "console": "ts-node src/console.ts",
+    "cli": "ts-node --files src/cli.ts",
+    "cli:dev": "JWT_SECRET=not-a-secret ts-node-dev --files src/cli.ts --debug",
+    "console": "ts-node --files src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
     "test": "jest",

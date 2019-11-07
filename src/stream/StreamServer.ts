@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import * as lps from 'length-prefixed-stream'
+import lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Executor } from '../base/Executor'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'

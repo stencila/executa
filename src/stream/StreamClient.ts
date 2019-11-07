@@ -1,4 +1,4 @@
-import * as lps from 'length-prefixed-stream'
+import lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'

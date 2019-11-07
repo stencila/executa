@@ -3,6 +3,5 @@
   "compilerOptions": {
     "outDir": "dist/lib"
   },
-  "files": ["src/index.ts", "src/cli.ts", "src/console.ts"],
   "include": ["src/**/*.ts"]
 }
