@@ -1,3 +1,10 @@
+## [0.11.3](https://github.com/stencila/executa/compare/v0.11.2...v0.11.3) (2019-11-07)
+
+
+### Bug Fixes
+
+* **Package:** Improve usage of ambient declarations ([5360586](https://github.com/stencila/executa/commit/53605869fc8fffa23d8ab876a515bcce48ae91ef))
+
 ## [0.11.2](https://github.com/stencila/executa/compare/v0.11.1...v0.11.2) (2019-11-07)
 
 
