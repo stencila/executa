@@ -1,4 +1,3 @@
-// @ts-ignore
 import * as lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Client } from '../base/Client'

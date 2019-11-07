@@ -1,15 +1,22 @@
-// @ts-ignore
+import { getLogger } from '@stencila/logga'
 import * as lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Executor } from '../base/Executor'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { Server } from '../base/Server'
+
+const log = getLogger('stream:server')
 export abstract class StreamServer extends Server {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
    */
   protected encoder: lps.Encoder
+
+  constructor() {
+    super()
+    this.encoder = lps.encode()
+  }
 
   public async start(
     executor?: Executor,
@@ -20,13 +27,15 @@ export abstract class StreamServer extends Server {
 
     const decoder = lps.decode()
     incoming.pipe(decoder)
-    decoder.on('data', async (data: Buffer) => {
+    decoder.on('data', (data: Buffer) => {
       const json = data.toString()
-      const response = await this.receive(json)
-      if (response !== undefined) this.send(response)
+      this.receive(json)
+        .then(response => {
+          if (response !== undefined) this.send(response)
+        })
+        .catch(error => log.error(error))
     })
 
-    this.encoder = lps.encode()
     this.encoder.pipe(outgoing)
   }
 
