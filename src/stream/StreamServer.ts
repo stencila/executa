@@ -2,9 +2,9 @@
 import * as lps from 'length-prefixed-stream'
 import { Readable, Writable } from 'stream'
 import { Executor } from '../base/Executor'
-import { Server } from '../base/Server'
-import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
+import { JsonRpcResponse } from '../base/JsonRpcResponse'
+import { Server } from '../base/Server'
 export abstract class StreamServer extends Server {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
