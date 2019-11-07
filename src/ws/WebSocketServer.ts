@@ -57,6 +57,16 @@ export class WebSocketConnection implements Connection {
   }
 
   /**
+   * Send a response using the Websocket
+   *
+   * Will wait until the socket is open before
+   * attempting to send the data.
+   */
+  public send(data: string) {
+    send(this.socket, data)
+  }
+
+  /**
    * @implements Implements {@link Connection.stop} by closing the WebSocket.
    */
   public stop(): Promise<void> {
@@ -115,7 +125,7 @@ export class WebSocketServer extends HttpServer {
               id: wsconnection.id
             }
           })
-          if (response !== undefined) socket.send(response)
+          if (response !== undefined) wsconnection.send(response)
         })
 
         // Handle any errors
