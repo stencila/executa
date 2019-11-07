@@ -15,6 +15,13 @@ beforeAll(() => {
 })
 
 test('WebSocketClient and WebSocketServer', async () => {
+  let serverLogs: LogData[] = []
+  addHandler((logData: LogData) => {
+    if (logData.tag === 'executa:ws:server') {
+      serverLogs = [...serverLogs, logData]
+    }
+  })
+
   let clientLog: LogData = { tag: '', level: 0, message: '' }
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:client') {
@@ -44,8 +51,8 @@ test('WebSocketClient and WebSocketServer', async () => {
     // JWT with session limits to be used for begin() method
     const sessionRequests = softwareSession({
       environment: softwareEnvironment('some-eviron'),
-      cpuRequested: 4,
-      memoryRequested: 5
+      cpuRequest: 4,
+      memoryRequest: 5
     })
     const user: User = {
       session: softwareSession({
@@ -62,44 +69,77 @@ test('WebSocketClient and WebSocketServer', async () => {
     const userclient = echoed.user.client
     expect(userclient.type).toEqual('ws')
     expect(userclient).toHaveProperty('id')
+
+    await client.stop()
   }
 
   {
     // Client with malformed JWT
-    const _ = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
-    await delay(100)
+    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
+    await delay(10)
     expect(clientLog.message).toMatch(/Unexpected server response: 401/)
+    await client.stop()
   }
 
   {
     // Client with invalid JWT
-    const _ = new WebSocketClient({
+    const client = new WebSocketClient({
       ...server.address,
       jwt: JWT.sign({}, 'not-the-right-secret')
     })
-    await delay(100)
+    await delay(10)
     expect(clientLog.message).toMatch(/Unexpected server response: 401/)
+    await client.stop()
   }
 
   {
+    // Sending notifications to several clients
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
     await delay(10)
 
     // Server notification to several clients
-    server.notify('debug', 'To all clients')
-    await delay(1)
-    expect(clientNotifs.length).toBe(4) // included global client
     clientNotifs = []
+    server.notify('debug', 'To all clients')
+    await delay(10)
+    expect(clientNotifs.length).toBe(3)
 
     // Server notification to some clients
     // @ts-ignore that connections is protected
-    const clients = Object.keys(server.connections).slice(2)
-    server.notify('debug', 'To all clients', clients)
-    await delay(1)
-    expect(clientNotifs.length).toBe(2)
+    const clients = Object.keys(server.connections).slice(0, 2)
     clientNotifs = []
+    server.notify('debug', 'To all clients', undefined, clients)
+    await delay(10)
+    expect(clientNotifs.length).toEqual(clients.length)
+
+    // Server notification after clients disconnect
+    await client1.stop()
+    await client2.stop()
+
+    serverLogs = []
+    clientNotifs = []
+    server.notify('debug', 'Hello, who is still there?')
+    // Server has sent notification to 2 closing sockets
+    await delay(10)
+    expect(serverLogs.length).toBe(0)
+    expect(clientLog.message).toMatch(
+      /Message received while socket was closing/
+    )
+    expect(clientNotifs.length).toBe(1)
+
+    await client3.stop()
+
+    serverLogs = []
+    clientNotifs = []
+    server.notify('debug', 'Anybody?')
+    // Server has sent notification to 2 closed sockets and one closing
+    await delay(10)
+    expect(serverLogs.length).toBe(0)
+    expect(clientLog.message).toMatch(
+      /Message received while socket was closing/
+    )
+    expect(clientNotifs.length).toBe(0)
   }
 
   await server.stop()

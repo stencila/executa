@@ -110,14 +110,33 @@ export abstract class Client implements Executor {
   }
 
   /**
-   * @inheritdoc
-   *
-   * Implementation of `Executor.notify` which sends a notification
-   * to the remote `Executor`.
+   * @implements Implements {@link Executor.notify} to send a notification
+   * to the remote executor that this client is connected to.
    */
-  public notify(subject: string, message: string) {
-    const notification = new JsonRpcRequest(subject, { message }, false)
+  public notify(level: string, message: string) {
+    const notification = new JsonRpcRequest(level, { message }, false)
     this.send(notification)
+  }
+
+  /**
+   * @implements Implements {@link Executor.notified} to receive a notification
+   * from the remote executor that this client is connected to.
+   *
+   * @description Currently simply calls the appropriate method of
+   * the `notifications` log instance. Override this to provide more fancy
+   * notification to users.
+   */
+  public notified(level: string, message: string, node?: Node): void {
+    switch (level) {
+      case 'debug':
+      case 'info':
+      case 'warn':
+      case 'error':
+        notifications[level](message)
+        break
+      default:
+        notifications.info(message)
+    }
   }
 
   /**
@@ -147,18 +166,8 @@ export abstract class Client implements Executor {
     if (id === undefined) {
       // A notification request
       const { method, params = [] } = message as JsonRpcRequest
-      const msg = Object.values(params)[0]
-      switch (method) {
-        case 'debug':
-        case 'info':
-        case 'warn':
-        case 'error':
-          notifications[method](msg)
-          return
-        default:
-          notifications.info(`${method}:${msg}`)
-          return
-      }
+      const args = Object.values(params)
+      return this.notified(method, args[0], args[1])
     }
 
     // Must be a response....

@@ -6,6 +6,7 @@ import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
 import { Connection } from '../base/Connection'
+import { Node } from '@stencila/schema'
 
 const log = getLogger('executa:tcp:server')
 
@@ -17,7 +18,8 @@ const log = getLogger('executa:tcp:server')
  */
 export class TcpConnection extends StreamServer implements Connection {
   /**
-   * @inheritdoc
+   * @implements Implements {@link Connection.id} to provide
+   * a unique id for the TCP connection.
    */
   id: string = crypto.randomBytes(32).toString('hex')
 
@@ -32,17 +34,22 @@ export class TcpConnection extends StreamServer implements Connection {
   }
 
   /**
-   * @inheritdoc
-   *
-   * It is necessary to override this method, so just return a
-   * default address.
+   * @override Override of {@link StreamServer.address} necessary
+   * because that is an `abstract` method. Just returns a default
+   * TCP address, not necessarily that of the server!
    */
   public get address(): TcpAddress {
     return new TcpAddress()
   }
 
+  /**
+   * @implements Implements {@link Connection.stop} by `end`ing
+   * and `unref`ing the socket. According to the docs `destroy()`
+   * should be only be used if there are errors.
+   */
   public stop(): Promise<void> {
-    this.socket.destroy()
+    this.socket.end()
+    this.socket.unref()
     return Promise.resolve()
   }
 }
@@ -102,11 +109,21 @@ export class TcpServer extends Server {
     }
   }
 
-  public notify(subject: string, message: string, clients?: string[]): void {
+  /**
+   * @override Override of {@link Server.notify} that notifies clients
+   * via this server's stored `Connection` instances. If the `clients`
+   * argument is not supplied then notifies all clients.
+   */
+  public notify(
+    level: string,
+    message: string,
+    node?: Node,
+    clients?: string[]
+  ): void {
     if (clients === undefined) clients = Object.keys(this.connections)
     for (const client of clients) {
       const connection = this.connections[client]
-      if (connection !== undefined) connection.notify(subject, message)
+      if (connection !== undefined) connection.notify(level, message, node)
     }
   }
 

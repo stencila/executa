@@ -130,7 +130,7 @@ export class HttpServer extends TcpServer {
     if (process.env.NODE_ENV === 'development') return
 
     // In all other cases, a valid JWT is required
-    // If there is no `Authorization` header and there is a `jwt` query parameter
+    // If there is no `Authorization` header and there is a `token` query parameter
     // then use that
     if (
       request.headers.authorization === undefined &&

@@ -1,14 +1,17 @@
 import { getLogger } from '@stencila/logga'
+import { Node } from '@stencila/schema'
 import crypto from 'crypto'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
+import WebSocket from 'isomorphic-ws'
+import { Connection } from '../base/Connection'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
-import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { Connection } from '../base/Connection'
+import { send, isOpen } from './util'
 
 const log = getLogger('executa:ws:server')
 
@@ -17,7 +20,8 @@ const log = getLogger('executa:ws:server')
  */
 export class WebSocketConnection implements Connection {
   /**
-   * @override
+   * @implements Implements {@link Connection.id} to provide
+   * a unique id for the WebSocket connection.
    */
   id: string = crypto.randomBytes(32).toString('hex')
 
@@ -31,16 +35,29 @@ export class WebSocketConnection implements Connection {
   }
 
   /**
-   * @override
+   * @implements Implements {@link Connection.notify} to send the
+   * notification over the WebSocket.
+   *
+   * @description Will log an warning if the send failed for a
+   * WebSocket that is still open (i.e. will ignore failures for
+   * connections that are closing or have closed).
    */
-  public notify(subject: string, message: string): void {
-    const notification = new JsonRpcRequest(subject, { message }, false)
+  public notify(level: string, message: string, node: Node): Promise<void> {
+    const notification = new JsonRpcRequest(level, { message, node }, false)
     const json = JSON.stringify(notification)
-    this.socket.send(json)
+    try {
+      return send(this.socket, json)
+    } catch (error) {
+      if (isOpen(this.socket))
+        log.warn(
+          `Failed to send notification to WebSocket connection: ${this.id}`
+        )
+    }
+    return Promise.resolve()
   }
 
   /**
-   * @override
+   * @implements Implements {@link Connection.stop} by closing the WebSocket.
    */
   public stop(): Promise<void> {
     this.socket.close()
@@ -100,6 +117,9 @@ export class WebSocketServer extends HttpServer {
           })
           if (response !== undefined) socket.send(response)
         })
+
+        // Handle any errors
+        socket.on('error', (error: Error) => log.error(error))
       },
       options: {
         verifyClient: (info: any, next: (ok: boolean) => void): void => {

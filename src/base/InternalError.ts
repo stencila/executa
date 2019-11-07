@@ -9,7 +9,7 @@
  * Messages should be written for developers using this library,
  * not for end users.
  *
- * @see JsonRpcError
+ * @see {@link JsonRpcError}
  */
 export class InternalError extends Error {
   constructor(message: string) {

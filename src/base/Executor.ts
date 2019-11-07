@@ -96,8 +96,8 @@ export abstract class Executor {
   /**
    * Get the manifest of the executor
    *
-   * @see Capabilities
-   * @see Addresses
+   * @see {@link Capabilities}
+   * @see {@link Addresses}
    */
   abstract async manifest(): Promise<Manifest>
 
@@ -142,11 +142,13 @@ export abstract class Executor {
    *
    * @param node The node to execute
    * @param session The session that the node will be executed in
+   * @param user The `User` making the call
    * @returns The node, with updated properties, after it has been executed
    */
   abstract async execute<NodeType extends Node>(
     node: NodeType,
-    session?: SoftwareSession
+    session?: SoftwareSession,
+    user?: User
   ): Promise<NodeType>
 
   /**
@@ -163,7 +165,7 @@ export abstract class Executor {
    * `session` property, or default session if that property is missing.
    *
    * @param node The node to run, usually but not necessarily, a `SoftwareSession`
-   * @param user The `User` making the request
+   * @param user The `User` making the call
    * @returns The node, with updated properties, after it has begun running
    */
   abstract async begin<NodeType extends Node>(
@@ -195,12 +197,26 @@ export abstract class Executor {
   ): Promise<Type>
 
   /**
-   * Notify an entity (a person or machine).
+   * Send a notification
    *
-   * @param subject The subject of notification e.g. `info`, `error`
+   * @param level The notification level e.g. `info`, `error`
    * @param message The notification message
-   * @param user The user on whose behalf the notification was sent
-   *             (only applies to client sent notifications)
+   * @param node The node to which this notification relates e.g. a `SoftwareSession`
+   * @param clients The ids of the clients to send the notification to. If missing send to all clients.
    */
-  abstract notify(subject: string, message: string, user?: User): void
+  abstract notify(
+    level: string,
+    message: string,
+    node?: Node,
+    clients?: string[]
+  ): void
+
+  /**
+   * Receive a notification
+   *
+   * @param level The notification level e.g. `info`, `error`
+   * @param message The notification message
+   * @param node The node to which this notification relates e.g. a `SoftwareSession`
+   */
+  abstract notified(level: string, message: string, node?: Node): void
 }
