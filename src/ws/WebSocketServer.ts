@@ -1,15 +1,17 @@
 import { getLogger } from '@stencila/logga'
+import { Node } from '@stencila/schema'
 import crypto from 'crypto'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
+import WebSocket from 'isomorphic-ws'
+import { Connection } from '../base/Connection'
+import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
-import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { Connection } from '../base/Connection'
-import { Node } from '@stencila/schema'
+import { send, isOpen } from './util'
 
 const log = getLogger('executa:ws:server')
 
@@ -36,21 +38,22 @@ export class WebSocketConnection implements Connection {
    * @implements Implements {@link Connection.notify} to send the
    * notification over the WebSocket.
    *
-   * @description Will log an error if the send failed for a
+   * @description Will log an warning if the send failed for a
    * WebSocket that is still open (i.e. will ignore failures for
    * connections that are closing or have closed).
    */
-  public notify(level: string, message: string, node: Node): void {
+  public notify(level: string, message: string, node: Node): Promise<void> {
     const notification = new JsonRpcRequest(level, { message, node }, false)
     const json = JSON.stringify(notification)
     try {
-      this.socket.send(json)
+      return send(this.socket, json)
     } catch (error) {
-      if (this.socket.readyState !== this.socket.OPEN)
+      if (isOpen(this.socket))
         log.warn(
           `Failed to send notification to WebSocket connection: ${this.id}`
         )
     }
+    return Promise.resolve()
   }
 
   /**

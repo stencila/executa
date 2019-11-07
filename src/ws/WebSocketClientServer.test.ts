@@ -120,8 +120,8 @@ test('WebSocketClient and WebSocketServer', async () => {
     serverLogs = []
     clientNotifs = []
     server.notify('debug', 'Hello, who is still there?')
-    await delay(1)
     // Server has sent notification to 2 closing sockets
+    await delay(10)
     expect(serverLogs.length).toBe(0)
     expect(clientLog.message).toMatch(
       /Message received while socket was closing/
@@ -133,12 +133,9 @@ test('WebSocketClient and WebSocketServer', async () => {
     serverLogs = []
     clientNotifs = []
     server.notify('debug', 'Anybody?')
-    await delay(1)
     // Server has sent notification to 2 closed sockets and one closing
-    expect(serverLogs.length).toBe(2)
-    expect(serverLogs[0].message).toMatch(
-      /Failed to send notification to WebSocket connection/
-    )
+    await delay(10)
+    expect(serverLogs.length).toBe(0)
     expect(clientLog.message).toMatch(
       /Message received while socket was closing/
     )
