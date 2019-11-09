@@ -33,7 +33,7 @@ export class HttpServer extends TcpServer {
    *
    * Used by derived classes to add routes.
    */
-  protected app: FastifyInstance
+  protected app?: FastifyInstance
 
   /**
    * Default JWT
@@ -48,9 +48,17 @@ export class HttpServer extends TcpServer {
     address: HttpAddressInitializer = new HttpAddress({ port: 8000 })
   ) {
     super(address)
+  }
 
+  /**
+   * Build the Fastify app.
+   *
+   * Derived classes may want to override this method
+   * to extend the set of endpoints etc.
+   */
+  protected buildApp(): FastifyInstance {
     // Define the routes
-    const app = (this.app = fastify())
+    const app = fastify()
 
     // Register CORS plugin
     app.register(fastifyCors)
@@ -116,7 +124,7 @@ export class HttpServer extends TcpServer {
     app.post('/begin', wrap('begin'))
     app.post('/end', wrap('end'))
 
-    this.server = app.server
+    return app
   }
 
   /**
@@ -201,14 +209,13 @@ export class HttpServer extends TcpServer {
   }
 
   public async start(executor?: Executor): Promise<void> {
-    // Ensure a n executor pass requests to
     if (executor === undefined) executor = new BaseExecutor()
     this.executor = executor
 
     const url = this.address.url()
     log.info(`Starting server: ${url}`)
 
-    const app = this.app
+    const app = this.app = this.buildApp()
 
     // Wait for plugins to be ready before using them
     await app.ready()
@@ -217,12 +224,21 @@ export class HttpServer extends TcpServer {
     // Start listening
     await app.listen(this.port, this.host)
 
-    // Set server property to use `TcpServer.stop()`
-    this.server = app.server
-
     log.info(
       `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
     )
+  }
+
+  /**
+   * @override Overrides {@link TcpServer.stop} to close
+   * Fastify app.
+   */
+  public async stop(): Promise<void> {
+    await super.stop()
+    if (this.app !== undefined) {
+      await this.app.close()
+      delete this.app
+    }
   }
 }
 

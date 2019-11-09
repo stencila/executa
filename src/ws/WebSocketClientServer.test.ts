@@ -22,10 +22,10 @@ test('WebSocketClient and WebSocketServer', async () => {
     }
   })
 
-  let clientLog: LogData = { tag: '', level: 0, message: '' }
+  let clientLogs: LogData[] = []
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:client') {
-      clientLog = logData
+      clientLogs = [...clientLogs, logData]
     }
   })
 
@@ -40,12 +40,18 @@ test('WebSocketClient and WebSocketServer', async () => {
   const executor = new EchoExecutor()
   await server.start(executor)
 
+  // @ts-ignore that connections is private
+  const serverConnections = () => Object.values(server.connections).length
+
   {
     // Well behaved client
     const client = new WebSocketClient(server.address)
     await testClient(client)
     await client.stop()
   }
+
+  await delay(10)
+  expect(serverConnections()).toBe(0)
 
   {
     // JWT with session limits to be used for begin() method
@@ -73,23 +79,61 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.stop()
   }
 
+  await delay(10)
+  expect(serverConnections()).toBe(0)
+
   {
     // Client with malformed JWT
-    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
+    clientLogs = []
+    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' }, 'malformed-jwt')
     await delay(10)
-    expect(clientLog.message).toMatch(/Unexpected server response: 401/)
+    expect(serverConnections()).toBe(0)
+    expect(clientLogs.length).toBe(1)
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server: jwt malformed/)
     await client.stop()
   }
 
   {
     // Client with invalid JWT
+    clientLogs = []
     const client = new WebSocketClient({
       ...server.address,
       jwt: JWT.sign({}, 'not-the-right-secret')
-    })
+    }, 'invalid-jwt')
     await delay(10)
-    expect(clientLog.message).toMatch(/Unexpected server response: 401/)
+    expect(serverConnections()).toBe(0)
+    expect(clientLogs.length).toBe(1)
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server: invalid signature/)
     await client.stop()
+  }
+
+  {
+    // Clients reconnect after disconnection
+    const client1 = new WebSocketClient(server.address, 'client1')
+    const client2 = new WebSocketClient(server.address, 'client2')
+    const client3 = new WebSocketClient(server.address, 'client3')
+    await delay(10)
+    expect(serverConnections()).toBe(3)
+
+    clientLogs = []
+
+    await server.stop()
+    expect(serverConnections()).toBe(0)
+
+    await server.start()
+    await delay(10)
+
+    expect(serverConnections()).toBe(3)
+    expect(clientLogs.length).toBe(3)
+    expect(clientLogs[0].message).toMatch(/Connection closed, trying to reconnect/)
+
+
+    await client1.stop()
+    await client2.stop()
+    await client3.stop()
+
+    await delay(10)
+    expect(serverConnections()).toBe(0)
   }
 
   {
@@ -118,12 +162,13 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client2.stop()
 
     serverLogs = []
+    clientLogs = []
     clientNotifs = []
     server.notify('debug', 'Hello, who is still there?')
     // Server has sent notification to 2 closing sockets
     await delay(10)
     expect(serverLogs.length).toBe(0)
-    expect(clientLog.message).toMatch(
+    expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
     expect(clientNotifs.length).toBe(1)
@@ -131,12 +176,13 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client3.stop()
 
     serverLogs = []
+    clientLogs = []
     clientNotifs = []
     server.notify('debug', 'Anybody?')
     // Server has sent notification to 2 closed sockets and one closing
     await delay(10)
     expect(serverLogs.length).toBe(0)
-    expect(clientLog.message).toMatch(
+    expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
     expect(clientNotifs.length).toBe(0)

@@ -79,10 +79,12 @@ export class TcpServer extends Server {
   }
 
   protected onConnected(connection: Connection): void {
+    log.info(`Client connected: ${connection.id}`)
     this.connections[connection.id] = connection
   }
 
   protected onDisconnected(connection: Connection): void {
+    log.info(`Client disconnected: ${connection.id}`)
     delete this.connections[connection.id]
   }
 
@@ -128,14 +130,14 @@ export class TcpServer extends Server {
   }
 
   public async stop(): Promise<void> {
+    Object.values(this.connections).forEach(connection => {
+      connection.stop().catch(error => log.error(error))
+    })
+    this.connections = {}
+
     if (this.server !== undefined) {
       const url = this.address.url()
       log.info(`Stopping server ${url}`)
-
-      Object.values(this.connections).forEach(connection => {
-        connection.stop().catch(error => log.error(error))
-      })
-      this.connections = {}
 
       return new Promise(resolve => {
         if (this.server !== undefined)
