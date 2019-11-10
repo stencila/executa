@@ -1,14 +1,14 @@
-import crypto from 'crypto'
-import WebSocket, { ErrorEvent, MessageEvent, CloseEvent, OpenEvent } from 'isomorphic-ws'
+import { getLogger } from '@stencila/logga'
+import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'isomorphic-ws'
 import retry from 'p-retry'
 import { Client } from '../base/Client'
+import { uid } from '../base/uid'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
-import { getLogger } from '@stencila/logga'
-import { send, isOpen } from './util'
+import { isOpen, send } from './util'
 
 const log = getLogger('executa:ws:client')
 
@@ -16,7 +16,6 @@ const log = getLogger('executa:ws:client')
  * A `Client` using the WebSockets API for communication.
  */
 export class WebSocketClient extends Client {
-
   /**
    * The address that this client connects to.
    */
@@ -35,22 +34,27 @@ export class WebSocketClient extends Client {
    */
   private socket?: WebSocket
 
-  private stopped: boolean = false
+  /**
+   * Has this client been explicitly stopped.
+   *
+   * Used to determine whether to try to reconnect.
+   */
+  private stopped = false
 
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress(),
-    id: string = crypto.randomBytes(32).toString('hex')
+    id: string = uid()
   ) {
     super()
     this.address = new WebSocketAddress(address)
     this.id = id
-    this.start()
+    this.start().catch(error => log.error(error))
   }
 
   /**
    * Start the connection.
    *
-   * Creates a new `WebSocket` and sets up event handlers including
+   * Creates a new WebSocket and sets up event handlers including
    * for automatically reconnecting if the connection is closed.
    */
   public start(): Promise<void> {
@@ -59,16 +63,18 @@ export class WebSocketClient extends Client {
     socket.onmessage = (event: MessageEvent) =>
       this.receive(event.data.toString())
     socket.onclose = (event: CloseEvent) => {
-      // Try to reconnect if not explicitly closed or a
+      // Try to reconnect if not explicitly closed or if
       // authentication failed
       if (this.stopped === true) return
-      const {code, reason} = event
+      const { code, reason } = event
       if (code === 4001) {
         log.error(`Failed to authenticate with server: ${reason}`)
         return
       }
       log.info(`Connection closed, trying to reconnect`)
-      retry(() => this.start(), { randomize: true })
+      retry(() => this.start(), {
+        randomize: true
+      }).catch(error => log.error(error))
     }
     socket.onerror = (error: ErrorEvent) => {
       log.error(error.message)
@@ -94,7 +100,7 @@ export class WebSocketClient extends Client {
 
   /**
    * @override Override of {@link Client.receive} to only
-   * accept messages if the WebSocket is open
+   * accept messages if the WebSocket is open.
    */
   protected receive(message: string): void {
     if (this.socket === undefined) return
@@ -102,6 +108,9 @@ export class WebSocketClient extends Client {
     else log.warn(`Message received while socket was closing: ${message}`)
   }
 
+  /**
+   * Stop the connection by closing the WebSocket.
+   */
   public stop(): Promise<void> {
     this.stopped = true
     if (this.socket !== undefined) this.socket.close()
