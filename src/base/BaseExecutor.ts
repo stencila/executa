@@ -1,18 +1,19 @@
 import { getLogger } from '@stencila/logga'
 import { isPrimitive, Node, nodeType, SoftwareSession } from '@stencila/schema'
 import Ajv from 'ajv'
+import { uid } from '../base/uid'
 import { ClientType } from './Client'
+import {
+  Addresses,
+  Capabilities,
+  Executor,
+  Manifest,
+  Method,
+  User
+} from './Executor'
 import { InternalError } from './InternalError'
 import { Server } from './Server'
 import { Transport } from './Transports'
-import {
-  Executor,
-  Method,
-  Manifest,
-  Capabilities,
-  Addresses,
-  User
-} from './Executor'
 
 const log = getLogger('executa:base-executor')
 
@@ -62,9 +63,14 @@ export class Peer {
    */
   private validators: { [key: string]: Ajv.ValidateFunction[] } = {}
 
-  public constructor(manifest: Manifest, clientTypes: ClientType[]) {
+  public constructor(
+    manifest: Manifest,
+    clientTypes: ClientType[],
+    executor?: Executor
+  ) {
     this.manifest = manifest
     this.clientTypes = clientTypes
+    this.interface = executor
   }
 
   /**
@@ -116,8 +122,8 @@ export class Peer {
 
     // If the executor is in-process, just use it directly
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (this.manifest.executor instanceof BaseExecutor) {
-      this.interface = this.manifest.executor
+    if (this.manifest.id instanceof BaseExecutor) {
+      this.interface = this.manifest.id
       return true
     }
 
@@ -184,16 +190,31 @@ export class Peer {
  */
 export class BaseExecutor implements Executor {
   /**
+   * The unique id of this executor.
+   *
+   * Used by peers to avoid duplicate entries for an
+   * executor (e.g. due to multiple addresses)
+   */
+  public readonly id: string
+
+  /**
    * Functions used to obtain manifests of potential
    * peer executors.
    */
-  private readonly discoveryFunctions: DiscoveryFunction[]
+  protected readonly discoveryFunctions: DiscoveryFunction[]
+
+  /**
+   * The date/time that discovery was last done.
+   *
+   * Used to calculate `shouldDiscover()`.
+   */
+  protected discoveryLast?: Date
 
   /**
    * Classes of `Client` that this executor is able
    * to use to connect to peer executors.
    */
-  private readonly clientTypes: ClientType[]
+  protected readonly clientTypes: ClientType[]
 
   /**
    * Peer executors that are delegated to depending
@@ -203,18 +224,19 @@ export class BaseExecutor implements Executor {
    * is made to the executor that it needs to delegate,
    * or by explicitly calling `discover()`.
    */
-  private peers?: Peer[]
+  protected peers: Peer[] = []
 
   /**
    * Servers that will pass on requests to this executor.
    */
-  private readonly servers: Server[] = []
+  protected readonly servers: Server[] = []
 
   public constructor(
     discoveryFunctions: DiscoveryFunction[] = [],
     clientTypes: ClientType[] = [],
     servers: Server[] = []
   ) {
+    this.id = uid()
     this.discoveryFunctions = discoveryFunctions
     this.clientTypes = clientTypes
     this.servers = servers
@@ -253,6 +275,7 @@ export class BaseExecutor implements Executor {
    */
   public async manifest(): Promise<Manifest> {
     return {
+      id: this.id,
       capabilities: await this.capabilities(),
       addresses: this.addresses()
     }
@@ -291,13 +314,8 @@ export class BaseExecutor implements Executor {
       ]
     }
 
-    // Do peer discovery if not yet done
-    if (this.peers === undefined) await this.discover()
-    // This may be able to be removed with assert signatures in TS 3.7
-    if (this.peers === undefined)
-      throw new InternalError(
-        `Whaaaat! How can this be, peers are still undefined!?`
-      )
+    // Do peer discovery
+    if (this.shouldDiscover()) await this.discover()
 
     // Merge in the capabilities of peer executors
     for (const peer of this.peers) {
@@ -461,7 +479,7 @@ export class BaseExecutor implements Executor {
     }
   }
 
-  private async walk<NodeType extends Node>(
+  protected async walk<NodeType extends Node>(
     root: NodeType,
     transformer: (node: Node) => Promise<Node>
   ): Promise<NodeType> {
@@ -485,13 +503,23 @@ export class BaseExecutor implements Executor {
   }
 
   /**
+   * Should peer discovery be (re)done?
+   *
+   * This method can be overriden by derived classes to implement
+   * more advanced logic.
+   */
+  protected shouldDiscover(): boolean {
+    return this.discoveryLast === undefined
+  }
+
+  /**
    * Discover peers by calling discovery functions.
    *
    * This gets called just-in-time, but you may also want to
    * call it ahead-of-time to reduce latency
    * in the first method call.
    */
-  private async discover(): Promise<void> {
+  protected async discover(): Promise<void> {
     log.info(`Discovering peers`)
 
     // Get the list of manifests
@@ -502,14 +530,12 @@ export class BaseExecutor implements Executor {
       Promise.resolve([])
     )
 
-    if (manifests.length === 0) {
-      log.warn(
-        'No peer executors discovered. Executor will have limited capabilities.'
-      )
-    }
-
-    // Create a list of peers
+    // Update the list of peers
     this.peers = manifests.map(manifest => new Peer(manifest, this.clientTypes))
+
+    // Record the date-time so it canbe used to determine is/when
+    // to redo this.
+    this.discoveryLast = new Date()
   }
 
   /**
@@ -519,20 +545,15 @@ export class BaseExecutor implements Executor {
    * @param params The parameter values (i.e. the arguments)
    * @param fallback A fallback function called if unable to delegate
    */
-  private async delegate<Type>(
+  protected async delegate<Type>(
     method: Method,
     params: { [key: string]: any },
     fallback: () => Promise<Type>
   ): Promise<Type> {
     log.debug(`Delegating: ${method}(${Object.keys(params).join(', ')})`)
 
-    // Do peer discovery if not yet done
-    if (this.peers === undefined) await this.discover()
-    // This may be able to be removed with assert signatures in TS 3.7
-    if (this.peers === undefined)
-      throw new InternalError(
-        `Whaaaat! How can this be, peers are still undefined!?`
-      )
+    // Do peer discovery
+    if (this.shouldDiscover()) await this.discover()
 
     // Attempt to delegate to a peer
     for (const peer of this.peers) {

@@ -58,10 +58,11 @@ export interface Addresses {
  */
 export interface Manifest {
   /**
-   * The actual in-process `Executor`, or
-   * it's id i it is ou-of-process
+   * The id of the `Executor`, or
+   * the `Executor` instance itself if it
+   * is in-process.
    */
-  executor?: Executor | string
+  id?: string | Executor
 
   /**
    * The capabilities of the executor

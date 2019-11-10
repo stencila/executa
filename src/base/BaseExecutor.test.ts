@@ -306,11 +306,11 @@ describe('BaseExecutor', () => {
     const executor = new BaseExecutor([
       async () => [
         {
-          executor: deepThought,
+          id: deepThought,
           capabilities: await deepThought.capabilities()
         },
         {
-          executor: calculator,
+          id: calculator,
           capabilities: await calculator.capabilities()
         }
       ]
