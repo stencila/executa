@@ -12,8 +12,8 @@ import {
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen } from './util'
-import { User } from '../base/Executor';
-import { FastifyRequest, FastifyInstance } from 'fastify';
+import { User } from '../base/Executor'
+import { FastifyRequest, FastifyInstance } from 'fastify'
 
 const log = getLogger('executa:ws:server')
 
@@ -37,10 +37,14 @@ export class WebSocketConnection implements Connection {
    */
   socket: WebSocket
 
-  constructor(socket: WebSocket, id: string, payload: {[key:string]: string}) {
+  constructor(
+    socket: WebSocket,
+    id: string,
+    payload: { [key: string]: string }
+  ) {
     this.socket = socket
     this.id = id
-    this.user = {...payload, client: {type: Transport.ws, id}}
+    this.user = { ...payload, client: { type: Transport.ws, id } }
   }
 
   /**
@@ -88,7 +92,6 @@ export class WebSocketConnection implements Connection {
  * A `Server` using WebSockets as the transport protocol.
  */
 export class WebSocketServer extends HttpServer {
-
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
   ) {
@@ -110,16 +113,18 @@ export class WebSocketServer extends HttpServer {
         const [id, token] = socket.protocol.split(':')
         let payload
         try {
-          payload = app.jwt.verify(token) as {}
+          payload = app.jwt.verify(token)
         } catch (error) {
           socket.close(4001, error.message)
           return
         }
 
         // Register connection and disconnection handler
-        const wsconnection = new WebSocketConnection(socket, id, payload)
+        const wsconnection = new WebSocketConnection(socket, id, payload as {
+          [key: string]: string
+        })
         this.onConnected(wsconnection)
-        socket.on('close', () =>  this.onDisconnected(wsconnection))
+        socket.on('close', () => this.onDisconnected(wsconnection))
 
         // Handle messages from connection
         socket.on('message', async (message: string) => {
@@ -127,7 +132,7 @@ export class WebSocketServer extends HttpServer {
           if (response !== undefined)
             wsconnection
               .send(response as string)
-              .catch(error => log.error(error))
+              .catch((error: Error) => log.error(error))
         })
 
         // Handle any errors

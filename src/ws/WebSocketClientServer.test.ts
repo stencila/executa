@@ -85,25 +85,35 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // Client with malformed JWT
     clientLogs = []
-    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' }, 'malformed-jwt')
+    const client = new WebSocketClient(
+      { ...server.address, jwt: 'jwhaaaat?' },
+      'malformed-jwt'
+    )
     await delay(10)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server: jwt malformed/)
+    expect(clientLogs[0].message).toMatch(
+      /Failed to authenticate with server: jwt malformed/
+    )
     await client.stop()
   }
 
   {
     // Client with invalid JWT
     clientLogs = []
-    const client = new WebSocketClient({
-      ...server.address,
-      jwt: JWT.sign({}, 'not-the-right-secret')
-    }, 'invalid-jwt')
+    const client = new WebSocketClient(
+      {
+        ...server.address,
+        jwt: JWT.sign({}, 'not-the-right-secret')
+      },
+      'invalid-jwt'
+    )
     await delay(10)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server: invalid signature/)
+    expect(clientLogs[0].message).toMatch(
+      /Failed to authenticate with server: invalid signature/
+    )
     await client.stop()
   }
 
@@ -125,8 +135,9 @@ test('WebSocketClient and WebSocketServer', async () => {
 
     expect(serverConnections()).toBe(3)
     expect(clientLogs.length).toBe(3)
-    expect(clientLogs[0].message).toMatch(/Connection closed, trying to reconnect/)
-
+    expect(clientLogs[0].message).toMatch(
+      /Connection closed, trying to reconnect/
+    )
 
     await client1.stop()
     await client2.stop()

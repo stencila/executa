@@ -215,7 +215,7 @@ export class HttpServer extends TcpServer {
     const url = this.address.url()
     log.info(`Starting server: ${url}`)
 
-    const app = this.app = this.buildApp()
+    const app = (this.app = this.buildApp())
 
     // Wait for plugins to be ready before using them
     await app.ready()
