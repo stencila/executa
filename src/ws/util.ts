@@ -26,28 +26,48 @@ export function isClosingOrClosed(socket: WebSocket): boolean {
 }
 
 /**
- * Wait until a socket is in the open state?
+ * Wait until a socket is in the open state.
  *
- * @param socket The Websocket to wait for
+ * @param socket The WebSocket to wait for
+ * @param timeout The number of seconds to wait for the socket
+ *                to be open before throwing a timeout error
  */
-export function untilOpen(socket: WebSocket): Promise<void> {
+export function untilOpen(socket: WebSocket, timeout = 60): Promise<void> {
   if (isClosingOrClosed(socket))
-    throw new Error('Websocket is closing or closed')
+    throw new Error('WebSocket is closing or closed')
   if (socket.readyState !== WebSocket.OPEN) {
-    return new Promise(resolve => {
-      socket.onopen = () => resolve()
+    return new Promise((resolve, reject) => {
+      let open = false
+      socket.onopen = () => {
+        open = true
+        resolve()
+      }
+      setTimeout(() => {
+        if (!open) reject(new Error('WebSocket timeout'))
+      }, timeout * 1000)
     })
   }
   return Promise.resolve()
 }
 
 /**
- * Send data on a Websocket
+ * Send data on a WebSocket connection.
  *
- * @param socket The WebSocket to send on
+ * @param socket The WebSocket to send data on
  * @param data The data to send
+ * @param timeout The number of seconds to wait for the socket
+ *                to be open before throwing a timeout error
  */
-export async function send(socket: WebSocket, data: string): Promise<void> {
-  await untilOpen(socket)
-  socket.send(data)
+export async function send(
+  socket: WebSocket,
+  data: string,
+  timeout = 60
+): Promise<void> {
+  await untilOpen(socket, timeout)
+  return new Promise((resolve, reject) => {
+    socket.send(data, error => {
+      if (error !== undefined) reject(error)
+      else resolve()
+    })
+  })
 }

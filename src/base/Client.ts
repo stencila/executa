@@ -105,7 +105,7 @@ export abstract class Client implements Executor {
         else resolve(result)
       }
     })
-    this.send(request)
+    await this.send(request)
     return promise
   }
 

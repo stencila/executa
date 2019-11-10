@@ -12,6 +12,31 @@ import { isOpen, send } from './util'
 
 const log = getLogger('executa:ws:client')
 
+interface WebSocketClientOptions {
+  /**
+   * Should logging of connection errors etc be done?
+   */
+  logging: boolean
+
+  /**
+   * Seconds to wait for connection to be open
+   * before sending a message.
+   */
+  timeout: number
+
+  /**
+   * Number of attempts to reconnect if
+   * the connection is closed.
+   */
+  retries: number
+}
+
+const defaultWebSocketClientOptions: WebSocketClientOptions = {
+  logging: true,
+  timeout: 60,
+  retries: 10
+}
+
 /**
  * A `Client` using the WebSockets API for communication.
  */
@@ -25,6 +50,11 @@ export class WebSocketClient extends Client {
    * A unique identifier for this client.
    */
   public readonly id: string
+
+  /**
+   * Options for this client.
+   */
+  public readonly options: WebSocketClientOptions
 
   /**
    * The `WebSocket` instance used for connections.
@@ -43,11 +73,13 @@ export class WebSocketClient extends Client {
 
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress(),
-    id: string = uid()
+    id: string = uid(),
+    options: Partial<WebSocketClientOptions> = defaultWebSocketClientOptions
   ) {
     super()
     this.address = new WebSocketAddress(address)
     this.id = id
+    this.options = { ...defaultWebSocketClientOptions, ...options }
     this.start().catch(error => log.error(error))
   }
 
@@ -58,8 +90,15 @@ export class WebSocketClient extends Client {
    * for automatically reconnecting if the connection is closed.
    */
   public start(): Promise<void> {
-    const protocol = `${this.id}:${this.address.jwt}`
-    const socket = (this.socket = new WebSocket(this.address.url(), protocol))
+    const {
+      id,
+      address,
+      options: { retries, logging }
+    } = this
+    const socket = (this.socket = new WebSocket(
+      address.url(),
+      `${id}:${address.jwt}`
+    ))
     socket.onmessage = (event: MessageEvent) =>
       this.receive(event.data.toString())
     socket.onclose = (event: CloseEvent) => {
@@ -68,16 +107,19 @@ export class WebSocketClient extends Client {
       if (this.stopped === true) return
       const { code, reason } = event
       if (code === 4001) {
-        log.error(`Failed to authenticate with server: ${reason}`)
+        if (logging) log.error(`Failed to authenticate with server: ${reason}`)
         return
       }
-      log.info(`Connection closed, trying to reconnect`)
-      retry(() => this.start(), {
-        randomize: true
-      }).catch(error => log.error(error))
+      if (retries > 0) {
+        if (logging) log.info(`Connection closed, trying to reconnect`)
+        retry(() => this.start(), {
+          retries,
+          randomize: true
+        }).catch(error => log.error(error))
+      }
     }
     socket.onerror = (error: ErrorEvent) => {
-      log.error(error.message)
+      if (logging) log.error(error.message)
     }
     this.stopped = false
     return Promise.resolve()
@@ -91,11 +133,15 @@ export class WebSocketClient extends Client {
    * attempting to send the data.
    */
   protected async send(request: JsonRpcRequest): Promise<void> {
-    if (this.socket === undefined) {
+    const {
+      socket,
+      options: { timeout }
+    } = this
+    if (socket === undefined) {
       await this.start()
       return this.send(request)
     }
-    return send(this.socket, JSON.stringify(request))
+    return send(socket, JSON.stringify(request), timeout)
   }
 
   /**
@@ -103,9 +149,14 @@ export class WebSocketClient extends Client {
    * accept messages if the WebSocket is open.
    */
   protected receive(message: string): void {
-    if (this.socket === undefined) return
-    if (isOpen(this.socket)) super.receive(message)
-    else log.warn(`Message received while socket was closing: ${message}`)
+    const {
+      socket,
+      options: { logging }
+    } = this
+    if (socket === undefined) return
+    if (isOpen(socket)) super.receive(message)
+    else if (logging)
+      log.warn(`Message received while socket was closing: ${message}`)
   }
 
   /**
