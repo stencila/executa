@@ -131,7 +131,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(serverConnections()).toBe(0)
 
     await server.start()
-    await delay(10)
+    await delay(100)
 
     expect(serverConnections()).toBe(3)
     expect(clientLogs.length).toBe(3)
