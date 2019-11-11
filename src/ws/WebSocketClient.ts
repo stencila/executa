@@ -8,7 +8,7 @@ import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
-import { isOpen, send } from './util'
+import { isOpen, send, generateProtocol } from './util'
 
 const log = getLogger('executa:ws:client')
 
@@ -97,7 +97,7 @@ export class WebSocketClient extends Client {
     } = this
     const socket = (this.socket = new WebSocket(
       address.url(),
-      `${id}:${address.jwt}`
+      generateProtocol(id, address.jwt)
     ))
     socket.onmessage = (event: MessageEvent) =>
       this.receive(event.data.toString())

@@ -11,7 +11,7 @@ import {
   Transport
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
-import { send, isOpen } from './util'
+import { send, isOpen, parseProtocol } from './util'
 import { User } from '../base/Executor'
 import { FastifyRequest, FastifyInstance } from 'fastify'
 
@@ -37,14 +37,10 @@ export class WebSocketConnection implements Connection {
    */
   socket: WebSocket
 
-  constructor(
-    socket: WebSocket,
-    id: string,
-    payload: { [key: string]: string }
-  ) {
+  constructor(socket: WebSocket, id: string, user: User) {
     this.socket = socket
     this.id = id
-    this.user = { ...payload, client: { type: Transport.ws, id } }
+    this.user = { ...user, client: { type: Transport.ws, id } }
   }
 
   /**
@@ -93,9 +89,10 @@ export class WebSocketConnection implements Connection {
  */
 export class WebSocketServer extends HttpServer {
   public constructor(
-    address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
+    address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 }),
+    jwtSecret?: string
   ) {
-    super(address)
+    super(address, jwtSecret)
   }
 
   /**
@@ -108,21 +105,32 @@ export class WebSocketServer extends HttpServer {
       handle: (connection: any, request: FastifyRequest) => {
         const { socket } = connection
 
-        // Extract id and token from the protocol ('sec-websocket-protocol' header)
-        // and verify the token
-        const [id, token] = socket.protocol.split(':')
-        let payload
+        // Extract id and jwt from the protocol ('sec-websocket-protocol' header)
+        // and verify the user jwt
+        let id = ''
+        let jwt
         try {
-          payload = app.jwt.verify(token)
+          ;({ id, jwt } = parseProtocol(socket.protocol))
         } catch (error) {
-          socket.close(4001, error.message)
-          return
+          log.warn(error)
+        }
+        let user: User = {}
+        if (jwt !== undefined) {
+          try {
+            user = app.jwt.verify(jwt)
+          } catch (error) {
+            log.warn(`JWT verification failed: ${error.message}`)
+            // If verification failed then close the connection
+            // with a 4001 code (mirrors the HTTP 401 code used by `HttpServer`
+            // in the same circumstance but in range assigned for application use
+            // by the WebSockets API)
+            socket.close(4001, error.message)
+            return
+          }
         }
 
         // Register connection and disconnection handler
-        const wsconnection = new WebSocketConnection(socket, id, payload as {
-          [key: string]: string
-        })
+        const wsconnection = new WebSocketConnection(socket, id, user)
         this.onConnected(wsconnection)
         socket.on('close', () => this.onDisconnected(wsconnection))
 
@@ -145,8 +153,7 @@ export class WebSocketServer extends HttpServer {
   public get address(): WebSocketAddress {
     return new WebSocketAddress({
       host: this.host,
-      port: this.port,
-      jwt: this.defaultJwt
+      port: this.port
     })
   }
 }

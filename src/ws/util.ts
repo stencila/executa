@@ -16,7 +16,7 @@ import WebSocket from 'isomorphic-ws'
  * @param id The id of the client
  * @param jwt A JWT
  */
-export function generateProtocol (id: string, jwt?: string): string {
+export function generateProtocol(id: string, jwt?: string): string {
   return `executa.stenci.la+1+${id}` + (jwt !== undefined ? `+${jwt}` : '')
 }
 
@@ -26,10 +26,11 @@ export function generateProtocol (id: string, jwt?: string): string {
  * @param protocol The protocol header
  * @returns The id and jwt in the header
  */
-export function parseProtocol (protocol: string): {id: string, jwt?: string } {
+export function parseProtocol(protocol: string): { id: string; jwt?: string } {
   const match = /executa\.stenci\.la\+1\+([^+]+)(?:\+([^+]+))?/.exec(protocol)
-  if (match === null) throw new Error(`Unable to parse the WebSocket protocol header`)
-  const [ _, id, jwt ] = match
+  if (match === null)
+    throw new Error(`Unable to parse the WebSocket protocol header`)
+  const [_, id, jwt] = match
   return { id, jwt }
 }
 
@@ -94,5 +95,5 @@ export async function send(
 ): Promise<void> {
   await untilOpen(socket, timeout)
   socket.send(data)
-  Promise.resolve()
+  return Promise.resolve()
 }

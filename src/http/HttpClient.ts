@@ -57,7 +57,12 @@ export class HttpClient extends Client {
       .then(async reply => {
         // Ensure that the response id is the same as
         // the request id
-        const response = await reply.json()
+        let response
+        try {
+          response = await reply.json()
+        } catch {
+          response = {}
+        }
         if (this.protocol === 'restful') {
           let result, error
           if (reply.status >= 400) error = response

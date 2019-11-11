@@ -1,4 +1,5 @@
 import { getLogger } from '@stencila/logga'
+import crypto from 'crypto'
 import fastify, {
   FastifyInstance,
   FastifyReply,
@@ -9,7 +10,6 @@ import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import { Executor } from '../base/Executor'
 import { BaseExecutor } from '../base/BaseExecutor'
-import { InternalError } from '../base/InternalError'
 import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
@@ -29,25 +29,32 @@ const log = getLogger('executa:http:server')
  */
 export class HttpServer extends TcpServer {
   /**
-   * The Fastify application
+   * The Fastify application.
    *
    * Used by derived classes to add routes.
    */
   protected app?: FastifyInstance
 
   /**
-   * Default JWT
+   * The secret used to decode JWT tokens.
    *
-   * This allows for connection to this server
-   * but holds no capabilities. Mainly used for
-   * testing.
+   * If this is not provided to the constructor
+   * then a random secret will be generated and
+   * logged for use in generating tokens.
    */
-  protected defaultJwt?: string
+  public readonly jwtSecret: string
 
   public constructor(
-    address: HttpAddressInitializer = new HttpAddress({ port: 8000 })
+    address: HttpAddressInitializer = new HttpAddress({ port: 8000 }),
+    jwtSecret?: string
   ) {
     super(address)
+
+    if (jwtSecret === undefined) {
+      jwtSecret = crypto.randomBytes(16).toString('hex')
+      log.info(`JWT secret generated for ${this.address.url()}: ${jwtSecret}`)
+    }
+    this.jwtSecret = jwtSecret
   }
 
   /**
@@ -64,12 +71,7 @@ export class HttpServer extends TcpServer {
     app.register(fastifyCors)
 
     // Register JWT plugin
-    const secret = process.env.JWT_SECRET
-    if (secret === undefined)
-      throw new InternalError('Environment variable JWT_SECRET must be set')
-    app.register(fastifyJwt, {
-      secret
-    })
+    app.register(fastifyJwt, { secret: this.jwtSecret })
 
     // Set custom, override-able, hooks and handlers
     app.addHook('onRequest', (request, reply) => this.onRequest(request, reply))
@@ -134,24 +136,24 @@ export class HttpServer extends TcpServer {
     request: FastifyRequest,
     reply: FastifyReply<any>
   ): Promise<void> {
-    // In development do not require a JWT (so the client can obtain a JWT from manifest!)
-    if (process.env.NODE_ENV === 'development') return
-
-    // In all other cases, a valid JWT is required
-    // If there is no `Authorization` header and there is a `token` query parameter
-    // then use that
-    if (
-      request.headers.authorization === undefined &&
-      request.query.token !== undefined
-    ) {
-      request.headers.authorization = `Bearer ${request.query.token}`
+    const { headers, query } = request
+    // If there is no `Authorization` header...
+    if (headers.authorization === undefined) {
+      // but there is a `jwt` query parameter, then use that
+      if (query.jwt !== undefined)
+        request.headers.authorization = `Bearer ${query.jwt}`
+      // otherwise no JWT verification to do
+      else return
     }
+
     try {
       await request.jwtVerify()
-    } catch (err) {
-      log.warn(`JWT verification failed: ${request.raw.url}`)
+    } catch (error) {
+      // Send "Unauthorized" response if there was JWT, but it is
+      // not valid
+      log.warn(`JWT verification failed: ${error.message}`)
       reply
-        .status(403)
+        .status(401)
         .send(
           jsonRpcErrorResponse(
             JsonRpcErrorCode.InvalidRequest,
@@ -203,8 +205,7 @@ export class HttpServer extends TcpServer {
   public get address(): HttpAddress {
     return new HttpAddress({
       host: this.host,
-      port: this.port,
-      jwt: this.defaultJwt
+      port: this.port
     })
   }
 
@@ -217,16 +218,11 @@ export class HttpServer extends TcpServer {
 
     const app = (this.app = this.buildApp())
 
-    // Wait for plugins to be ready before using them
+    // Wait for plugins to be ready
     await app.ready()
-    this.defaultJwt = app.jwt.sign({})
 
     // Start listening
     await app.listen(this.port, this.host)
-
-    log.info(
-      `Started server: ${url}. To connect add header:\n  Authorization: Bearer ${this.defaultJwt}`
-    )
   }
 
   /**

@@ -2,12 +2,8 @@ import { testClient } from '../test/testClient'
 import { HttpClient } from './HttpClient'
 import { HttpServer } from './HttpServer'
 
-beforeAll(() => {
-  process.env.JWT_SECRET = 'not-a-secret-at-all'
-})
-
 test('HttpClient and HttpServer', async () => {
-  const server = new HttpServer()
+  const server = new HttpServer(undefined, 'not-a-secret-at-all')
   await server.start()
 
   // Client using JSON RPC protocol

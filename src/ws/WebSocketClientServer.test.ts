@@ -8,12 +8,6 @@ import { WebSocketClient } from './WebSocketClient'
 import { WebSocketServer } from './WebSocketServer'
 import { delay } from '../test/delay'
 
-const JWT_SECRET = 'not-a-secret-at-all'
-
-beforeAll(() => {
-  process.env.JWT_SECRET = JWT_SECRET
-})
-
 test('WebSocketClient and WebSocketServer', async () => {
   let serverLogs: LogData[] = []
   addHandler((logData: LogData) => {
@@ -67,7 +61,8 @@ test('WebSocketClient and WebSocketServer', async () => {
         memoryLimit: 2
       })
     }
-    const jwt = JWT.sign(user, JWT_SECRET)
+    // Sign with the server's secret
+    const jwt = JWT.sign(user, server.jwtSecret)
     const client = new WebSocketClient({ ...server.address, jwt })
     const echoed = (await client.begin(sessionRequests)) as any
     expect(echoed.node).toEqual(sessionRequests)
