@@ -74,6 +74,13 @@ export interface Manifest {
    * to communicate with the executor
    */
   addresses?: Addresses
+
+  /**
+   * Other properties that the `Executor`
+   * implementations may wish to add
+   * e.g. package name and version
+   */
+  [key: string]: any
 }
 
 /**
