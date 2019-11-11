@@ -1,3 +1,17 @@
+# [0.13.0](https://github.com/stencila/executa/compare/v0.12.0...v0.13.0) (2019-11-11)
+
+
+### Bug Fixes
+
+* **WebSocket:** Namespace and version protocol header ([95ac321](https://github.com/stencila/executa/commit/95ac32126613e9773018b1815a400f667884ec86))
+* **WebSocket:** Remove callback from send ([f136310](https://github.com/stencila/executa/commit/f136310436ba5955e0c1f3e31892b1d8acd0a484))
+
+
+### Features
+
+* **HTTP & WebSocket:** Do not require JWT tokens to connect ([f9da21e](https://github.com/stencila/executa/commit/f9da21e463b88f3f3a9be62445687f2def1440e6))
+* **WebSocketClient:** Adds  options for logging, timeouts and retries ([5ddfcb0](https://github.com/stencila/executa/commit/5ddfcb0ec44a95fb04e72e9de26d5606fe49a6fa))
+
 # [0.12.0](https://github.com/stencila/executa/compare/v0.11.3...v0.12.0) (2019-11-11)
 
 
