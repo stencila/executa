@@ -30,7 +30,9 @@ export default [
         exclude: 'node_modules/**'
       }),
       builtins(),
-      resolve()
+      resolve({
+        mainFields: ['browser', 'module', 'main']
+      })
     ],
 
     // Do not bundle modules that provide things already

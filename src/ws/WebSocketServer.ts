@@ -1,6 +1,5 @@
 import { getLogger } from '@stencila/logga'
 import { Node } from '@stencila/schema'
-import crypto from 'crypto'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
 import WebSocket from 'isomorphic-ws'
@@ -8,10 +7,13 @@ import { Connection } from '../base/Connection'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
-  WebSocketAddressInitializer
+  WebSocketAddressInitializer,
+  Transport
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen } from './util'
+import { User } from '../base/Executor'
+import { FastifyRequest, FastifyInstance } from 'fastify'
 
 const log = getLogger('executa:ws:server')
 
@@ -21,17 +23,28 @@ const log = getLogger('executa:ws:server')
 export class WebSocketConnection implements Connection {
   /**
    * @implements Implements {@link Connection.id} to provide
-   * a unique id for the WebSocket connection.
+   * a unique id for the WebSocket client.
    */
-  id: string = crypto.randomBytes(32).toString('hex')
+  id: string
+
+  /**
+   * User information for this connection
+   */
+  user: User
 
   /**
    * The WebSocket used by this connection
    */
   socket: WebSocket
 
-  constructor(socket: WebSocket) {
+  constructor(
+    socket: WebSocket,
+    id: string,
+    payload: { [key: string]: string }
+  ) {
     this.socket = socket
+    this.id = id
+    this.user = { ...payload, client: { type: Transport.ws, id } }
   }
 
   /**
@@ -79,75 +92,54 @@ export class WebSocketConnection implements Connection {
  * A `Server` using WebSockets as the transport protocol.
  */
 export class WebSocketServer extends HttpServer {
-  /**
-   * A map of JWT tokens to their payload.
-   *
-   * This is necessary, because we need to keep provide the
-   * JWT payload to `this.executor` on each message.
-   * In `HttpServer` this is easy because the payload is
-   * attached to the request as the `user` property.
-   * Here, we need to do the association ourselves.
-   */
-  users: { [key: string]: any } = {}
-
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 })
   ) {
     super(address)
+  }
 
-    this.app.register(fastifyWebsocket, {
-      handle: (connection: any) => {
+  /**
+   * @override Overrides {@link HttpServer.buildApp} to add WebSocket
+   * handling.
+   */
+  protected buildApp(): FastifyInstance {
+    const app = super.buildApp()
+    app.register(fastifyWebsocket, {
+      handle: (connection: any, request: FastifyRequest) => {
         const { socket } = connection
 
-        const token = socket.protocol
-        const user = this.users[token]
-        if (user === undefined) {
-          // This should not happen
-          log.error('Unable to get user for connection')
+        // Extract id and token from the protocol ('sec-websocket-protocol' header)
+        // and verify the token
+        const [id, token] = socket.protocol.split(':')
+        let payload
+        try {
+          payload = app.jwt.verify(token)
+        } catch (error) {
+          socket.close(4001, error.message)
+          return
         }
 
         // Register connection and disconnection handler
-        const wsconnection = new WebSocketConnection(socket)
-        this.onConnected(wsconnection)
-        socket.on('close', () => {
-          this.onDisconnected(wsconnection)
-          delete this.users[token]
+        const wsconnection = new WebSocketConnection(socket, id, payload as {
+          [key: string]: string
         })
+        this.onConnected(wsconnection)
+        socket.on('close', () => this.onDisconnected(wsconnection))
 
         // Handle messages from connection
         socket.on('message', async (message: string) => {
-          const response = await this.receive(message, {
-            // The `user` argument is a merging of the JWT
-            // payload and client identification info.
-            ...user,
-            client: {
-              type: 'ws',
-              id: wsconnection.id
-            }
-          })
+          const response = await this.receive(message, wsconnection.user)
           if (response !== undefined)
             wsconnection
               .send(response as string)
-              .catch(error => log.error(error))
+              .catch((error: Error) => log.error(error))
         })
 
         // Handle any errors
         socket.on('error', (error: Error) => log.error(error))
-      },
-      options: {
-        verifyClient: (info: any, next: (ok: boolean) => void): void => {
-          const { headers } = info.req
-          const token = headers['sec-websocket-protocol']
-          if (token === undefined) return next(false)
-          try {
-            this.users[token] = this.app.jwt.verify(token)
-            next(true)
-          } catch {
-            next(false)
-          }
-        }
       }
     })
+    return app
   }
 
   public get address(): WebSocketAddress {
