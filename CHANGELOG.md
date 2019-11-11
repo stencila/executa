@@ -1,3 +1,16 @@
+# [0.12.0](https://github.com/stencila/executa/compare/v0.11.3...v0.12.0) (2019-11-11)
+
+
+### Bug Fixes
+
+* **Bundling:** Upgrade Logga and user browser field when bundling ([5c5498a](https://github.com/stencila/executa/commit/5c5498ab40a5ebabe9087d5fa494e0da300db2ad))
+
+
+### Features
+
+* **Identifers:** Use nanoid instead of crypto for shorter ids and browser compatability ([f172125](https://github.com/stencila/executa/commit/f172125eadb7303c56b29363b2900b94742305ca))
+* **WebSocket:** Try to reconnect when connection is closed ([96af014](https://github.com/stencila/executa/commit/96af01469b6d1d7ad0a0b1420d440d7a05db7fd6))
+
 ## [0.11.3](https://github.com/stencila/executa/compare/v0.11.2...v0.11.3) (2019-11-07)
 
 
