@@ -117,6 +117,7 @@ export class HttpServer extends TcpServer {
         }
       }
     }
+    app.get('/manifest', wrap('manifest'))
     app.post('/manifest', wrap('manifest'))
     app.post('/decode', wrap('decode'))
     app.post('/encode', wrap('encode'))
