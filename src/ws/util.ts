@@ -93,10 +93,6 @@ export async function send(
   timeout = 60
 ): Promise<void> {
   await untilOpen(socket, timeout)
-  return new Promise((resolve, reject) => {
-    socket.send(data, error => {
-      if (error !== undefined) reject(error)
-      else resolve()
-    })
-  })
+  socket.send(data)
+  Promise.resolve()
 }
