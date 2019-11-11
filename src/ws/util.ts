@@ -5,6 +5,35 @@
 import WebSocket from 'isomorphic-ws'
 
 /**
+ * Generate the `Sec-Websocket-Protocol` header.
+ *
+ * This is the only header that can be set in the WebSocket constructor
+ * and we use it to pass client id and JWT to the server.
+ * The generated header follows the recommendations of
+ * https://tools.ietf.org/html/rfc6455#section-1.9 with `+`
+ * used as a separator between its parts.
+ *
+ * @param id The id of the client
+ * @param jwt A JWT
+ */
+export function generateProtocol (id: string, jwt?: string): string {
+  return `executa.stenci.la+1+${id}` + (jwt !== undefined ? `+${jwt}` : '')
+}
+
+/**
+ * Parse the `Sec-Websocket-Protocol` header.
+ *
+ * @param protocol The protocol header
+ * @returns The id and jwt in the header
+ */
+export function parseProtocol (protocol: string): {id: string, jwt?: string } {
+  const match = /executa\.stenci\.la\+1\+([^+]+)(?:\+([^+]+))?/.exec(protocol)
+  if (match === null) throw new Error(`Unable to parse the WebSocket protocol header`)
+  const [ _, id, jwt ] = match
+  return { id, jwt }
+}
+
+/**
  * Is a WebSocket in the open state?
  *
  * @param socket The WebSocket to check
