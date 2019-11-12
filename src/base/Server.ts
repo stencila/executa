@@ -186,7 +186,9 @@ export abstract class Server {
     const stop = (): void => {
       this.stop()
         .then(() => process.exit())
-        .catch(e => console.warn('Could not stop the server\n', e))
+        .catch(error =>
+          log.error(`Error when stopping server: ${error.message}`)
+        )
     }
     process.on('SIGINT', stop)
     process.on('SIGTERM', stop)

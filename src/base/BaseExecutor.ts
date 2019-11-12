@@ -268,6 +268,25 @@ export class BaseExecutor implements Executor {
   }
 
   /**
+   * Run the executor with graceful shutdown on `SIGINT` or `SIGTERM`.
+   *
+   * @see {@link Server.run}
+   */
+  public run(): Promise<void> {
+    const stop = (): void => {
+      this.stop()
+        .then(() => process.exit())
+        .catch(error =>
+          log.error(`Error when stopping executor: ${error.message}`)
+        )
+    }
+    process.on('SIGINT', stop)
+    process.on('SIGTERM', stop)
+
+    return this.start()
+  }
+
+  /**
    * Get the manifest of the executor
    *
    * Derived classes may override this method,
