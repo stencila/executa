@@ -33,3 +33,5 @@ export { HttpServer } from './http/HttpServer'
 export { WebSocketAddress } from './base/Transports'
 export { WebSocketClient } from './ws/WebSocketClient'
 export { WebSocketServer, WebSocketConnection } from './ws/WebSocketServer'
+
+export { uid } from './base/uid'
