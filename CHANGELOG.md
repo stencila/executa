@@ -1,3 +1,13 @@
+# [0.14.0](https://github.com/stencila/executa/compare/v0.13.0...v0.14.0) (2019-11-12)
+
+
+### Features
+
+* **BaseExecutor:** Add run method to allow for graceful shutdown ([e9057d1](https://github.com/stencila/executa/commit/e9057d12b9bf8c30d244c851ff25d4f2255cd8c9))
+* **Executor:** Allow manifest to be extended with other properties ([aa23480](https://github.com/stencila/executa/commit/aa234803e943b303e8314f788cb56ed3f915925c))
+* **HttpServer:** Add GET /manifest route ([62f9c28](https://github.com/stencila/executa/commit/62f9c288d521327acd35c4218fc4e83b38f80be8))
+* **Package:** Export the uid function ([485015c](https://github.com/stencila/executa/commit/485015cdd9d64376680d4607e623b07bdc202596))
+
 # [0.13.0](https://github.com/stencila/executa/compare/v0.12.0...v0.13.0) (2019-11-11)
 
 
