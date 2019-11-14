@@ -119,7 +119,6 @@ export class WebSocketServer extends HttpServer {
           try {
             user = app.jwt.verify(jwt)
           } catch (error) {
-            log.warn(`JWT verification failed: ${error.message}`)
             // If verification failed then close the connection
             // with a 4001 code (mirrors the HTTP 401 code used by `HttpServer`
             // in the same circumstance but in range assigned for application use

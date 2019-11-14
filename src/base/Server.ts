@@ -129,28 +129,21 @@ export abstract class Server {
           )
       }
     } catch (exc) {
-      if (id === undefined) {
-        // Received a notification which generated an error
-        // so log it here.
-        log.error(exc)
+      if (exc instanceof JsonRpcError) {
+        // A JSON-RPC client error (e.g. missing parameters), do
+        // not log it (to avoid noisy logs), just send to the client.
+        error = exc
       } else {
-        if (exc instanceof JsonRpcError) {
-          // A JSON-RPC error (e.g. missing parameters), so
-          // log it as a warning and send to the client.
-          log.warn(exc)
-          error = exc
-        } else {
-          // Some sort of internal error, so log it and wrap
-          // it into a JSON RPC error to send to the client.
-          log.error(exc)
-          error = new JsonRpcError(
-            JsonRpcErrorCode.ServerError,
-            `Internal error: ${exc.message}`,
-            {
-              trace: exc.stack
-            }
-          )
-        }
+        // Some sort of internal error, so log it and wrap
+        // it into a JSON RPC error to send to the client.
+        log.error(exc)
+        error = new JsonRpcError(
+          JsonRpcErrorCode.ServerError,
+          `Internal error: ${exc.message}`,
+          {
+            trace: exc.stack
+          }
+        )
       }
     }
 

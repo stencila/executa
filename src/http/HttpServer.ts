@@ -152,7 +152,6 @@ export class HttpServer extends TcpServer {
     } catch (error) {
       // Send "Unauthorized" response if there was JWT, but it is
       // not valid
-      log.warn(`JWT verification failed: ${error.message}`)
       reply
         .status(401)
         .send(
