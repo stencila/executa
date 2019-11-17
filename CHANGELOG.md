@@ -1,3 +1,10 @@
+## [0.14.1](https://github.com/stencila/executa/compare/v0.14.0...v0.14.1) (2019-11-17)
+
+
+### Bug Fixes
+
+* **Logging:** Remove extraneous server logging of client generated errors ([1bfd22f](https://github.com/stencila/executa/commit/1bfd22f7ed6f732bb95029e4015c62f06fda15a4))
+
 # [0.14.0](https://github.com/stencila/executa/compare/v0.13.0...v0.14.0) (2019-11-12)
 
 
