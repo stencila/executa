@@ -44,7 +44,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.stop()
   }
 
-  await delay(10)
+  await delay(25)
   expect(serverConnections()).toBe(0)
 
   {
@@ -74,7 +74,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.stop()
   }
 
-  await delay(10)
+  await delay(25)
   expect(serverConnections()).toBe(0)
 
   {
@@ -84,7 +84,7 @@ test('WebSocketClient and WebSocketServer', async () => {
       { ...server.address, jwt: 'jwhaaaat?' },
       'malformed-jwt'
     )
-    await delay(10)
+    await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
     expect(clientLogs[0].message).toMatch(
@@ -103,7 +103,7 @@ test('WebSocketClient and WebSocketServer', async () => {
       },
       'invalid-jwt'
     )
-    await delay(10)
+    await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
     expect(clientLogs[0].message).toMatch(
@@ -117,7 +117,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     const client1 = new WebSocketClient(server.address, 'client1')
     const client2 = new WebSocketClient(server.address, 'client2')
     const client3 = new WebSocketClient(server.address, 'client3')
-    await delay(10)
+    await delay(25)
     expect(serverConnections()).toBe(3)
 
     clientLogs = []
@@ -138,7 +138,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client2.stop()
     await client3.stop()
 
-    await delay(10)
+    await delay(25)
     expect(serverConnections()).toBe(0)
   }
 
@@ -147,12 +147,12 @@ test('WebSocketClient and WebSocketServer', async () => {
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
-    await delay(10)
+    await delay(25)
 
     // Server notification to several clients
     clientNotifs = []
     server.notify('debug', 'To all clients')
-    await delay(10)
+    await delay(25)
     expect(clientNotifs.length).toBe(3)
 
     // Server notification to some clients
@@ -160,7 +160,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     const clients = Object.keys(server.connections).slice(0, 2)
     clientNotifs = []
     server.notify('debug', 'To all clients', undefined, clients)
-    await delay(10)
+    await delay(25)
     expect(clientNotifs.length).toEqual(clients.length)
 
     // Server notification after clients disconnect
@@ -172,7 +172,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientNotifs = []
     server.notify('debug', 'Hello, who is still there?')
     // Server has sent notification to 2 closing sockets
-    await delay(10)
+    await delay(25)
     expect(serverLogs.length).toBe(0)
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
@@ -186,7 +186,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientNotifs = []
     server.notify('debug', 'Anybody?')
     // Server has sent notification to 2 closed sockets and one closing
-    await delay(10)
+    await delay(25)
     expect(serverLogs.length).toBe(0)
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
