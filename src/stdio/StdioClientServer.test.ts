@@ -4,7 +4,7 @@ import { testClient } from '../test/testClient'
 import { addHandler, LogData } from '@stencila/logga'
 import { delay } from '../test/delay'
 
-jest.setTimeout(30 * 1000)
+jest.setTimeout(2 * 60 * 1000)
 
 describe('StdioClient and StdioServer', () => {
   const testServer = (arg = ''): string =>
@@ -36,7 +36,9 @@ describe('StdioClient and StdioServer', () => {
       /^Error parsing message as JSON: ah hah/
     )
 
-    client.decode('crash now!')
+    client.decode('crash now!').catch(error => {
+      throw error
+    })
     await delay(250)
     expect(clientLogs.length).toBe(2)
     expect(clientLogs[1].message).toMatch(
@@ -51,7 +53,7 @@ describe('StdioClient and StdioServer', () => {
   if (process.env.CI !== undefined) {
     test('crash-on-start', async () => {
       const client = new StdioClient(testServer('crash-on-start'))
-      await delay(10000)
+      await delay(20 * 1000)
       expect(clientLogs.length).toBe(2)
       expect(clientLogs[1].message).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
@@ -61,7 +63,7 @@ describe('StdioClient and StdioServer', () => {
 
     test('exit-prematurely', async () => {
       const client = new StdioClient(testServer('exit-prematurely'))
-      await delay(10000)
+      await delay(20 * 1000)
       expect(clientLogs.length).toBe(3)
       expect(clientLogs[2].message).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
