@@ -54,8 +54,8 @@ describe('StdioClient and StdioServer', () => {
     test('crash-on-start', async () => {
       const client = new StdioClient(testServer('crash-on-start'))
       await delay(20 * 1000)
-      expect(clientLogs.length).toBe(2)
-      expect(clientLogs[1].message).toMatch(
+      expect(clientLogs.length).toBe(3)
+      expect(clientLogs[2].message).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
       )
       await client.stop()
@@ -64,8 +64,8 @@ describe('StdioClient and StdioServer', () => {
     test('exit-prematurely', async () => {
       const client = new StdioClient(testServer('exit-prematurely'))
       await delay(20 * 1000)
-      expect(clientLogs.length).toBe(3)
-      expect(clientLogs[2].message).toMatch(
+      expect(clientLogs.length).toBe(4)
+      expect(clientLogs[3].message).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
       )
       await client.stop()
