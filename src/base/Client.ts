@@ -156,11 +156,21 @@ export abstract class Client implements Executor {
    * when a response is returned. Uses the `id` of the response to match it to the corresponding
    * request and resolve it's promise.
    *
+   * Logs errors, rather than throwing exceptions, if the server sends a bad
+   * response because this method is called asynchronously when a message
+   * is received and to avoid crashing the process.
+   *
    * @param message A JSON-RPC response (to a request) or a notification.
    */
   protected receive(message: string | JsonRpcResponse | JsonRpcRequest): void {
-    if (typeof message === 'string')
-      message = JSON.parse(message) as JsonRpcResponse | JsonRpcRequest
+    if (typeof message === 'string') {
+      try {
+        message = JSON.parse(message) as JsonRpcResponse | JsonRpcRequest
+      } catch (error) {
+        log.error(`Error parsing message as JSON: ${message}`)
+        return
+      }
+    }
     const { id } = message
 
     if (id === undefined) {
@@ -171,20 +181,31 @@ export abstract class Client implements Executor {
     }
 
     // Must be a response....
-    message = message as JsonRpcResponse
-    if (id < 0)
+
+    if (id < 0) {
       // A response with accidentally missing id
-      throw new JsonRpcError(
-        JsonRpcErrorCode.InternalError,
-        `Response is missing id: ${message}`
-      )
+      log.error(`Response is missing id: ${JSON.stringify(message)}`)
+      return
+    }
+
     const resolve = this.requests[id]
-    if (resolve === undefined)
-      throw new JsonRpcError(
-        JsonRpcErrorCode.InternalError,
-        `No request found for response with id: ${id}`
-      )
-    resolve(message)
+    if (resolve === undefined) {
+      log.error(`No request found for response with id: ${id}`)
+      return
+    }
+
+    try {
+      resolve(message as JsonRpcResponse)
+    } catch (error) {
+      const { message: errorMessage, stack } = error
+      log.error({
+        message: `Error thrown when handling message: ${errorMessage}\n${JSON.stringify(
+          message
+        )}`,
+        stack
+      })
+    }
+
     delete this.requests[id]
   }
 
