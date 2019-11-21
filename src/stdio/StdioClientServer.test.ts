@@ -3,6 +3,12 @@ import { StdioClient } from './StdioClient'
 import { testClient } from '../test/testClient'
 import { nextLogData } from '../test/nextLogData'
 
+// Some of these tests take time to run
+// due to spawning a ts-node process, so
+// increase timeout to avoid this:
+// https://travis-ci.org/stencila/executa/jobs/614741283#L381
+jest.setTimeout(30 * 1000)
+
 describe('StdioClient and StdioServer', () => {
   const testServer = (arg = ''): string =>
     `npx ts-node --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
