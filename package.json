@@ -52,7 +52,7 @@
     "typescript": "3.6.4"
   },
   "dependencies": {
-    "@stencila/logga": "^1.4.1",
+    "@stencila/logga": "^2.0.0",
     "@stencila/schema": "^0.31.0",
     "@types/ws": "^6.0.3",
     "ajv": "^6.10.2",
