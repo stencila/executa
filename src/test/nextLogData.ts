@@ -8,12 +8,12 @@ import { addHandler, LogData, removeHandler } from '@stencila/logga'
  */
 export const nextLogData = (tags: string[]): Promise<LogData> => {
   return new Promise(resolve => {
-    const handler = (logData: LogData) => {
-      if (tags.includes(logData.tag)) {
+    const handler = addHandler(
+      (logData: LogData) => {
         resolve(logData)
         removeHandler(handler)
-      }
-    }
-    addHandler(handler)
+      },
+      { tags }
+    )
   })
 }

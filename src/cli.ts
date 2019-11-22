@@ -30,7 +30,7 @@ const log = getLogger('executa:cli')
 
 replaceHandlers(data =>
   defaultHandler(data, {
-    level: options.debug !== undefined ? LogLevel.debug : LogLevel.info
+    maxLevel: options.debug !== undefined ? LogLevel.debug : LogLevel.info
   })
 )
 

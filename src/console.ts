@@ -48,7 +48,7 @@ replaceHandlers(data => {
   const { level } = data
   if (level <= (options.debug !== undefined ? LogLevel.debug : LogLevel.warn)) {
     process.stderr.write(`--- `)
-    defaultHandler(data, { level: LogLevel.debug })
+    defaultHandler(data, { maxLevel: LogLevel.debug })
   }
 })
 
