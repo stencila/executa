@@ -1,3 +1,10 @@
+## [0.14.2](https://github.com/stencila/executa/compare/v0.14.1...v0.14.2) (2019-11-22)
+
+
+### Bug Fixes
+
+* **Client:** Do not throw error on bad message ([0bc9327](https://github.com/stencila/executa/commit/0bc932772dbdaabe64783e91a893040b1bfd4056)), closes [#41](https://github.com/stencila/executa/issues/41)
+
 ## [0.14.1](https://github.com/stencila/executa/compare/v0.14.0...v0.14.1) (2019-11-17)
 
 
