@@ -13,8 +13,8 @@ describe('StdioClient and StdioServer', () => {
   const testServer = (arg = ''): string =>
     `npx ts-node --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
 
-  const nextClientLogData = () =>
-    nextLogData(['executa:client', 'executa:stdio:client'])
+  const nextMessage = async () =>
+    (await nextLogData(['executa:client', 'executa:stdio:client'])).message
 
   test('main', async () => {
     const client = new StdioClient(testServer())
@@ -26,20 +26,16 @@ describe('StdioClient and StdioServer', () => {
     client.decode('send bad message').catch(error => {
       throw error
     })
-    {
-      const logData = await nextClientLogData()
-      expect(logData.message).toMatch(/^Error parsing message as JSON: ah hah/)
-    }
+    expect(await nextMessage()).toMatch(
+      /^Error parsing message as JSON: ah hah/
+    )
 
     client.decode('crash now!').catch(error => {
       throw error
     })
-    {
-      const logData = await nextClientLogData()
-      expect(logData.message).toMatch(
-        /^Server exited prematurely with exit code 1 and signal null/
-      )
-    }
+    expect(await nextMessage()).toMatch(
+      /^Server exited prematurely with exit code 1 and signal null/
+    )
 
     await client.stop()
   })
@@ -50,8 +46,7 @@ describe('StdioClient and StdioServer', () => {
   if (process.env.CI !== undefined) {
     test('crash-on-start', async () => {
       const client = new StdioClient(testServer('crash-on-start'))
-      const logData = await nextClientLogData()
-      expect(logData.message).toMatch(
+      expect(await nextMessage()).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
       )
       await client.stop()
@@ -59,8 +54,7 @@ describe('StdioClient and StdioServer', () => {
 
     test('exit-prematurely', async () => {
       const client = new StdioClient(testServer('exit-prematurely'))
-      const logData = await nextClientLogData()
-      expect(logData.message).toMatch(
+      expect(await nextMessage()).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
       )
       await client.stop()

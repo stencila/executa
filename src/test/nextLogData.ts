@@ -6,7 +6,7 @@ import { addHandler, LogData, removeHandler } from '@stencila/logga'
  *
  * @param tags A list of tags that the log data must have
  */
-export const nextLogData = (tags: string[]): Promise<LogData> => {
+export const nextLogData = (tags?: string[]): Promise<LogData> => {
   return new Promise(resolve => {
     const handler = addHandler(
       (logData: LogData) => {

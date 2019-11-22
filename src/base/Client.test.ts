@@ -1,9 +1,7 @@
+import { nextLogData } from '../test/nextLogData'
 import { Client } from './Client'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { addHandler, LogData } from '@stencila/logga'
-import { delay } from '../test/delay'
-
 /**
  * Simple test client that implements the
  * `send` to echo back the
@@ -67,40 +65,33 @@ test('calling methods', async () => {
 test('receiving bad response', async () => {
   const client = new TestClient()
 
-  let clientLogs: LogData[] = []
-  addHandler((logData: LogData) => {
-    if (logData.tag === 'executa:client') {
-      clientLogs = [...clientLogs, logData]
-    }
-  })
+  // Because there is no async tick between the client receiving
+  // the request and generating the log entry, we need to create
+  // the promise for the next message before.
+  const nextMessage = async () => (await nextLogData()).message
+  let message
 
+  message = nextMessage()
   // @ts-ignore that receive is protected
   client.receive('Try parsing this as JSON, client!')
-  await delay(25)
-  expect(clientLogs.length).toBe(1)
-  expect(clientLogs[0].message).toMatch(/^Error parsing message as JSON/)
+  expect(await message).toMatch(/^Error parsing message as JSON/)
 
+  message = nextMessage()
   // @ts-ignore that receive is protected
   client.receive({ id: -1 })
-  await delay(25)
-  expect(clientLogs.length).toBe(2)
-  expect(clientLogs[1].message).toMatch(/^Response is missing id/)
+  expect(await message).toMatch(/^Response is missing id/)
 
+  message = nextMessage()
   // @ts-ignore that receive is protected
   client.receive({ id: 489629879 })
-  await delay(25)
-  expect(clientLogs.length).toBe(3)
-  expect(clientLogs[2].message).toMatch(
-    /^No request found for response with id/
-  )
+  expect(await message).toMatch(/^No request found for response with id/)
 
+  message = nextMessage()
   // @ts-ignore that requests is private
   client.requests[42] = () => {
     throw Error("Yo! I'm an error")
   }
   // @ts-ignore that receive is protected
   client.receive({ id: 42 })
-  await delay(25)
-  expect(clientLogs.length).toBe(4)
-  expect(clientLogs[3].message).toMatch(/^Error thrown when handling message/)
+  expect(await message).toMatch(/^Error thrown when handling message/)
 })
