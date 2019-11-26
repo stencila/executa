@@ -29,7 +29,7 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@babel/preset-typescript": "7.7.2",
+    "@babel/preset-typescript": "7.7.4",
     "@gerrit0/typedoc": "0.15.10",
     "@stencila/dev-config": "1.2.2",
     "@types/jest": "24.0.23",
