@@ -1,7 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import { isPrimitive, Node, nodeType, SoftwareSession } from '@stencila/schema'
 import Ajv from 'ajv'
-import { uid } from './uid'
 import { ClientType } from './Client'
 import {
   Addresses,
@@ -12,6 +11,7 @@ import {
   User
 } from './Executor'
 import { InternalError } from './InternalError'
+import { Listener } from './Listener'
 import { Server } from './Server'
 import { Transport } from './Transports'
 
@@ -188,15 +188,7 @@ export class Peer {
  * the `Node` unchanged (for `compile`, `build` etc) or
  * attempting to use JSON as format (for `decode` and `encode`).
  */
-export class Manager implements Executor {
-  /**
-   * The unique id of this executor.
-   *
-   * Used by peers to avoid duplicate entries for an
-   * executor (e.g. due to multiple addresses)
-   */
-  public readonly id: string
-
+export class Manager extends Listener {
   /**
    * Functions used to obtain manifests of potential
    * peer executors.
@@ -226,64 +218,14 @@ export class Manager implements Executor {
    */
   protected peers: Peer[] = []
 
-  /**
-   * Servers that will pass on requests to this executor.
-   */
-  protected readonly servers: Server[] = []
-
   public constructor(
     discoveryFunctions: DiscoveryFunction[] = [],
     clientTypes: ClientType[] = [],
     servers: Server[] = []
   ) {
-    this.id = uid()
+    super(servers)
     this.discoveryFunctions = discoveryFunctions
     this.clientTypes = clientTypes
-    this.servers = servers
-  }
-
-  /**
-   * Start servers for the executor.
-   */
-  public async start(): Promise<void> {
-    if (this.servers.length === 0) {
-      log.warn('No servers configured; executor will not be accessible.')
-      return
-    }
-
-    log.info(
-      `Starting servers: ${this.servers
-        .map(server => server.address.type)
-        .join(', ')}`
-    )
-    await Promise.all(this.servers.map(server => server.start(this)))
-  }
-
-  /**
-   * Stop servers for the executor.
-   */
-  public async stop(): Promise<void> {
-    log.info('Stopping servers')
-    await Promise.all(this.servers.map(server => server.stop()))
-  }
-
-  /**
-   * Run the executor with graceful shutdown on `SIGINT` or `SIGTERM`.
-   *
-   * @see {@link Server.run}
-   */
-  public run(): Promise<void> {
-    const stop = (): void => {
-      this.stop()
-        .then(() => process.exit())
-        .catch(error =>
-          log.error(`Error when stopping executor: ${error.message}`)
-        )
-    }
-    process.on('SIGINT', stop)
-    process.on('SIGTERM', stop)
-
-    return this.start()
   }
 
   /**
@@ -457,44 +399,6 @@ export class Manager implements Executor {
         return this.build(params.node)
       case Method.execute:
         return this.execute(params.node, params.session)
-    }
-  }
-
-  /**
-   * @implements {Executor.notify}
-   *
-   * Send a notification to clients via each of this
-   * executor's servers
-   */
-  public notify(
-    level: string,
-    message: string,
-    node: Node,
-    clients: string[] = []
-  ) {
-    for (const server of this.servers)
-      server.notify(level, message, node, clients)
-  }
-
-  /**
-   * @implements {Executor.notified}
-   *
-   * Receive a notification from a client using one of this
-   * executor's servers.
-   *
-   * Just calls the appropriate method of `log`. Override this to
-   * provide more fancy notification to users.
-   */
-  public notified(level: string, message: string): void {
-    switch (level) {
-      case 'debug':
-      case 'info':
-      case 'warn':
-      case 'error':
-        log[level](message)
-        break
-      default:
-        log.info(message)
     }
   }
 
