@@ -1,3 +1,10 @@
+## [0.14.3](https://github.com/stencila/executa/compare/v0.14.2...v0.14.3) (2019-12-02)
+
+
+### Bug Fixes
+
+* **deps:** update dependency fastify-cors to v3 ([f7e3ba3](https://github.com/stencila/executa/commit/f7e3ba3a6dd55264bbcdce369338b2df86af4e4d))
+
 ## [0.14.2](https://github.com/stencila/executa/compare/v0.14.1...v0.14.2) (2019-11-22)
 
 
