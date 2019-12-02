@@ -107,7 +107,9 @@ export abstract class Executor {
    * @see {@link Capabilities}
    * @see {@link Addresses}
    */
-  abstract async manifest(): Promise<Manifest>
+  public async manifest(): Promise<Manifest> {
+    return this.call<Manifest>(Method.manifest)
+  }
 
   /**
    * Decode content to a `Node`.
@@ -116,7 +118,9 @@ export abstract class Executor {
    * @param format The format of the content
    * @returns The decoded node
    */
-  abstract async decode(content: string, format?: string): Promise<Node>
+  public async decode(content: string, format?: string): Promise<Node> {
+    return this.call<Node>(Method.decode, { content, format })
+  }
 
   /**
    * Encode a `Node` in a format.
@@ -125,7 +129,9 @@ export abstract class Executor {
    * @param format The format to encode
    * @returns The node encoded in the format
    */
-  abstract async encode(node: Node, format?: string): Promise<string>
+  public async encode(node: Node, format?: string): Promise<string> {
+    return this.call<string>(Method.encode, { node, format })
+  }
 
   /**
    * Compile a `Node`.
@@ -133,9 +139,11 @@ export abstract class Executor {
    * @param node The node to compile
    * @returns The compiled node
    */
-  abstract async compile<NodeType extends Node>(
+  public async compile<NodeType extends Node>(
     node: NodeType
-  ): Promise<NodeType>
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.compile, { node })
+  }
 
   /**
    * Build a `Node`.
@@ -143,7 +151,9 @@ export abstract class Executor {
    * @param node The node to build
    * @returns The build node
    */
-  abstract async build<NodeType extends Node>(node: NodeType): Promise<NodeType>
+  public async build<NodeType extends Node>(node: NodeType): Promise<NodeType> {
+    return this.call<NodeType>(Method.build, { node })
+  }
 
   /**
    * Execute a `Node`.
@@ -153,11 +163,13 @@ export abstract class Executor {
    * @param user The `User` making the call
    * @returns The node, with updated properties, after it has been executed
    */
-  abstract async execute<NodeType extends Node>(
+  public async execute<NodeType extends Node>(
     node: NodeType,
     session?: SoftwareSession,
     user?: User
-  ): Promise<NodeType>
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.execute, { node, session, user })
+  }
 
   /**
    * Begin running a `Node`.
@@ -176,10 +188,12 @@ export abstract class Executor {
    * @param user The `User` making the call
    * @returns The node, with updated properties, after it has begun running
    */
-  abstract async begin<NodeType extends Node>(
+  public async begin<NodeType extends Node>(
     node: NodeType,
     user?: User
-  ): Promise<NodeType>
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.begin, { node, user })
+  }
 
   /**
    * End running a `Node`.
@@ -188,10 +202,12 @@ export abstract class Executor {
    * @param user The `User` making the request
    * @returns The node, with updated properties, after it has ended running
    */
-  abstract async end<NodeType extends Node>(
+  public async end<NodeType extends Node>(
     node: NodeType,
     user?: User
-  ): Promise<NodeType>
+  ): Promise<NodeType> {
+    return this.call<NodeType>(Method.end, { node, user })
+  }
 
   /**
    * Call one of the above methods.
@@ -201,7 +217,7 @@ export abstract class Executor {
    */
   abstract async call<Type>(
     method: Method,
-    params: { [key: string]: any }
+    params?: { [key: string]: any }
   ): Promise<Type>
 
   /**

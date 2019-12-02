@@ -13,78 +13,18 @@ const notifications = getLogger('executa:client:notifs')
 /**
  * A client to a remote, out of process, `Executor`.
  *
- * Implements asynchronous, methods for `Executor` methods `compile`, `build`, `execute`, etc.
+ * Implements asynchronous, methods for `Executor` methods `call` and `notify`
  * which send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
-export abstract class Client implements Executor {
+export abstract class Client extends Executor {
   /**
    * A map of requests to which responses can be paired against
    */
   private requests: { [key: number]: (response: JsonRpcResponse) => void } = {}
 
   /**
-   * Call the remote `Executor`'s `manifest` method
-   */
-  public async manifest(): Promise<Manifest> {
-    return this.call<Manifest>(Method.manifest)
-  }
-
-  /**
-   * Call the remote `Executor`'s `decode` method
-   */
-  public async decode(content: string, format = 'json'): Promise<Node> {
-    return this.call<string>(Method.decode, { content, format })
-  }
-
-  /**
-   * Call the remote `Executor`'s `encode` method
-   */
-  public async encode(node: Node, format = 'json'): Promise<string> {
-    return this.call<string>(Method.encode, { node, format })
-  }
-
-  /**
-   * Call the remote `Executor`'s `compile` method
-   */
-  public async compile<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.compile, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `build` method
-   */
-  public async build<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.build, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `execute` method
-   */
-  public async execute<NodeType extends Node>(
-    node: NodeType,
-    session?: SoftwareSession
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.execute, { node, session })
-  }
-
-  /**
-   * Call the remote `Executor`'s `begin` method
-   */
-  public async begin<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.begin, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `end` method
-   */
-  public async end<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.end, { node })
-  }
-
-  /**
-   * Call a method of a remote `Executor`.
+   * @implements Implements {@link Executor.call} by sending a
+   * a request to the remote `Executor` that this client is connected to.
    *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
@@ -110,8 +50,8 @@ export abstract class Client implements Executor {
   }
 
   /**
-   * @implements Implements {@link Executor.notify} to send a notification
-   * to the remote executor that this client is connected to.
+   * @implements Implements {@link Executor.notify} by sending a notification
+   * to the remote `Executor` that this client is connected to.
    */
   public notify(level: string, message: string) {
     const notification = new JsonRpcRequest(level, { message }, false)
@@ -207,6 +147,15 @@ export abstract class Client implements Executor {
     }
 
     delete this.requests[id]
+  }
+
+  /**
+   * Start the client
+   *
+   * Derived classes may override this method.
+   */
+  public start(): Promise<void> {
+    return Promise.resolve()
   }
 
   /**
