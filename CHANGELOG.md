@@ -1,3 +1,10 @@
+# [0.15.0](https://github.com/stencila/executa/compare/v0.14.3...v0.15.0) (2019-12-02)
+
+
+### Features
+
+* **Config:** Use Configa to improve configuration ([b73969b](https://github.com/stencila/executa/commit/b73969b578000f996edd078f289630d948f7491b))
+
 ## [0.14.3](https://github.com/stencila/executa/compare/v0.14.2...v0.14.3) (2019-12-02)
 
 
