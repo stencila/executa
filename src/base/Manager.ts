@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { isPrimitive, Node, nodeType, SoftwareSession } from '@stencila/schema'
 import Ajv from 'ajv'
-import { uid } from '../base/uid'
+import { uid } from './uid'
 import { ClientType } from './Client'
 import {
   Addresses,
@@ -122,7 +122,7 @@ export class Peer {
 
     // If the executor is in-process, just use it directly
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (this.manifest.id instanceof BaseExecutor) {
+    if (this.manifest.id instanceof Manager) {
       this.interface = this.manifest.id
       return true
     }
@@ -188,7 +188,7 @@ export class Peer {
  * the `Node` unchanged (for `compile`, `build` etc) or
  * attempting to use JSON as format (for `decode` and `encode`).
  */
-export class BaseExecutor implements Executor {
+export class Manager implements Executor {
   /**
    * The unique id of this executor.
    *

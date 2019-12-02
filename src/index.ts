@@ -6,7 +6,7 @@ export {
   Capabilities,
   User
 } from './base/Executor'
-export { BaseExecutor } from './base/BaseExecutor'
+export { Manager } from './base/Manager'
 
 export { StreamClient } from './stream/StreamClient'
 export { StreamServer } from './stream/StreamServer'

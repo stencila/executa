@@ -28,7 +28,7 @@ import { CodeChunk } from '@stencila/schema'
 import minimist from 'minimist'
 import * as readline from 'readline'
 import { ClientType } from './base/Client'
-import { BaseExecutor } from './base/BaseExecutor'
+import { Manager } from './base/Manager'
 import { discover as discoverTcp } from './tcp/discover'
 import { TcpClient } from './tcp/TcpClient'
 
@@ -55,7 +55,7 @@ replaceHandlers(data => {
 // eslint-disable-next-line
 ;(async () => {
   // Create executor (no need to start it, since it has no servers)
-  const executor = new BaseExecutor([discoverTcp], [TcpClient as ClientType])
+  const manager = new Manager([discoverTcp], [TcpClient as ClientType])
 
   // Create the REPL with the starting prompt
   const repl = readline.createInterface({
@@ -67,7 +67,7 @@ replaceHandlers(data => {
 
   const getLine = async (line: string): Promise<void> => {
     // When user enters a line, execute a `CodeChunk`
-    const result = (await executor.execute({
+    const result = (await manager.execute({
       type: 'CodeChunk',
       programmingLanguage: 'python',
       text: line

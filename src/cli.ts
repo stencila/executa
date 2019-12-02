@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga'
-import { BaseExecutor } from './base/BaseExecutor'
+import { Manager } from './base/Manager'
 import { ClientType } from './base/Client'
 import { Server } from './base/Server'
 import { VsockAddress } from './base/Transports'
@@ -47,7 +47,7 @@ const main = async () => {
   if (ws !== false) servers.push(new WebSocketServer(ws === true ? 9000 : ws))
 
   // Initialize the executor
-  const executor = new BaseExecutor(
+  const manager = new Manager(
     [discoverStdio],
     [StdioClient as ClientType],
     servers
@@ -60,9 +60,9 @@ const main = async () => {
     case 'config':
       return console.log(JSON.stringify(config, null, '  '))
     case 'serve':
-      return executor.start()
+      return manager.start()
     case 'execute':
-      return execute(executor)
+      return execute(manager)
     default:
       log.error(`Unknown command: ${command}`)
   }
@@ -71,7 +71,7 @@ const main = async () => {
 /**
  * Convert a document
  */
-const convert = async (executor: BaseExecutor): Promise<void> => {
+const convert = async (executor: Manager): Promise<void> => {
   const input = args[1]
   const output = args[2] !== undefined ? args[2] : '-'
 
@@ -82,7 +82,7 @@ const convert = async (executor: BaseExecutor): Promise<void> => {
 /**
  * Execute a document
  */
-const execute = async (executor: BaseExecutor): Promise<void> => {
+const execute = async (executor: Manager): Promise<void> => {
   const input = args[1]
   const output = args[2] !== undefined ? args[2] : input
 

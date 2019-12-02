@@ -9,7 +9,7 @@ import fastify, {
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import { Executor } from '../base/Executor'
-import { BaseExecutor } from '../base/BaseExecutor'
+import { Manager } from '../base/Manager'
 import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
@@ -210,7 +210,7 @@ export class HttpServer extends TcpServer {
   }
 
   public async start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new BaseExecutor()
+    if (executor === undefined) executor = new Manager()
     this.executor = executor
 
     const url = this.address.url()

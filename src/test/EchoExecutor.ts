@@ -1,4 +1,4 @@
-import { BaseExecutor } from '../base/BaseExecutor'
+import { Manager } from '../base/Manager'
 import { Node } from '@stencila/schema'
 import { User } from '../base/Executor'
 
@@ -7,7 +7,7 @@ import { User } from '../base/Executor'
  * it received as a new object. Used for testing that
  * `Server` implementations pass through arguments correctly.
  */
-export class EchoExecutor extends BaseExecutor {
+export class EchoExecutor extends Manager {
   begin<NodeType extends Node>(
     node: NodeType,
     user: User = {}

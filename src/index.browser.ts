@@ -1,5 +1,5 @@
 export { Executor, User } from './base/Executor'
-export { BaseExecutor } from './base/BaseExecutor'
+export { Manager } from './base/Manager'
 
 export { HttpAddress } from './base/Transports'
 export { discover as httpDiscover } from './http/discover'

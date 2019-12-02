@@ -2,12 +2,12 @@ import { PassThrough } from 'stream'
 import * as stencila from '@stencila/schema'
 import { StreamClient } from './StreamClient'
 import { StreamServer } from './StreamServer'
-import { BaseExecutor } from '../base/BaseExecutor'
+import { Manager } from '../base/Manager'
 
 describe('StreamClient and StreamServer', () => {
   // @ts-ignore Ignore the fact that this is an abstract class
   const server = new StreamServer()
-  const executor = new BaseExecutor()
+  const executor = new Manager()
   const serverIncoming = new PassThrough()
   const serverOutgoing = new PassThrough()
   server.start(executor, serverIncoming, serverOutgoing)

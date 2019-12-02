@@ -1,6 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import { Node } from '@stencila/schema'
-import { BaseExecutor } from './BaseExecutor'
+import { Manager } from './Manager'
 import { Executor, User } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
@@ -158,7 +158,7 @@ export abstract class Server {
    * call this method, or ensure that `executor` is set themselves.
    */
   public start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new BaseExecutor()
+    if (executor === undefined) executor = new Manager()
     this.executor = executor
     return Promise.resolve()
   }

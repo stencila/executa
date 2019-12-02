@@ -12,10 +12,10 @@
  */
 
 import { StdioServer } from './StdioServer'
-import { BaseExecutor } from '../base/BaseExecutor'
+import { Manager } from '../base/Manager'
 import { Node } from '@stencila/schema'
 
-class TestExecutor extends BaseExecutor {
+class TestExecutor extends Manager {
   decode(content: string): Promise<Node> {
     if (content === 'send bad message') {
       process.stdout.write('Hah hah, a bad message to try to crash you!')

@@ -4,7 +4,7 @@ import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
 import { ClientType } from './Client'
 import { Capabilities, Manifest, Method } from './Executor'
-import { BaseExecutor, Peer } from './BaseExecutor'
+import { Manager, Peer } from './Manager'
 import { Transport } from './Transports'
 
 describe('Peer', () => {
@@ -226,7 +226,7 @@ describe('Peer', () => {
 /**
  * An executor class that gives the answer to life.
  */
-class DeepThought extends BaseExecutor {
+class DeepThought extends Manager {
   public static readonly question: string =
     'the answer to life the universe and everything'
 
@@ -262,7 +262,7 @@ class DeepThought extends BaseExecutor {
 /**
  * An executor class that acts like a simple Javascript calculator.
  */
-class Calculator extends BaseExecutor {
+class Calculator extends Manager {
   public async capabilities(): Promise<Capabilities> {
     return Promise.resolve({
       execute: {
@@ -303,7 +303,7 @@ describe('BaseExecutor', () => {
     const deepThought = new DeepThought()
     const calculator = new Calculator()
 
-    const executor = new BaseExecutor([
+    const executor = new Manager([
       async () => [
         {
           id: deepThought,
@@ -388,7 +388,7 @@ describe('BaseExecutor', () => {
     const calculatorServer = new DirectServer()
     await calculatorServer.start(calculator)
 
-    const executor = new BaseExecutor(
+    const executor = new Manager(
       [
         async () => [
           {
