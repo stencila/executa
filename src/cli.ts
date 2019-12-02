@@ -1,21 +1,10 @@
 #!/usr/bin/env node
 
-import {
-  defaultHandler,
-  getLogger,
-  LogLevel,
-  replaceHandlers
-} from '@stencila/logga'
-import minimist from 'minimist'
+import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga'
 import { BaseExecutor } from './base/BaseExecutor'
 import { ClientType } from './base/Client'
 import { Server } from './base/Server'
-import {
-  HttpAddress,
-  TcpAddress,
-  VsockAddress,
-  WebSocketAddress
-} from './base/Transports'
+import { VsockAddress } from './base/Transports'
 import { HttpServer } from './http/HttpServer'
 import { discover as discoverStdio } from './stdio/discover'
 import { StdioClient } from './stdio/StdioClient'
@@ -24,57 +13,40 @@ import { TcpServer } from './tcp/TcpServer'
 import { VsockServer } from './vsock/VsockServer'
 import { WebSocketServer } from './ws/WebSocketServer'
 
-const { _: args, ...options } = minimist(process.argv.slice(2))
+import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
+import { Config } from './config'
+import configSchema from './config.schema.json'
 
-const log = getLogger('executa:cli')
+const { args = ['help'], config, valid, log } = collectOptions<Config>(
+  'executa',
+  configSchema
+)
+const command = args[0]
+
+const { debug, stdio, vsock, tcp, http, ws } = config
 
 replaceHandlers(data =>
   defaultHandler(data, {
-    maxLevel: options.debug !== undefined ? LogLevel.debug : LogLevel.info
+    maxLevel: debug ? LogLevel.debug : LogLevel.info,
+    showStack: debug
   })
 )
 
 const main = async () => {
-  // Initialize the executor
-
   // Add server classes based on supplied options
   const servers: Server[] = []
-  if (options.stdio !== undefined) {
+  if (stdio) {
     servers.push(new StdioServer())
   }
-  if (options.vsock !== undefined) {
+  if (vsock !== false)
     servers.push(
-      new VsockServer(
-        new VsockAddress(
-          typeof options.vsock === 'boolean' ? 6000 : options.vsock
-        )
-      )
+      new VsockServer(new VsockAddress(vsock === true ? 6000 : vsock))
     )
-  }
-  if (options.tcp !== undefined) {
-    servers.push(
-      new TcpServer(
-        new TcpAddress(typeof options.tcp === 'boolean' ? 7000 : options.tcp)
-      )
-    )
-  }
-  if (options.http !== undefined) {
-    servers.push(
-      new HttpServer(
-        new HttpAddress(typeof options.http === 'boolean' ? 8000 : options.http)
-      )
-    )
-  }
-  if (options.ws !== undefined) {
-    servers.push(
-      new WebSocketServer(
-        new WebSocketAddress(
-          typeof options.ws === 'boolean' ? 9000 : options.ws
-        )
-      )
-    )
-  }
+  if (tcp !== false) servers.push(new TcpServer(tcp === true ? 7000 : tcp))
+  if (http !== false) servers.push(new HttpServer(http === true ? 8000 : http))
+  if (ws !== false) servers.push(new WebSocketServer(ws === true ? 9000 : ws))
 
+  // Initialize the executor
   const executor = new BaseExecutor(
     [discoverStdio],
     [StdioClient as ClientType],
@@ -82,19 +54,18 @@ const main = async () => {
   )
 
   // Run command
-  const command = args[0]
-  if (command === 'serve' || command === undefined) return serve(executor)
-  else if (command === 'execute') return execute(executor)
-  else {
-    log.error(`Unrecognised command: ${command}`)
+  switch (command) {
+    case 'help':
+      return console.log(helpUsage(configSchema, args[1]))
+    case 'config':
+      return console.log(JSON.stringify(config, null, '  '))
+    case 'serve':
+      return executor.start()
+    case 'execute':
+      return execute(executor)
+    default:
+      log.error(`Unknown command: ${command}`)
   }
-}
-
-/**
- * Serve the executor
- */
-const serve = async (executor: BaseExecutor) => {
-  await executor.start()
 }
 
 /**
@@ -121,6 +92,7 @@ const execute = async (executor: BaseExecutor): Promise<void> => {
 }
 
 // Run the main function and log any exceptions
-main()
-  .then(() => {})
-  .catch(err => log.error(err))
+if (valid)
+  main()
+    .then(() => {})
+    .catch(err => log.error(err))

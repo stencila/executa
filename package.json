@@ -1,7 +1,7 @@
 {
   "name": "@stencila/executa",
   "version": "0.14.3",
-  "description": "Execution delegator for various language backends.",
+  "description": "Document executors: protocols, transports and reference implementations",
   "main": "./dist/lib/index.js",
   "types": "./dist/lib/index.d.ts",
   "browser": "./dist/browser/index.js",
@@ -19,12 +19,15 @@
     "test:watch": "jest --watch",
     "test:cover": "jest --coverage",
     "test:browser": "jest --env=jsdom",
-    "build": "npm run build:node && npm run build:browser",
+    "build": "npm run build:config && npm run build:node && npm run build:browser",
+    "build:config": "configa schema",
     "build:node": "tsc",
     "build:browser": "rollup --config",
-    "docs": "npm run docs:readme && npm run docs:ts",
-    "docs:readme": "markdown-toc -i --maxdepth=4 README.md",
-    "docs:ts": "typedoc --options typedoc.js ./src"
+    "docs": "npm run docs:readme && npm run docs:api",
+    "docs:readme": "npm run docs:readme:config && npm run docs:readme:toc",
+    "docs:readme:config": "configa readme",
+    "docs:readme:toc": "markdown-toc -i --maxdepth=4 README.md",
+    "docs:api": "typedoc --options typedoc.js ./src"
   },
   "author": "",
   "license": "Apache-2.0",
@@ -52,7 +55,8 @@
     "typescript": "3.6.4"
   },
   "dependencies": {
-    "@stencila/logga": "^2.0.0",
+    "@stencila/configa": "^0.2.0",
+    "@stencila/logga": "^2.1.0",
     "@stencila/schema": "^0.31.0",
     "@types/ws": "^6.0.3",
     "ajv": "^6.10.2",

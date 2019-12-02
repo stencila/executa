@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Executa 0.14.3",
+  "$comment": "",
+  "properties": {
+    "debug": {
+      "description": "Display debug log data?",
+      "type": "boolean",
+      "default": false
+    },
+    "stdio": {
+      "description": "Start a `stdio` server.",
+      "type": "boolean",
+      "default": false
+    },
+    "vsock": {
+      "description": "Start a `vsock` server.",
+      "$comment": "If a `number`, it will be used as the port number.\nIf `true`, the default Vsock port `6000` will be used.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "number"
+        }
+      ],
+      "default": false
+    },
+    "tcp": {
+      "description": "Start a TCP server.",
+      "$comment": "If a `string`, it will be parsed and used as the address\nof the TCP server.\nIf `true`, the default TCP address `tcp://127.0.0.1:7000`\nwill be used.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "pattern": "^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$"
+        }
+      ],
+      "default": false
+    },
+    "http": {
+      "description": "Start a HTTP server.",
+      "$comment": "If a `string`, it will be parsed and used as the address\nof the HTTP server.\nIf `true`, the default HTTP address `http://127.0.0.1:8000`\nwill be used.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "pattern": "^((https?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$"
+        }
+      ],
+      "default": false
+    },
+    "ws": {
+      "description": "Start a WebSocket server.",
+      "$comment": "If a `string`, it will be parsed and used as the address\nof the WebSocket server.\nIf `true`, the default WebSocket address `ws://127.0.0.1:9000`\nwill be used.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string",
+          "pattern": "^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$"
+        }
+      ],
+      "default": false
+    }
+  }
+}
