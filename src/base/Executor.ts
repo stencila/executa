@@ -1,3 +1,4 @@
+import { getLogger } from '@stencila/logga'
 import { Node, SoftwareSession } from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import {
@@ -10,6 +11,9 @@ import {
   VsockAddress,
   WebSocketAddressInitializer
 } from './Transports'
+import { InternalError } from './InternalError'
+
+const log = getLogger('executa:executor')
 
 /**
  * The methods of an `Executor` class.
@@ -228,12 +232,16 @@ export abstract class Executor {
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    * @param clients The ids of the clients to send the notification to. If missing send to all clients.
    */
-  abstract notify(
+  public notify(
     level: string,
     message: string,
     node?: Node,
     clients?: string[]
-  ): void
+  ): void {
+    throw new InternalError(
+      'Method notify should be implemented in derived classes'
+    )
+  }
 
   /**
    * Receive a notification
@@ -242,5 +250,16 @@ export abstract class Executor {
    * @param message The notification message
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    */
-  abstract notified(level: string, message: string, node?: Node): void
+  public notified(level: string, message: string, node?: Node): void {
+    switch (level) {
+      case 'debug':
+      case 'info':
+      case 'warn':
+      case 'error':
+        log[level](message)
+        break
+      default:
+        log.info(message)
+    }
+  }
 }

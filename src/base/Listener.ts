@@ -6,7 +6,7 @@ import { uid } from './uid'
 const log = getLogger('executa:listener')
 
 /**
- * An `Executor` class that listens for requests
+ * A base `Executor` class that listens for requests
  * and notifications using one or more `Server`s.
  *
  * Is also able to `notify()` clients that are
@@ -48,28 +48,6 @@ export abstract class Listener extends Executor {
   ) {
     for (const server of this.servers)
       server.notify(level, message, node, clients)
-  }
-
-  /**
-   * @implements {Executor.notified}
-   *
-   * Receive a notification from a client using one of this
-   * executor's servers.
-   *
-   * Just calls the appropriate method of `log`. Override this to
-   * provide more fancy notification to users.
-   */
-  public notified(level: string, message: string): void {
-    switch (level) {
-      case 'debug':
-      case 'info':
-      case 'warn':
-      case 'error':
-        log[level](message)
-        break
-      default:
-        log.info(message)
-    }
   }
 
   /**

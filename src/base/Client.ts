@@ -1,14 +1,10 @@
-import { Node, SoftwareSession } from '@stencila/schema'
-import { Executor, Manifest, Method, User } from './Executor'
-import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
+import { getLogger } from '@stencila/logga'
+import { Executor, Method } from './Executor'
+import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { InternalError } from './InternalError'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:client')
-
-const notifications = getLogger('executa:client:notifs')
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -25,9 +21,6 @@ export abstract class Client extends Executor {
   /**
    * @implements Implements {@link Executor.call} by sending a
    * a request to the remote `Executor` that this client is connected to.
-   *
-   * @param method The name of the method
-   * @param params Values of parameters (i.e. arguments)
    */
   public async call<Type>(
     method: Method,
@@ -50,33 +43,12 @@ export abstract class Client extends Executor {
   }
 
   /**
-   * @implements Implements {@link Executor.notify} by sending a notification
+   * @override Overrides {@link Executor.notify} by sending a notification
    * to the remote `Executor` that this client is connected to.
    */
   public notify(level: string, message: string) {
     const notification = new JsonRpcRequest(level, { message }, false)
     this.send(notification)
-  }
-
-  /**
-   * @implements Implements {@link Executor.notified} to receive a notification
-   * from the remote executor that this client is connected to.
-   *
-   * @description Currently simply calls the appropriate method of
-   * the `notifications` log instance. Override this to provide more fancy
-   * notification to users.
-   */
-  public notified(level: string, message: string, node?: Node): void {
-    switch (level) {
-      case 'debug':
-      case 'info':
-      case 'warn':
-      case 'error':
-        notifications[level](message)
-        break
-      default:
-        notifications.info(message)
-    }
   }
 
   /**

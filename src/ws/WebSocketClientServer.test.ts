@@ -25,7 +25,7 @@ test('WebSocketClient and WebSocketServer', async () => {
 
   let clientNotifs: LogData[] = []
   addHandler((logData: LogData) => {
-    if (logData.tag === 'executa:client:notifs') {
+    if (logData.tag === 'executa:executor') {
       clientNotifs = [...clientNotifs, logData]
     }
   })
