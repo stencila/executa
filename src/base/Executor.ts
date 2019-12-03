@@ -29,6 +29,11 @@ export enum Method {
   end = 'end'
 }
 
+export interface Call {
+  method: Method
+  params: { [key: string]: unknown }
+}
+
 /**
  * The capabilities of an `Executor` class as
  * a mapping of method name to a JSON Schema object
@@ -261,5 +266,23 @@ export abstract class Executor {
       default:
         log.info(message)
     }
+  }
+
+  /**
+   * Start the executor
+   *
+   * Derived classes may override this method.
+   */
+  public start(): Promise<void> {
+    return Promise.resolve()
+  }
+
+  /**
+   * Stop the executor
+   *
+   * Derived classes may override this method.
+   */
+  public stop(): Promise<void> {
+    return Promise.resolve()
   }
 }

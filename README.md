@@ -23,14 +23,17 @@ All configuration options can be set, in descending order of priority, by:
 <!-- CONFIGA-USAGE-END -->
 
 <!-- CONFIGA-TABLE-BEGIN -->
-| Name  | Description                                                      | Type                | Validators                                                  | Default |
-| ----- | ---------------------------------------------------------------- | ------------------- | ----------------------------------------------------------- | ------- |
-| debug | Should debug level logging information be displayed?             | `boolean`           |                                                             | `false` |
-| stdio | Start a `stdio` server.                                          | `boolean`           |                                                             | `false` |
-| vsock | Start a `vsock` server.<a href="#vsock-details"><sup>1</sup></a> | `boolean \| number` |                                                             | `false` |
-| tcp   | Start a TCP server.<a href="#tcp-details"><sup>2</sup></a>       | `boolean \| string` | pattern: `/^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/`   | `false` |
-| http  | Start a HTTP server.<a href="#http-details"><sup>3</sup></a>     | `boolean \| string` | pattern: `/^((https?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/` | `false` |
-| ws    | Start a WebSocket server.<a href="#ws-details"><sup>4</sup></a>  | `boolean \| string` | pattern: `/^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/`   | `false` |
+| Name          | Description                                                                                         | Type                | Validators                                                  | Default |
+| ------------- | --------------------------------------------------------------------------------------------------- | ------------------- | ----------------------------------------------------------- | ------- |
+| debug         | Display debug log data?                                                                             | `boolean`           |                                                             | `false` |
+| stdio         | Start a `stdio` server.                                                                             | `boolean`           |                                                             | `false` |
+| vsock         | Start a `vsock` server.<a href="#vsock-details"><sup>1</sup></a>                                    | `boolean \| number` |                                                             | `false` |
+| tcp           | Start a TCP server.<a href="#tcp-details"><sup>2</sup></a>                                          | `boolean \| string` | pattern: `/^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/`   | `false` |
+| http          | Start a HTTP server.<a href="#http-details"><sup>3</sup></a>                                        | `boolean \| string` | pattern: `/^((https?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/` | `false` |
+| ws            | Start a WebSocket server.<a href="#ws-details"><sup>4</sup></a>                                     | `boolean \| string` | pattern: `/^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)\|(d+)$/`   | `false` |
+| queueLength   | Maximum length of the request queue.<a href="#queueLength-details"><sup>5</sup></a>                 | `number`            | minimum: `0`                                                | `1000`  |
+| queueInterval | Interval between attempts to reduce request queue.<a href="#queueInterval-details"><sup>6</sup></a> | `number`            | exclusiveMinimum: `0`                                       | `1`     |
+| queueStale    | Duration after which a request is removed from queue.<a href="#queueStale-details"><sup>7</sup></a> | `number`            | exclusiveMinimum: `0`                                       | `3600`  |
 
 
 1. <a id="vsock-details"></a>If a `number`, it will be used as the port number.
@@ -47,5 +50,9 @@ will be used.
 of the WebSocket server.
 If `true`, the default WebSocket address `ws://127.0.0.1:9000`
 will be used.
+5. <a id="queueLength-details"></a>When queue reaches this length, subsequent requests will
+fail with an error response to client.
+6. <a id="queueInterval-details"></a>Seconds.
+7. <a id="queueStale-details"></a>Seconds. Client will be notified when a request is removed.
 
 <!-- CONFIGA-TABLE-END -->

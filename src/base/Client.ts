@@ -120,24 +120,6 @@ export abstract class Client extends Executor {
 
     delete this.requests[id]
   }
-
-  /**
-   * Start the client
-   *
-   * Derived classes may override this method.
-   */
-  public start(): Promise<void> {
-    return Promise.resolve()
-  }
-
-  /**
-   * Stop the client
-   *
-   * Derived classes may override this method.
-   */
-  public stop(): Promise<void> {
-    return Promise.resolve()
-  }
 }
 
 export interface ClientType {
