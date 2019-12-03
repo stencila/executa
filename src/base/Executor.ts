@@ -31,7 +31,7 @@ export enum Method {
 
 export interface Call {
   method: Method
-  params: { [key: string]: unknown }
+  params: { [key: string]: any }
 }
 
 /**
