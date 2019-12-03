@@ -1,10 +1,10 @@
-import { getLogger } from '@stencila/logga';
-import Ajv from 'ajv';
-import { ClientType } from "./Client";
-import { Executor, Manifest, Method, Call } from "./Executor";
-import { InternalError } from "./InternalError";
-import { Transport } from './Transports';
-import { CapabilityError } from './CapabilityError';
+import { getLogger } from '@stencila/logga'
+import Ajv from 'ajv'
+import { ClientType } from './Client'
+import { Executor, Manifest, Method, Call } from './Executor'
+import { InternalError } from './InternalError'
+import { Transport } from './Transports'
+import { CapabilityError } from './CapabilityError'
 
 const ajv = new Ajv()
 
@@ -19,7 +19,6 @@ const log = getLogger('executa:delegator')
  * which can be used to perform other handling.
  */
 export class Delegator extends Executor {
-
   /**
    * Classes of `Client` that can be used
    * to connect to peer executors.
@@ -30,15 +29,16 @@ export class Delegator extends Executor {
    * Peer executors that are delegated to depending
    * upon their capabilities and the request at hand.
    */
-  protected readonly peers: {[key:string]: Peer} = {}
+  protected readonly peers: { [key: string]: Peer } = {}
 
   public constructor(
     clientTypes: ClientType[] = [],
-    manifests: {[key: string]: Manifest} = {}
+    manifests: { [key: string]: Manifest } = {}
   ) {
     super()
     this.clientTypes = clientTypes
-    for (const [id, manifest] of Object.entries(manifests)) this.add(id, manifest)
+    for (const [id, manifest] of Object.entries(manifests))
+      this.add(id, manifest)
   }
 
   /**
@@ -56,10 +56,13 @@ export class Delegator extends Executor {
         }
       }
     }
-    return Promise.reject(new CapabilityError(`Unable to delegate method "${method}"`))
+    return Promise.reject(
+      new CapabilityError(`Unable to delegate method "${method}"`)
+    )
   }
 
   public add(id: string, manifest: Manifest): void {
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
     const peer = new Peer(manifest, this.clientTypes)
     this.peers[id] = peer
   }
@@ -74,7 +77,6 @@ export class Delegator extends Executor {
     delete this.peers[id]
   }
 }
-
 
 /**
  * A instance of a `Executor` used as a peer

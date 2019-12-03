@@ -16,14 +16,14 @@ import { Manager } from '../base/Manager'
 import { Node } from '@stencila/schema'
 
 class TestExecutor extends Manager {
-  decode(content: string): Promise<Node> {
+  decode(content: string, format?: string): Promise<Node> {
     if (content === 'send bad message') {
       process.stdout.write('Hah hah, a bad message to try to crash you!')
       return Promise.resolve('bad message sent')
     } else if (content === 'crash now!') {
       setTimeout(() => process.exit(1), 100)
       return Promise.resolve('crashing soon')
-    } else return super.decode(content)
+    } else return super.decode(content, format)
   }
 }
 

@@ -1,7 +1,7 @@
 import { Config } from '../config'
 import { Method, Call, Executor } from './Executor'
 import { uid } from './uid'
-import { Node } from '@stencila/schema';
+import { Node } from '@stencila/schema'
 
 interface Job<Type> {
   id: string

@@ -1,10 +1,10 @@
 import { PassThrough } from 'stream'
-import * as stencila from '@stencila/schema'
 import { StreamClient } from './StreamClient'
 import { StreamServer } from './StreamServer'
 import { Manager } from '../base/Manager'
+import { testClient } from '../test/testClient'
 
-describe('StreamClient and StreamServer', () => {
+test('StreamClient and StreamServer', async () => {
   // @ts-ignore Ignore the fact that this is an abstract class
   const server = new StreamServer()
   const executor = new Manager()
@@ -14,25 +14,8 @@ describe('StreamClient and StreamServer', () => {
 
   const client = new StreamClient(serverIncoming, serverOutgoing)
 
-  test('calling manifest', async () => {
-    expect(await client.manifest()).toEqual(await executor.manifest())
-  })
+  await testClient(client)
 
-  test('calling methods with node', async () => {
-    const node = stencila.person({
-      givenNames: ['Jane'],
-      familyNames: ['Jones']
-    })
-
-    for (const method of ['compile', 'build', 'execute']) {
-      // @ts-ignore
-      expect(await client[method](node)).toEqual(node)
-    }
-
-    // There should be no more requests waiting for a response
-    // @ts-ignore
-    expect(Object.keys(client.requests).length).toEqual(0)
-  })
-
+  await client.stop()
   server.stop()
 })

@@ -1,8 +1,8 @@
-import { getLogger } from '@stencila/logga';
-import { Executor, Manifest, Method, Call, Capabilities } from "./Executor";
-import { InternalError } from './InternalError';
-import { CapabilityError } from './CapabilityError';
-import { Node, nodeType } from '@stencila/schema';
+import { getLogger } from '@stencila/logga'
+import { Executor, Manifest, Method, Call, Capabilities } from './Executor'
+import { InternalError } from './InternalError'
+import { CapabilityError } from './CapabilityError'
+import { Node, nodeType } from '@stencila/schema'
 
 const log = getLogger('executa:worker')
 
@@ -10,14 +10,10 @@ const log = getLogger('executa:worker')
  * An `Executor` class that ...
  */
 export class Worker extends Executor {
-
   /**
    * @implements Implements {@link Executor.call} by
    */
-  public async call(
-    method: Method,
-    params: Call['params'] = {}
-  ): Promise<any> {
+  public call(method: Method, params: Call['params'] = {}): Promise<any> {
     switch (method) {
       case Method.manifest:
         return this.manifest()
@@ -39,7 +35,7 @@ export class Worker extends Executor {
     throw new InternalError(`Unhandled method ${method}`)
   }
 
-  public async manifest(): Promise<Manifest> {
+  public manifest(): Promise<Manifest> {
     const capabilities: Capabilities = {
       decode: [
         // Can decode string content of JSON format
@@ -62,42 +58,48 @@ export class Worker extends Executor {
         }
       ]
     }
-    return {
+    return Promise.resolve({
       capabilities
-    }
+    })
   }
 
-  public async decode(content: string, format: string): Promise<Node> {
-    if (format === 'json') return JSON.parse(content)
+  public decode(content: string, format: string): Promise<Node> {
+    if (format === 'json') return Promise.resolve(JSON.parse(content))
     throw new CapabilityError(`Unable to decode content of format "${format}"`)
   }
 
-  public async encode(node: Node, format = 'json'): Promise<string> {
-    if (format === 'json') return JSON.stringify(node)
+  public encode(node: Node, format = 'json'): Promise<string> {
+    if (format === 'json') return Promise.resolve(JSON.stringify(node))
     throw new CapabilityError(`Unable to encode node to format "${format}"`)
   }
 
-  public async compile<Node>(node: Node): Promise<Node> {
-    throw new CapabilityError(`Unable to compile node of type "${nodeType(node)}"`)
+  public compile<Node>(node: Node): Promise<Node> {
+    throw new CapabilityError(
+      `Unable to compile node of type "${nodeType(node)}"`
+    )
   }
 
-  public async build<Node>(node: Node): Promise<Node> {
-    throw new CapabilityError(`Unable to build node of type "${nodeType(node)}"`)
+  public build<Node>(node: Node): Promise<Node> {
+    throw new CapabilityError(
+      `Unable to build node of type "${nodeType(node)}"`
+    )
   }
 
-  public execute<Node>(
-    node: Node,
-  ): Promise<Node> {
-    throw new CapabilityError(`Unable to execute node of type "${nodeType(node)}"`)
+  public execute<Node>(node: Node): Promise<Node> {
+    throw new CapabilityError(
+      `Unable to execute node of type "${nodeType(node)}"`
+    )
   }
 
-  public begin<Node>(
-    node: Node
-  ): Promise<Node> {
-    throw new CapabilityError(`Unable to begin node of type "${nodeType(node)}"`)
+  public begin<Node>(node: Node): Promise<Node> {
+    throw new CapabilityError(
+      `Unable to begin node of type "${nodeType(node)}"`
+    )
   }
 
   public end<Node>(node: Node): Promise<Node> {
-    throw new CapabilityError(`Unable to begin node of type "${nodeType(node)}"`)
+    throw new CapabilityError(
+      `Unable to begin node of type "${nodeType(node)}"`
+    )
   }
 }

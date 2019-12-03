@@ -7,8 +7,6 @@
  *
  * Messages should be written for developers using this library,
  * not for end users.
- *
- * @see {@link JsonRpcError} {@link InternalError}
  */
 export class CapabilityError extends Error {
   constructor(message: string) {

@@ -3,8 +3,16 @@ import { Executor, Method } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
+import { JsonRpcErrorCode, JsonRpcError } from './JsonRpcError'
 
 const log = getLogger('executa:client')
+
+interface Request<Type> {
+  id: number
+  date: Date
+  resolve: (result: Type) => void
+  reject: (error: Error) => void
+}
 
 /**
  * A client to a remote, out of process, `Executor`.
@@ -16,7 +24,7 @@ export abstract class Client extends Executor {
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: { [key: number]: (response: JsonRpcResponse) => void } = {}
+  private requests: { [key: number]: Request<any> } = {}
 
   /**
    * @implements Implements {@link Executor.call} by sending a
@@ -32,10 +40,11 @@ export abstract class Client extends Executor {
       throw new InternalError('Request should have id defined')
 
     const promise = new Promise<Type>((resolve, reject) => {
-      this.requests[id] = (response: JsonRpcResponse) => {
-        const { result, error } = response
-        if (error !== undefined) reject(error)
-        else resolve(result)
+      this.requests[id] = {
+        id,
+        date: new Date(),
+        resolve,
+        reject
       }
     })
     await this.send(request)
@@ -100,22 +109,22 @@ export abstract class Client extends Executor {
       return
     }
 
-    const resolve = this.requests[id]
-    if (resolve === undefined) {
+    const request = this.requests[id]
+    if (request === undefined) {
       log.error(`No request found for response with id: ${id}`)
       return
     }
 
-    try {
-      resolve(message as JsonRpcResponse)
-    } catch (error) {
-      const { message: errorMessage, stack } = error
-      log.error({
-        message: `Error thrown when handling message: ${errorMessage}\n${JSON.stringify(
-          message
-        )}`,
-        stack
-      })
+    const { resolve, reject } = request
+    const { result, error } = message as JsonRpcResponse
+
+    if (error !== undefined) reject(JsonRpcError.toError(error))
+    else {
+      try {
+        resolve(result)
+      } catch (error) {
+        log.error(`Unhandled error when resolving result: ${error}`)
+      }
     }
 
     delete this.requests[id]

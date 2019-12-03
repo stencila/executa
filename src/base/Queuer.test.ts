@@ -48,7 +48,7 @@ test('call', async () => {
 })
 
 test('check', async () => {
-  const queuer = new Queuer({ ...new Config(), queueStale: 0.0010 })
+  const queuer = new Queuer({ ...new Config(), queueStale: 0.001 })
   const { queue } = queuer
 
   const p0 = queuer.decode('')
@@ -70,12 +70,12 @@ test('check', async () => {
 test('start + stop', async () => {
   const queuer = new Queuer({
     ...new Config(),
-    queueStale: 0.0010,
+    queueStale: 0.001,
     queueInterval: 0.0001
   })
   const { queue } = queuer
 
-  queuer.start()
+  await queuer.start()
 
   const p0 = queuer.decode('')
   expect(queue.length).toBe(1)
@@ -85,7 +85,7 @@ test('start + stop', async () => {
   const p1 = queuer.decode('')
   expect(queue.length).toBe(1)
 
-  queuer.stop()
+  await queuer.stop()
   await expect(p1).rejects.toThrow(/Executor is stopping/)
   expect(queue.length).toBe(0)
 })

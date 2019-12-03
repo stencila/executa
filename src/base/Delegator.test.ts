@@ -1,13 +1,13 @@
-import { codeChunk, codeExpression, isA, Node } from '@stencila/schema';
-import { DirectClient } from '../direct/DirectClient';
-import { DirectServer } from '../direct/DirectServer';
-import { StdioClient } from '../stdio/StdioClient';
-import { ClientType } from './Client';
-import { Delegator, Peer } from './Delegator';
-import { Capabilities, Manifest, Method } from './Executor';
-import { Transport } from './Transports';
-import { Worker } from './Worker';
-import { CapabilityError } from './CapabilityError';
+import { codeChunk, codeExpression, isA, Node } from '@stencila/schema'
+import { DirectClient } from '../direct/DirectClient'
+import { DirectServer } from '../direct/DirectServer'
+import { StdioClient } from '../stdio/StdioClient'
+import { ClientType } from './Client'
+import { Delegator, Peer } from './Delegator'
+import { Capabilities, Manifest, Method } from './Executor'
+import { Transport } from './Transports'
+import { Worker } from './Worker'
+import { CapabilityError } from './CapabilityError'
 
 describe('Peer', () => {
   test('capable: no capabilities', () => {
@@ -309,10 +309,11 @@ describe('Delegator', () => {
     const calculator = new Calculator()
 
     const delegator = new Delegator([], {
-        deepThought: {
-          id: deepThought,
-          capabilities: await deepThought.capabilities()
-        },})
+      deepThought: {
+        id: deepThought,
+        capabilities: await deepThought.capabilities()
+      }
+    })
 
     // @ts-ignore that peers are private
     const peersCount = () => Object.keys(delegator.peers).length
@@ -327,7 +328,7 @@ describe('Delegator', () => {
     delegator.remove('calculator')
     expect(peersCount()).toBe(1)
 
-    delegator.update('calculator',{
+    delegator.update('calculator', {
       id: calculator,
       capabilities: await calculator.capabilities()
     })
@@ -370,29 +371,26 @@ describe('Delegator', () => {
     const calculatorServer = new DirectServer()
     await calculatorServer.start(calculator)
 
-    const executor = new Delegator(
-      [DirectClient as ClientType],
-      {
-        deepThought: {
-            addresses: {
-              direct: {
-                type: Transport.direct,
-                server: deepThoughtServer
-              }
-            },
-            capabilities: await deepThought.capabilities()
-          },
-          calculator: {
-            addresses: {
-              direct: {
-                type: Transport.direct,
-                server: calculatorServer
-              }
-            },
-            capabilities: await calculator.capabilities()
+    const executor = new Delegator([DirectClient as ClientType], {
+      deepThought: {
+        addresses: {
+          direct: {
+            type: Transport.direct,
+            server: deepThoughtServer
           }
+        },
+        capabilities: await deepThought.capabilities()
+      },
+      calculator: {
+        addresses: {
+          direct: {
+            type: Transport.direct,
+            server: calculatorServer
+          }
+        },
+        capabilities: await calculator.capabilities()
       }
-    )
+    })
 
     expect(await executor.execute(codeChunk(DeepThought.question))).toEqual({
       type: 'CodeChunk',

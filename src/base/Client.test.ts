@@ -88,10 +88,12 @@ test('receiving bad response', async () => {
 
   message = nextMessage()
   // @ts-ignore that requests is private
-  client.requests[42] = () => {
-    throw Error("Yo! I'm an error")
+  client.requests[42] = {
+    resolve: () => {
+      throw Error("Yo! I'm an error")
+    }
   }
   // @ts-ignore that receive is protected
   client.receive({ id: 42 })
-  expect(await message).toMatch(/^Error thrown when handling message/)
+  expect(await message).toMatch(/^Unhandled error when resolving result/)
 })

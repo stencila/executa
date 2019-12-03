@@ -1,4 +1,3 @@
-import * as stencila from '@stencila/schema'
 import { DirectClient } from './DirectClient'
 import { DirectServer } from './DirectServer'
 import { Manager } from '../base/Manager'
@@ -17,16 +16,11 @@ test('DirectClient and DirectServer', async () => {
   // Run some other tests that take advantage of the fact
   // that we have access to the executor...
 
-  // The results of method calls should be the same on client as on the executor
-  const node = stencila.person({
-    givenNames: ['Jane'],
-    familyNames: ['Jones']
-  })
+  // Method calls give same result as calling directly
   expect(await client.manifest()).toEqual(await executor.manifest())
-  for (const method of ['compile', 'build', 'execute']) {
-    // @ts-ignore
-    expect(await client[method](node)).toEqual(await executor[method](node))
-  }
+  expect(await client.decode('{"a": 1}', 'json')).toEqual(
+    await executor.decode('{"a": 1}', 'json')
+  )
 
   // There should be no more requests waiting for a response
   // @ts-ignore that client.requests is private

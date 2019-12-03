@@ -7,6 +7,7 @@ import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
+import { CapabilityError } from './CapabilityError'
 
 const log = getLogger('executa:server')
 
@@ -133,6 +134,9 @@ export abstract class Server {
         // A JSON-RPC client error (e.g. missing parameters), do
         // not log it (to avoid noisy logs), just send to the client.
         error = exc
+      } else if (exc instanceof CapabilityError) {
+        // Executor not capable of performing call so return special code
+        error = new JsonRpcError(JsonRpcErrorCode.CapabilityError, exc.message)
       } else {
         // Some sort of internal error, so log it and wrap
         // it into a JSON RPC error to send to the client.

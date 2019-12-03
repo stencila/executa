@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Executor } from './Executor'
+import { Executor, Addresses } from './Executor'
 import { Server } from './Server'
 import { uid } from './uid'
 
@@ -32,6 +32,15 @@ export abstract class Listener extends Executor {
     super()
     this.id = uid()
     this.servers = servers
+  }
+
+  /**
+   * Get a map of server addresses for this executor.
+   */
+  public addresses(): Addresses {
+    return this.servers
+      .map(server => server.address)
+      .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
   }
 
   /**
