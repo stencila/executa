@@ -2,12 +2,13 @@ import { nextLogData } from '../test/nextLogData'
 import { Client } from './Client'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
+
 /**
  * Simple test client that implements the
- * `send` to echo back the
+ * `send` method to echo back the
  * called method and arguments.
  */
-class TestClient extends Client {
+class EchoClient extends Client {
   public send(request: JsonRpcRequest): void {
     const { id, method, params } = request
     const response = new JsonRpcResponse(id, { method, params })
@@ -21,7 +22,7 @@ class TestClient extends Client {
  * `method` and `params`.
  */
 test('calling methods', async () => {
-  const client = new TestClient()
+  const client = new EchoClient()
 
   expect(await client.manifest()).toEqual({
     method: 'manifest',
@@ -63,7 +64,7 @@ test('calling methods', async () => {
  * throwing an error when sent bad responses
  */
 test('receiving bad response', async () => {
-  const client = new TestClient()
+  const client = new EchoClient()
 
   // Because there is no async tick between the client receiving
   // the request and generating the log entry, we need to create
