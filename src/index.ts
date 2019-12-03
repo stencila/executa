@@ -4,7 +4,7 @@ export {
   Manifest,
   Addresses,
   Capabilities,
-  User
+  Claims
 } from './base/Executor'
 export { Manager } from './base/Manager'
 

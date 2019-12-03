@@ -1,4 +1,4 @@
-export { Executor, User } from './base/Executor'
+export { Executor, Claims } from './base/Executor'
 export { Manager } from './base/Manager'
 
 export { HttpAddress } from './base/Transports'

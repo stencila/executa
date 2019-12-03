@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { Node } from '@stencila/schema'
 import { Manager } from './Manager'
-import { Executor, User } from './Executor'
+import { Executor, Claims } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
@@ -50,8 +50,8 @@ export abstract class Server {
    * Receive a request or notification
    *
    * @param request A JSON-RPC request from a client
-   * @param user An object representing the user and their rights,
-   *             usually a JWT payload
+   * @param claims An object representing the claims for the request,
+   *             usually a from a JWT payload
    * @param stringify Should the response be stringified?
    * @returns If receiving a request then a JSON-RPC response as an
    *          object or string (default).
@@ -59,7 +59,7 @@ export abstract class Server {
    */
   protected async receive(
     request: string | JsonRpcRequest,
-    user: User = {},
+    claims: Claims = {},
     stringify = true
   ): Promise<string | JsonRpcResponse | void> {
     if (this.executor === undefined)
@@ -105,18 +105,18 @@ export abstract class Server {
           result = await this.executor.execute(
             request.param(0, 'node'),
             request.param(1, 'session', false),
-            // Any `user` parameter requested is ignored and instead
-            // the user from the server (e.g. based on a JWT) is applied
-            user
+            // Any `claims` parameter is ignored and instead
+            // the claims from the server (e.g. based on a JWT) is applied
+            claims
           )
           break
         case 'begin':
         case 'end':
           result = await this.executor[method](
             request.param(0, 'node'),
-            // Any `user` parameter requested is ignored and instead
-            // the user from the server (e.g. based on a JWT) is applied
-            user
+            // Any `claims` parameter is ignored and instead
+            // the claims from the server (e.g. based on a JWT) is applied
+            claims
           )
           break
         case 'compile':

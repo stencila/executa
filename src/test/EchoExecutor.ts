@@ -1,6 +1,6 @@
 import { Manager } from '../base/Manager'
 import { Node } from '@stencila/schema'
-import { User } from '../base/Executor'
+import { Claims } from '../base/Executor'
 
 /**
  * A test `Executor` which echos back the arguments
@@ -10,9 +10,9 @@ import { User } from '../base/Executor'
 export class EchoExecutor extends Manager {
   begin<NodeType extends Node>(
     node: NodeType,
-    user: User = {}
+    claims: Claims = {}
   ): Promise<NodeType> {
     // This intentionally breaks contract to return the same node type as received
-    return Promise.resolve(({ node, user } as unknown) as NodeType)
+    return Promise.resolve(({ node, claims } as unknown) as NodeType)
   }
 }

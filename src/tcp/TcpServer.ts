@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
 import net from 'net'
-import { Executor, User } from '../base/Executor'
+import { Executor, Claims } from '../base/Executor'
 import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'

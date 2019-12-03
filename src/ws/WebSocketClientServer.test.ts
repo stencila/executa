@@ -1,7 +1,7 @@
 import { addHandler, LogData } from '@stencila/logga'
 import { softwareEnvironment, softwareSession } from '@stencila/schema'
 import JWT from 'jsonwebtoken'
-import { User } from '../base/Executor'
+import { Claims } from '../base/Executor'
 import { EchoExecutor } from '../test/EchoExecutor'
 import { testClient } from '../test/testClient'
 import { WebSocketClient } from './WebSocketClient'
@@ -54,7 +54,7 @@ test('WebSocketClient and WebSocketServer', async () => {
       cpuRequest: 4,
       memoryRequest: 5
     })
-    const user: User = {
+    const claims: Claims = {
       session: softwareSession({
         environment: softwareEnvironment('some-eviron'),
         cpuLimit: 2,
@@ -62,12 +62,12 @@ test('WebSocketClient and WebSocketServer', async () => {
       })
     }
     // Sign with the server's secret
-    const jwt = JWT.sign(user, server.jwtSecret)
+    const jwt = JWT.sign(claims, server.jwtSecret)
     const client = new WebSocketClient({ ...server.address, jwt })
     const echoed = (await client.begin(sessionRequests)) as any
     expect(echoed.node).toEqual(sessionRequests)
 
-    const userclient = echoed.user.client
+    const userclient = echoed.claims.client
     expect(userclient.type).toEqual('ws')
     expect(userclient).toHaveProperty('id')
 

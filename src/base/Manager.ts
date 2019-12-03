@@ -5,7 +5,7 @@ import {
   Capabilities,
   Manifest,
   Method,
-  User,
+  Claims,
   Executor
 } from './Executor'
 import { Listener } from './Listener'

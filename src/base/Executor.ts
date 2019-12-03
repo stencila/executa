@@ -93,17 +93,23 @@ export interface Manifest {
 }
 
 /**
- * User information used in some methods for
- * authorization (e.g. limiting the number of
- * session that a user can have)
+ * Information used in some methods for
+ * authorization (e.g. limiting the number
+ * of users accessing a session, limiting
+ * the resources used by a session)
  */
-export interface User {
-  id?: string
+export interface Claims {
+  user?: {
+    id: string
+  }
   client?: {
     type: Transport
     id: string
   }
   session?: SoftwareSession
+
+  // Allow for other arbitrary properties
+  [key: string]: any
 }
 
 /**
@@ -169,15 +175,15 @@ export abstract class Executor {
    *
    * @param node The node to execute
    * @param session The session that the node will be executed in
-   * @param user The `User` making the call
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has been executed
    */
   public async execute<NodeType extends Node>(
     node: NodeType,
     session?: SoftwareSession,
-    user?: User
+    claims?: Claims
   ): Promise<NodeType> {
-    return this.call<NodeType>(Method.execute, { node, session, user })
+    return this.call<NodeType>(Method.execute, { node, session, claims })
   }
 
   /**
@@ -194,28 +200,28 @@ export abstract class Executor {
    * `session` property, or default session if that property is missing.
    *
    * @param node The node to run, usually but not necessarily, a `SoftwareSession`
-   * @param user The `User` making the call
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has begun running
    */
   public async begin<NodeType extends Node>(
     node: NodeType,
-    user?: User
+    claims?: Claims
   ): Promise<NodeType> {
-    return this.call<NodeType>(Method.begin, { node, user })
+    return this.call<NodeType>(Method.begin, { node, claims })
   }
 
   /**
    * End running a `Node`.
    *
    * @param node The running node, usually but not necessarily, a `SoftwareSession`
-   * @param user The `User` making the request
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has ended running
    */
   public async end<NodeType extends Node>(
     node: NodeType,
-    user?: User
+    claims?: Claims
   ): Promise<NodeType> {
-    return this.call<NodeType>(Method.end, { node, user })
+    return this.call<NodeType>(Method.end, { node, claims })
   }
 
   /**

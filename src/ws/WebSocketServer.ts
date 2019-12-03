@@ -12,7 +12,7 @@ import {
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen, parseProtocol } from './util'
-import { User } from '../base/Executor'
+import { Claims } from '../base/Executor'
 import { FastifyRequest, FastifyInstance } from 'fastify'
 
 const log = getLogger('executa:ws:server')
@@ -28,19 +28,19 @@ export class WebSocketConnection implements Connection {
   id: string
 
   /**
-   * User information for this connection
+   * Claims made for this connection
    */
-  user: User
+  claims: Claims
 
   /**
    * The WebSocket used by this connection
    */
   socket: WebSocket
 
-  constructor(socket: WebSocket, id: string, user: User) {
+  constructor(socket: WebSocket, id: string, claims: Claims) {
     this.socket = socket
     this.id = id
-    this.user = { ...user, client: { type: Transport.ws, id } }
+    this.claims = { ...claims, client: { type: Transport.ws, id } }
   }
 
   /**
@@ -114,10 +114,10 @@ export class WebSocketServer extends HttpServer {
         } catch (error) {
           log.warn(error)
         }
-        let user: User = {}
+        let claims: Claims = {}
         if (jwt !== undefined) {
           try {
-            user = app.jwt.verify(jwt)
+            claims = app.jwt.verify(jwt)
           } catch (error) {
             // If verification failed then close the connection
             // with a 4001 code (mirrors the HTTP 401 code used by `HttpServer`
@@ -129,13 +129,13 @@ export class WebSocketServer extends HttpServer {
         }
 
         // Register connection and disconnection handler
-        const wsconnection = new WebSocketConnection(socket, id, user)
+        const wsconnection = new WebSocketConnection(socket, id, claims)
         this.onConnected(wsconnection)
         socket.on('close', () => this.onDisconnected(wsconnection))
 
         // Handle messages from connection
         socket.on('message', async (message: string) => {
-          const response = await this.receive(message, wsconnection.user)
+          const response = await this.receive(message, wsconnection.claims)
           if (response !== undefined)
             wsconnection
               .send(response as string)
