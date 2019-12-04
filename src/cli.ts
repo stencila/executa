@@ -1,38 +1,89 @@
 #!/usr/bin/env node
 
+import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
 import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga'
+import * as readline from 'readline'
+import { Executor } from './base/Executor'
 import { Manager } from './base/Manager'
-import { ClientType } from './base/Client'
 import { Server } from './base/Server'
 import { VsockAddress } from './base/Transports'
+import { Config } from './config'
+import configSchema from './config.schema.json'
 import { HttpServer } from './http/HttpServer'
-import { discover as discoverStdio } from './stdio/discover'
-import { StdioClient } from './stdio/StdioClient'
 import { StdioServer } from './stdio/StdioServer'
 import { TcpServer } from './tcp/TcpServer'
 import { VsockServer } from './vsock/VsockServer'
 import { WebSocketServer } from './ws/WebSocketServer'
+import { CodeChunk } from '@stencila/schema'
 
-import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
-import { Config } from './config'
-import configSchema from './config.schema.json'
+const main = async (): Promise<void> => {
+  // Collect configuration options
+  const { args = ['help'], config, valid, log } = collectOptions<Config>(
+    'executa',
+    configSchema
+  )
 
-const { args = ['help'], config, valid, log } = collectOptions<Config>(
-  'executa',
-  configSchema
-)
-const command = args[0]
+  // Exit if config is not valid
+  if (!valid) process.exit(1)
 
-const { debug, stdio, vsock, tcp, http, ws } = config
+  // Configure log handler
+  const { debug } = config
+  replaceHandlers(data =>
+    defaultHandler(data, {
+      maxLevel: debug ? LogLevel.debug : LogLevel.info,
+      showStack: debug
+    })
+  )
 
-replaceHandlers(data =>
-  defaultHandler(data, {
-    maxLevel: debug ? LogLevel.debug : LogLevel.info,
-    showStack: debug
-  })
-)
+  // Run the command
+  const command = args[0]
+  switch (command) {
+    case 'help':
+      return help(args[1])
+    case 'conf':
+      return conf(config)
+    default: {
+      const executor = init(config)
+      switch (command) {
+        case 'repl':
+          return repl(executor, args[1], debug)
+        case 'start':
+        case 'serve':
+          return start(executor)
+        case 'convert':
+          return convert(executor)
+        case 'execute':
+          return execute(executor)
+      }
+    }
+  }
+  log.error(`Unknown command: ${command}`)
+}
 
-const main = async () => {
+/**
+ * Show usage help, possibly for a single option
+ */
+const help = (option?: string): void =>
+  console.log(helpUsage(configSchema, option))
+
+/**
+ * Show the configuration
+ */
+const conf = (config: Config): void =>
+  console.log(JSON.stringify(config, null, '  '))
+
+/**
+ * Initialize a root executor based on the config
+ */
+const init = (config: Config): Executor => {
+  const { debug, stdio, vsock, tcp, http, ws } = config
+
+  replaceHandlers(data =>
+    defaultHandler(data, {
+      maxLevel: debug ? LogLevel.debug : LogLevel.info,
+      showStack: debug
+    })
+  )
   // Add server classes based on supplied options
   const servers: Server[] = []
   if (stdio) {
@@ -46,34 +97,100 @@ const main = async () => {
   if (http !== false) servers.push(new HttpServer(http === true ? 8000 : http))
   if (ws !== false) servers.push(new WebSocketServer(ws === true ? 9000 : ws))
 
-  // Initialize the executor
-  const manager = new Manager(
-    [discoverStdio],
-    [StdioClient as ClientType],
-    servers
+  return new Manager()
+}
+
+/**
+ * A simple REPL for testing connection to, and configuration of,
+ * executors.
+ *
+ * Sends requests to execute a `CodeChunk` with `programmingLanguage: 'sh'`
+ * to the VM and prints it's `outputs` to the console. You can change the
+ * language being used by typing a line starting with `<` e.g. `< py`
+ */
+const repl = (executor: Executor, lang = 'js', debug: boolean): void => {
+  // Reconfigure log handler to only show `info` and `debug` events
+  // and error stacks when `--debug` option is set
+  replaceHandlers(data =>
+    defaultHandler(data, {
+      maxLevel: debug ? LogLevel.debug : LogLevel.warn,
+      showStack: debug
+    })
   )
 
-  // Run command
-  switch (command) {
-    case 'help':
-      return console.log(helpUsage(configSchema, args[1]))
-    case 'config':
-      return console.log(JSON.stringify(config, null, '  '))
-    case 'serve':
-      return manager.start()
-    case 'execute':
-      return execute(manager)
-    default:
-      log.error(`Unknown command: ${command}`)
+  const red = '\u001b[31;1m'
+  const blue = '\u001b[34;1m'
+  const reset = '\u001b[0m'
+
+  // Function to create a prompt base don current
+  // language
+  const prompt = (): string => `${blue}${lang}${reset}> `
+
+  // Create the REPL with the starting prompt
+  const repl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: prompt()
+  })
+  repl.prompt()
+
+  // Function that handles each line
+  const getLine = async (line: string): Promise<void> => {
+    // Check if user wants to switch language
+    const match = /^<\s*(\w+)/.exec(line)
+    if (match !== null) {
+      // Change language and provide new prompt
+      lang = match[1].toLowerCase()
+      repl.setPrompt(prompt())
+      repl.prompt()
+      return
+    }
+
+    // User entered a 'normal' line: execute a `CodeChunk`
+    const result = (await executor.execute({
+      type: 'CodeChunk',
+      programmingLanguage: lang,
+      text: line
+    })) as CodeChunk
+
+    // Display any errors
+    if (result.errors !== undefined && result.errors.length > 0) {
+      process.stderr.write(red)
+      for (const error of result.errors)
+        if (error.message !== undefined) process.stderr.write(error.message)
+      process.stderr.write(reset)
+    }
+
+    // Display any outputs
+    if (result.outputs !== undefined && result.outputs.length > 0) {
+      process.stdout.write(blue)
+      for (const output of result.outputs) process.stdout.write(`${output}`)
+      process.stdout.write(reset)
+    }
+
+    // Provide a new prompt
+    repl.prompt()
   }
+
+  // For each line the user enters...
+  repl.on('line', line => {
+    getLine(line).catch(e => {
+      console.warn(e)
+    })
+  })
 }
+
+/**
+ * Start the executor
+ */
+const start = (executor: Executor): Promise<void> => executor.start()
 
 /**
  * Convert a document
  */
-const convert = async (executor: Manager): Promise<void> => {
-  const input = args[1]
-  const output = args[2] !== undefined ? args[2] : '-'
+const convert = async (executor: Executor): Promise<void> => {
+  const input = 'TODO:' // args[1]
+  const output = 'TODO:' // args[2] !== undefined ? args[2] : '-'
 
   const decoded = await executor.decode(input)
   await executor.encode(decoded, output)
@@ -82,9 +199,9 @@ const convert = async (executor: Manager): Promise<void> => {
 /**
  * Execute a document
  */
-const execute = async (executor: Manager): Promise<void> => {
-  const input = args[1]
-  const output = args[2] !== undefined ? args[2] : input
+const execute = async (executor: Executor): Promise<void> => {
+  const input = 'TODO:' // args[1]
+  const output = 'TODO:' // args[2] !== undefined ? args[2] : input
 
   const decoded = await executor.decode(input)
   const executed = await executor.execute(decoded)
@@ -92,7 +209,4 @@ const execute = async (executor: Manager): Promise<void> => {
 }
 
 // Run the main function and log any exceptions
-if (valid)
-  main()
-    .then(() => {})
-    .catch(err => log.error(err))
+main().catch(err => console.error(err))

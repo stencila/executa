@@ -68,7 +68,6 @@
     "glob": "^7.1.4",
     "isomorphic-ws": "^4.0.1",
     "length-prefixed-stream": "^2.0.0",
-    "minimist": "^1.2.0",
     "nanoid": "^2.1.6",
     "p-retry": "^4.2.0"
   },
