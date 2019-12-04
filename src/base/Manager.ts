@@ -47,6 +47,6 @@ export class Manager extends Listener {
    */
   async start(): Promise<void> {
     await super.start()
-    this.queuer.check(this.delegator)
+    await this.queuer.check(this.delegator)
   }
 }
