@@ -37,10 +37,9 @@ const onReadyHandler = (): void => {
 }
 
 export const init = (address: HttpAddressInitializer): void => {
-  executor = new Manager(
-    //[() => discover(address)],
-    //[HttpClient, WebSocketClient]
-  )
+  executor = new Manager()
+  // [() => discover(address)],
+  // [HttpClient, WebSocketClient]
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', onReadyHandler)

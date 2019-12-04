@@ -37,8 +37,10 @@ export class Worker extends Executor {
 
   public manifest(): Promise<Manifest> {
     const capabilities: Capabilities = {
+      // Can provide this manifest
+      manifest: true,
+      // Can decode string content of JSON format
       decode: [
-        // Can decode string content of JSON format
         {
           properties: {
             content: { type: 'string' },
@@ -47,8 +49,8 @@ export class Worker extends Executor {
           required: ['content']
         }
       ],
+      // Can encode any node to JSON format
       encode: [
-        // Can encode any node to JSON format
         {
           properties: {
             node: true,

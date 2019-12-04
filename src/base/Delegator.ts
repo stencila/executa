@@ -5,6 +5,7 @@ import { Executor, Manifest, Method, Call } from './Executor'
 import { InternalError } from './InternalError'
 import { Transport } from './Transports'
 import { CapabilityError } from './CapabilityError'
+import { uid } from './uid'
 
 const ajv = new Ajv()
 
@@ -32,13 +33,12 @@ export class Delegator extends Executor {
   protected readonly peers: { [key: string]: Peer } = {}
 
   public constructor(
-    clientTypes: ClientType[] = [],
-    manifests: { [key: string]: Manifest } = {}
+    executors: Executor[] = [],
+    clientTypes: ClientType[] = []
   ) {
     super()
     this.clientTypes = clientTypes
-    for (const [id, manifest] of Object.entries(manifests))
-      this.add(id, manifest)
+    for (const executor of executors) this.add(executor)
   }
 
   /**
@@ -50,8 +50,8 @@ export class Delegator extends Executor {
     params: Call['params'] = {}
   ): Promise<Type> {
     for (const peer of Object.values(this.peers)) {
-      if (peer.capable(method, params)) {
-        if (peer.connect()) {
+      if (await peer.capable(method, params)) {
+        if (await peer.connect()) {
           return peer.call<Type>(method, params)
         }
       }
@@ -61,17 +61,26 @@ export class Delegator extends Executor {
     )
   }
 
-  public add(id: string, manifest: Manifest): void {
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const peer = new Peer(manifest, this.clientTypes)
+  /* eslint-disable @typescript-eslint/no-use-before-define */
+
+  public add(executor: Executor, id?: string): string {
+    id = id !== undefined ? id : `mem://${uid()}`
+    const peer = new Peer(executor, this.clientTypes)
     this.peers[id] = peer
+    return id
   }
 
   public update(id: string, manifest: Manifest): void {
     const peer = this.peers[id]
-    if (peer !== undefined) peer.manifest = manifest
-    else this.add(id, manifest)
+    if (peer !== undefined) {
+      peer.update(manifest)
+    } else {
+      log.warn(`Peer with id not found, adding new peer: ${id}`)
+      this.peers[id] = new Peer(undefined, this.clientTypes, manifest)
+    }
   }
+
+  /* eslint-enable @typescript-eslint/no-use-before-define */
 
   public remove(id: string): void {
     delete this.peers[id]
@@ -83,10 +92,7 @@ export class Delegator extends Executor {
  * to delegate method calls to.
  */
 export class Peer {
-  /**
-   * The manifest of the peer executor.
-   */
-  public manifest: Manifest
+  executor?: Executor
 
   /**
    * A list of classes, that extend `Client`, and are available
@@ -100,13 +106,18 @@ export class Peer {
   public readonly clientTypes: ClientType[]
 
   /**
+   * The manifest of the peer executor.
+   */
+  public manifest?: Manifest
+
+  /**
    * The interface to the peer executor.
    *
    * May be an in-process `Executor` or a `Client` to an out-of-process
    * `Executor`, in which case it's type e.g. `StdioClient` vs `WebSocketClient`
    * will depend upon the available transports in `manifest.addresses`.
    */
-  private executor?: Executor
+  private interface?: Executor
 
   /**
    * Ajv validation functions for each method.
@@ -117,13 +128,44 @@ export class Peer {
   private validators: { [key: string]: Ajv.ValidateFunction[] } = {}
 
   public constructor(
-    manifest: Manifest,
-    clientTypes: ClientType[],
-    executor?: Executor
+    executor?: Executor,
+    clientTypes: ClientType[] = [],
+    manifest?: Manifest
   ) {
-    this.manifest = manifest
-    this.clientTypes = clientTypes
     this.executor = executor
+    this.clientTypes = clientTypes
+    this.manifest = manifest
+  }
+
+  /**
+   * Initialize the peer manifest and
+   * connection interface.
+   */
+  async initialize(): Promise<Manifest> {
+    let { executor, manifest } = this
+
+    if (executor !== undefined) {
+      if (manifest === undefined)
+        manifest = this.manifest = await executor.manifest()
+      this.interface = executor
+    } else {
+      if (manifest === undefined) manifest = this.manifest = {}
+    }
+
+    return manifest
+  }
+
+  /**
+   * Update the peer with a new manifest.
+   *
+   * This method updates the manifest and resets the
+   * capability validation functions.
+   *
+   * @param manifest The new manifest
+   */
+  update(manifest: Manifest) {
+    this.manifest = manifest
+    this.validators = {}
   }
 
   /**
@@ -137,13 +179,19 @@ export class Peer {
    * @param method The method to be called
    * @param params The parameter values of the call
    */
-  public capable(method: Method, params: { [key: string]: unknown }): boolean {
+  public async capable(
+    method: Method,
+    params: { [key: string]: unknown }
+  ): Promise<boolean> {
+    let { manifest } = this
+    if (manifest === undefined) manifest = await this.initialize()
+
     let validators = this.validators[method]
     if (validators === undefined) {
       // Peer does not have any capabilities defined
-      if (this.manifest.capabilities === undefined) return false
+      if (manifest.capabilities === undefined) return false
 
-      let capabilities = this.manifest.capabilities[method]
+      let capabilities = manifest.capabilities[method]
       // Peer does not have any capabilities for this method defined
       if (capabilities === undefined) return false
 
@@ -156,7 +204,8 @@ export class Peer {
       )
     }
     for (const validator of validators) {
-      if (validator(params) === true) return true
+      const valid = validator(params) as boolean
+      if (valid) return true
     }
     return false
   }
@@ -169,16 +218,12 @@ export class Peer {
    *
    * @returns A client instance or `undefined` if not able to connect
    */
-  public connect(): boolean {
-    // Check if already connected
-    if (this.executor !== undefined) return true
+  public async connect(): Promise<boolean> {
+    let { manifest } = this
+    if (manifest === undefined) manifest = await this.initialize()
 
-    // If the executor is in-process, just use it directly
-    // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    if (this.manifest.id instanceof Executor) {
-      this.executor = this.manifest.id
-      return true
-    }
+    // Check if already connected
+    if (this.interface !== undefined) return true
 
     // Connect to remote executor in order of preference of
     // transports
@@ -201,10 +246,10 @@ export class Peer {
         )
 
       // See if the peer has an address for the transport
-      if (this.manifest.addresses === undefined) return false
-      const address = this.manifest.addresses[transport]
+      if (manifest.addresses === undefined) return false
+      const address = manifest.addresses[transport]
       if (address !== undefined) {
-        this.executor = new ClientType(address)
+        this.interface = new ClientType(address)
         return true
       }
     }
@@ -226,10 +271,10 @@ export class Peer {
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     //  istanbul ignore next
-    if (this.executor === undefined)
+    if (this.interface === undefined)
       throw new InternalError(
         "WTF, no client! You shouldn't be calling this yet!"
       )
-    return this.executor.call<Type>(method, params)
+    return this.interface.call<Type>(method, params)
   }
 }
