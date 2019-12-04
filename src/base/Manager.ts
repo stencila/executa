@@ -1,73 +1,52 @@
 import { getLogger } from '@stencila/logga'
-import { isPrimitive, Node, nodeType, SoftwareSession } from '@stencila/schema'
-import {
-  Addresses,
-  Capabilities,
-  Manifest,
-  Method,
-  Claims,
-  Executor
-} from './Executor'
+import { Method } from './Executor'
 import { Listener } from './Listener'
 import { Worker } from './Worker'
 import { Queuer } from './Queuer'
 import { Delegator } from './Delegator'
+import { CapabilityError } from './CapabilityError'
 
 const log = getLogger('executa:manager')
 
 /**
- * A base `Executor` class implementation.
+ * An `Executor` class implementation which combines
+ * a `Delegator` and a `Queuer`.
  */
 export class Manager extends Listener {
-  worker: Executor
+  delegator: Delegator
+  queuer: Queuer
 
   constructor(
-    worker: Executor = new Worker(),
-    delegator?: Delegator,
-    queuer?: Queuer
+    delegator: Delegator = new Delegator([new Worker()]),
+    queuer: Queuer = new Queuer()
   ) {
     super()
-    this.worker = worker
+    this.delegator = delegator
+    this.queuer = queuer
   }
 
   /**
-   * Get the manifest of the executor
-   *
-   * Derived classes may override this method,
-   * but will normally just override `capabilities()`.
+   * @override Override of {@link Executor.call} which
+   * places the call on the queue if it is unable to
+   * be delegated.
    */
-  public manifest(): Promise<Manifest> {
-    return Promise.resolve({
-      id: this.id,
-      capabilities: {},
-      addresses: this.addresses()
-    })
-  }
-
   public call(method: Method, params: { [key: string]: any }): Promise<any> {
-    return this.worker.call(method, params)
+    try {
+      return this.delegator.call(method, params)
+    } catch (error) {
+      if (error instanceof CapabilityError) {
+        return this.queuer.call(method, params)
+      }
+      throw error
+    }
   }
 
-  protected async walk<NodeType extends Node>(
-    root: NodeType,
-    transformer: (node: Node) => Promise<Node>
-  ): Promise<NodeType> {
-    return walk(root) as Promise<NodeType>
-    async function walk(node: Node): Promise<Node> {
-      const transformed = await transformer(node)
-
-      if (transformed !== node) return transformed
-
-      if (transformed === undefined || isPrimitive(transformed))
-        return transformed
-      if (Array.isArray(transformed)) return Promise.all(transformed.map(walk))
-      return Object.entries(transformed).reduce(
-        async (prev, [key, child]) => ({
-          ...(await prev),
-          ...{ [key]: await walk(child) }
-        }),
-        Promise.resolve({})
-      )
-    }
+  /**
+   * @override Override of {@link Listener.start} which
+   * also starts periodic checking of the queue
+   */
+  async start(): Promise<void> {
+    await super.start()
+    this.queuer.check(this.delegator)
   }
 }

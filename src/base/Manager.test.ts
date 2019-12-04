@@ -1,3 +1,5 @@
 import { Manager } from './Manager'
 
-test('', () => {})
+test('', () => {
+  expect(1).toBe(1)
+})
