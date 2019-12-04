@@ -38,8 +38,8 @@ const onReadyHandler = (): void => {
 
 export const init = (address: HttpAddressInitializer): void => {
   executor = new Manager(
-    [() => discover(address)],
-    [HttpClient, WebSocketClient]
+    //[() => discover(address)],
+    //[HttpClient, WebSocketClient]
   )
 
   if (document.readyState === 'loading') {
