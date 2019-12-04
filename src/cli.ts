@@ -155,9 +155,13 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
   })
   repl.prompt()
 
+  let buffer = ''
+
   // Function that handles each line
   const getLine = async (line: string): Promise<void> => {
-    // Check if user wants to switch language
+    // Check if user wants to...
+
+    // ...switch language
     const match = /^<\s*(\w+)/.exec(line)
     if (match !== null) {
       // Change language and provide new prompt
@@ -167,7 +171,23 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
       return
     }
 
-    // User entered a 'normal' line: execute a `CodeChunk`..
+    // ...continue the line
+    // We use backslash which is line continuation char in most
+    // common languages e.g. JS, Python
+    if (line.endsWith('\\')) {
+      buffer += line.slice(0, -1)
+      return
+    }
+    // ...continue the chunk on a new line
+    // Useful where nelines are important e.g. `for` loops in Python
+    if (line.endsWith('...')) {
+      buffer += line.slice(0, -3) + '\n'
+      return
+    }
+
+    // User entered a 'normal' line so add to buffer and
+    // execute a `CodeChunk`
+    buffer += line
 
     // Spinner: it's useful feedback for long cells
     const spinnerText = (seconds = 0) => chalk.grey(`${seconds}s`)
@@ -192,14 +212,17 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
         'yellow',
         'magenta',
         'red'
-      ][Math.min(seconds, 6)] as Ora['color']
+      ][Math.min(Math.round(Math.log(seconds)), 6)] as Ora['color']
     }, 1000)
 
     const result = (await executor.execute({
       type: 'CodeChunk',
       programmingLanguage: lang,
-      text: line
+      text: buffer
     })) as CodeChunk
+
+    // Clear the buffer
+    buffer = ''
 
     // Stop the spinner
     clearInterval(interval)
