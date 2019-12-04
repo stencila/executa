@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "cli": "ts-node --files src/cli.ts",
-    "cli:dev": "ts-node-dev --files src/cli.ts --debug",
+    "cli:dev": "ts-node-dev --files src/cli.ts --debug=1",
     "console": "ts-node --files src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
