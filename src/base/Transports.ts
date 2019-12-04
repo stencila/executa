@@ -274,7 +274,7 @@ export function parseTcpAddress(
 
 export function parseAddress(address: string): Address | undefined {
   const match = /^([a-zA-Z]+):\/\/(.*)$/.exec(address)
-  if (match) {
+  if (match !== null) {
     const scheme = match[1]
     const rest = match[2]
     switch (scheme) {

@@ -1,11 +1,11 @@
-import { getLogger } from '@stencila/logga';
-import { CapabilityError } from './CapabilityError';
-import { Delegator } from './Delegator';
-import { Method } from './Executor';
-import { Listener } from './Listener';
-import { Queuer } from './Queuer';
-import { Server } from './Server';
-import { Worker } from './Worker';
+import { getLogger } from '@stencila/logga'
+import { CapabilityError } from './CapabilityError'
+import { Delegator } from './Delegator'
+import { Method } from './Executor'
+import { Listener } from './Listener'
+import { Queuer } from './Queuer'
+import { Server } from './Server'
+import { Worker } from './Worker'
 
 const log = getLogger('executa:manager')
 

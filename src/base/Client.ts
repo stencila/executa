@@ -4,7 +4,13 @@ import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { JsonRpcError } from './JsonRpcError'
-import { Transport, TcpAddressInitializer, parseTcpAddress, AddressInitializer, parseAddress } from './Transports'
+import {
+  Transport,
+  TcpAddressInitializer,
+  parseTcpAddress,
+  AddressInitializer,
+  parseAddress
+} from './Transports'
 
 const log = getLogger('executa:client')
 
@@ -138,15 +144,15 @@ export interface ClientType {
 }
 
 const clientTypeTransportMap: { [key: string]: Transport } = {
-  'DirectClient': Transport.direct,
-  'StdioClient': Transport.stdio,
-  'VsockClient': Transport.vsock,
-  'TcpClient': Transport.tcp,
-  'HttpClient': Transport.http,
-  'WebSocketClient': Transport.ws
+  DirectClient: Transport.direct,
+  StdioClient: Transport.stdio,
+  VsockClient: Transport.vsock,
+  TcpClient: Transport.tcp,
+  HttpClient: Transport.http,
+  WebSocketClient: Transport.ws
 }
 
-export function clientTypeToTransport (client: string | Function): Transport {
+export function clientTypeToTransport(client: string | Function): Transport {
   const name = typeof client === 'string' ? client : client.name
   const transport = clientTypeTransportMap[name]
   if (transport !== undefined) return transport
@@ -156,7 +162,7 @@ export function clientTypeToTransport (client: string | Function): Transport {
   )
 }
 
-export function transportToClientType (transport: Transport): string {
+export function transportToClientType(transport: Transport): string {
   for (const [name, trans] of Object.entries(clientTypeTransportMap)) {
     if (transport === trans) return name
   }
@@ -166,18 +172,24 @@ export function transportToClientType (transport: Transport): string {
   )
 }
 
-export function addressToClient (addressInitializer: string, clientTypes: ClientType[]): Client | undefined {
+export function addressToClient(
+  addressInitializer: string,
+  clientTypes: ClientType[]
+): Client | undefined {
   const address = parseAddress(addressInitializer)
   if (address === undefined) return
 
   const clientTypeName = transportToClientType(address.type)
-  const clientType = clientTypes.filter(clientType => clientType.name === clientTypeName)[0]
-  if (clientType === undefined) return
-
-  else return new clientType(address)
+  const ClientType = clientTypes.filter(
+    clientType => clientType.name === clientTypeName
+  )[0]
+  if (ClientType !== undefined) return new ClientType(address)
 }
 
-export function addressesToClients (addresses: string[], clientTypes: ClientType[]): Client[] {
+export function addressesToClients(
+  addresses: string[],
+  clientTypes: ClientType[]
+): Client[] {
   return addresses.reduce((clients: Client[], address) => {
     const client = addressToClient(address, clientTypes)
     return client !== undefined ? [...clients, client] : clients

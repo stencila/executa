@@ -185,16 +185,8 @@ describe('Peer', () => {
         stdio: 'echo'
       }
     }
-    const peer1 = new Peer(
-      undefined,
-      [DirectClient, StdioClient],
-      manifest
-    )
-    const peer2 = new Peer(
-      undefined,
-      [StdioClient, DirectClient],
-      manifest
-    )
+    const peer1 = new Peer(undefined, [DirectClient, StdioClient], manifest)
+    const peer2 = new Peer(undefined, [StdioClient, DirectClient], manifest)
 
     expect(await peer1.connect()).toBe(true)
     // @ts-ignore that interface is private

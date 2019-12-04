@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 
-import { collectOptions, helpUsage } from '@stencila/configa/dist/run';
-import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga';
-import { CodeChunk } from '@stencila/schema';
-import * as readline from 'readline';
-import { ClientType, addressesToClients } from './base/Client';
-import { Delegator } from './base/Delegator';
-import { Executor } from './base/Executor';
-import { Manager } from './base/Manager';
-import { Queuer } from './base/Queuer';
-import { Server } from './base/Server';
-import { VsockAddress } from './base/Transports';
-import { Config } from './config';
-import configSchema from './config.schema.json';
-import { HttpServer } from './http/HttpServer';
-import { StdioServer } from './stdio/StdioServer';
-import { TcpServer } from './tcp/TcpServer';
-import { VsockServer } from './vsock/VsockServer';
-import { WebSocketServer } from './ws/WebSocketServer';
-import { HttpClient } from './http/HttpClient';
-import { StdioClient } from './stdio/StdioClient';
-import { WebSocketClient } from './ws/WebSocketClient';
-import { TcpClient } from './tcp/TcpClient';
+import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
+import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga'
+import { CodeChunk } from '@stencila/schema'
+import * as readline from 'readline'
+import { ClientType, addressesToClients } from './base/Client'
+import { Delegator } from './base/Delegator'
+import { Executor } from './base/Executor'
+import { Manager } from './base/Manager'
+import { Queuer } from './base/Queuer'
+import { Server } from './base/Server'
+import { VsockAddress } from './base/Transports'
+import { Config } from './config'
+import configSchema from './config.schema.json'
+import { HttpServer } from './http/HttpServer'
+import { StdioServer } from './stdio/StdioServer'
+import { TcpServer } from './tcp/TcpServer'
+import { VsockServer } from './vsock/VsockServer'
+import { WebSocketServer } from './ws/WebSocketServer'
+import { HttpClient } from './http/HttpClient'
+import { StdioClient } from './stdio/StdioClient'
+import { WebSocketClient } from './ws/WebSocketClient'
+import { TcpClient } from './tcp/TcpClient'
 import chalk from 'chalk'
 import ora, { Ora } from 'ora'
 
@@ -95,13 +95,16 @@ const init = (config: Config): Executor => {
   // Create servers based on config options
   const { stdio, vsock, tcp, http, ws } = config
   const servers: Server[] = []
-  if (stdio)
-    servers.push(new StdioServer())
+  if (stdio) servers.push(new StdioServer())
   if (vsock !== false)
-    servers.push(new VsockServer(new VsockAddress(vsock === true ? undefined : vsock)))
+    servers.push(
+      new VsockServer(new VsockAddress(vsock === true ? undefined : vsock))
+    )
   if (tcp !== false) servers.push(new TcpServer(tcp === true ? undefined : tcp))
-  if (http !== false) servers.push(new HttpServer(http === true ? undefined : http))
-  if (ws !== false) servers.push(new WebSocketServer(ws === true ? undefined : ws))
+  if (http !== false)
+    servers.push(new HttpServer(http === true ? undefined : http))
+  if (ws !== false)
+    servers.push(new WebSocketServer(ws === true ? undefined : ws))
 
   // Client types that are available for connecting to peers
   const clientTypes: ClientType[] = [
@@ -181,7 +184,15 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
     const interval = setInterval(() => {
       const seconds = Math.round((Date.now() - started) / 1000)
       spinner.text = spinnerText(seconds)
-      spinner.color = ['gray', 'blue', 'cyan', 'green', 'yellow', 'magenta', 'red'][Math.min(seconds, 6)] as Ora['color']
+      spinner.color = [
+        'gray',
+        'blue',
+        'cyan',
+        'green',
+        'yellow',
+        'magenta',
+        'red'
+      ][Math.min(seconds, 6)] as Ora['color']
     }, 1000)
 
     const result = (await executor.execute({
@@ -197,7 +208,8 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
     // Display any errors
     if (result.errors !== undefined && result.errors.length > 0) {
       for (const error of result.errors)
-        if (error.message !== undefined) console.error(`${chalk.red(error.message)}`)
+        if (error.message !== undefined)
+          console.error(`${chalk.red(error.message)}`)
     }
 
     // Display any outputs
