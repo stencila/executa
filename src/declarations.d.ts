@@ -1,3 +1,4 @@
+type Interval = NodeJS.Timeout
 declare module 'length-prefixed-stream' {
   import stream from 'stream'
 

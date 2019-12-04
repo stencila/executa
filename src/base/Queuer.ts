@@ -1,7 +1,10 @@
 import { Config } from '../config'
 import { Method, Call, Executor } from './Executor'
 import { uid } from './uid'
-import { Node } from '@stencila/schema'
+import { getLogger } from '@stencila/logga'
+import { CapabilityError } from './CapabilityError'
+
+const log = getLogger('executa:queuer')
 
 interface Job<Type> {
   id: string
@@ -29,9 +32,9 @@ export class Queuer extends Executor {
   public readonly config: Config
 
   /**
-   * Identifier for the interval used to call `check`
+   * Identifier for the interval used to call `clean`
    */
-  private checkInterval?: any
+  private cleanInterval?: Interval
 
   constructor(config: Config = new Config()) {
     super()
@@ -51,9 +54,8 @@ export class Queuer extends Executor {
       config: { queueLength }
     } = this
 
-    if (queue.length >= queueLength) {
-      return Promise.reject(new Error('Queue is at maximum length'))
-    }
+    if (queue.length >= queueLength)
+      throw new CapabilityError('Queue is at maximum length')
 
     return new Promise<Type>((resolve, reject) => {
       const id = `job-${uid()}`
@@ -74,6 +76,52 @@ export class Queuer extends Executor {
   }
 
   /**
+   * Check the queue on an ongoing basis and attempt to
+   * reduce its size by completing jobs.
+   *
+   * @see {@link Queuer.reduce}
+   *
+   * @param executor An executor that will attempt
+   *                 to complete jobs.
+   * @returns A timeout that can be used to cancel the checks
+   */
+  public async check(executor: Executor): Promise<Interval> {
+    await this.reduce(executor)
+    return setInterval(() => {
+      this.reduce(executor).catch(error => log.error(error))
+    }, this.config.queueInterval)
+  }
+
+  /**
+   * Attempt to reduce the size of the queue by completing
+   * any jobs that are on it.
+   *
+   * @param executor An executor that will attempt
+   *                 to complete jobs.
+   * @returns The amount by which the queue was reduced
+   */
+  public async reduce(executor: Executor): Promise<number> {
+    let resolved = 0
+    for (const { call, resolve, reject } of [...this.queue]) {
+      const { method, params } = call
+      let result
+      try {
+        result = await executor.call(method, params)
+      } catch (error) {
+        if (!(error instanceof CapabilityError)) {
+          log.error(error)
+          reject(error)
+        }
+      }
+      if (result !== undefined) {
+        resolve(result)
+        resolved += 1
+      }
+    }
+    return resolved
+  }
+
+  /**
    * Remove a job from the queue.
    *
    * This method is `protected` because jobs should only
@@ -85,17 +133,12 @@ export class Queuer extends Executor {
   }
 
   /**
-   * Check the queue for stale jobs.
+   * Clean the queue by removing stale jobs.
    */
-  public check(): void {
-    const {
-      queue,
-      config: { queueStale }
-    } = this
-
+  public clean(): void {
     const now = Date.now()
-    for (const { date, reject } of queue) {
-      if ((now - date.valueOf()) / 1000 >= queueStale) {
+    for (const { date, reject } of [...this.queue]) {
+      if ((now - date.valueOf()) / 1000 >= this.config.queueStale) {
         reject(new Error('Request has become stale'))
       }
     }
@@ -106,8 +149,10 @@ export class Queuer extends Executor {
    * an interval for checking queue.
    */
   public start(): Promise<void> {
-    const { queueInterval } = this.config
-    this.checkInterval = setInterval(() => this.check(), queueInterval * 1000)
+    this.cleanInterval = setInterval(
+      () => this.clean(),
+      this.config.queueInterval * 1000
+    )
     return Promise.resolve()
   }
 
@@ -116,7 +161,7 @@ export class Queuer extends Executor {
    * all outstanding jobs in the queue.
    */
   public stop(): Promise<void> {
-    if (this.checkInterval !== undefined) clearInterval(this.checkInterval)
+    if (this.cleanInterval !== undefined) clearInterval(this.cleanInterval)
     for (const { reject } of this.queue)
       reject(new Error('Executor is stopping'))
     return Promise.resolve()

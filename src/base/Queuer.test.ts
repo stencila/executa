@@ -1,6 +1,8 @@
 import { Queuer } from './Queuer'
 import { Config } from '../config'
 import { delay } from '../test/delay'
+import { Worker } from './Worker'
+import { CapabilityError } from './CapabilityError'
 
 test('construct', () => {
   const queuer1 = new Queuer()
@@ -27,7 +29,9 @@ test('call', async () => {
   expect(queue.length).toBe(5)
 
   const p5 = queuer.manifest()
-  await expect(p5).rejects.toThrow(/Queue is at maximum length/)
+  await expect(p5).rejects.toThrow(
+    new CapabilityError('Queue is at maximum length')
+  )
 
   // Resolve a job
   const j0 = queue[0]
@@ -48,6 +52,40 @@ test('call', async () => {
 })
 
 test('check', async () => {
+  const queuer = new Queuer()
+  const worker = new Worker()
+
+  const p0 = queuer.decode('0', 'json')
+  const p1 = queuer.decode('1', 'json')
+
+  await queuer.check(worker)
+
+  const p2 = queuer.decode('2', 'json')
+  const p3 = queuer.decode('3', 'json')
+
+  expect(await p0).toBe(0)
+  expect(await p1).toBe(1)
+  expect(await p2).toBe(2)
+  expect(await p3).toBe(3)
+})
+
+test('reduce', async () => {
+  const queuer = new Queuer()
+  const worker = new Worker()
+
+  const p0 = queuer.decode('0', 'json')
+  const p1 = queuer.decode('1', 'json')
+  const p2 = queuer.decode('2', 'json')
+  const p3 = queuer.decode('3', 'pdf') // Will not be resolved
+  const resolved = await queuer.reduce(worker)
+  expect(resolved).toBe(3)
+
+  expect(await p0).toBe(0)
+  expect(await p1).toBe(1)
+  expect(await p2).toBe(2)
+})
+
+test('clean', async () => {
   const queuer = new Queuer({ ...new Config(), queueStale: 0.001 })
   const { queue } = queuer
 
@@ -56,14 +94,14 @@ test('check', async () => {
 
   await delay(20)
 
-  queuer.check()
+  queuer.clean()
   await expect(p0).rejects.toThrow(/Request has become stale/)
   expect(queue.length).toBe(0)
 
   const p1 = queuer.decode('')
   expect(queue.length).toBe(1)
 
-  queuer.check()
+  queuer.clean()
   expect(queue.length).toBe(1)
 })
 
