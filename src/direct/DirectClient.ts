@@ -23,4 +23,8 @@ export class DirectClient extends Client {
         throw error
       })
   }
+
+  static discover(): DirectClient[] {
+    return []
+  }
 }

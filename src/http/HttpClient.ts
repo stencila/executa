@@ -75,4 +75,9 @@ export class HttpClient extends Client {
       })
       .catch(err => log.error(err))
   }
+
+  static discover(): HttpClient[] {
+    log.warn('No peer discovery available for HTTP clients')
+    return []
+  }
 }

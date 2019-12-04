@@ -22,7 +22,7 @@ export class StdioClient extends StreamClient {
     // stderr of current process
     const { stdin, stdout, stderr } = child
     super(stdin, stdout)
-    stderr.pipe(process.stderr)
+    // TODO: stderr.pipe(process.stderr)
 
     this.child = child
   }
@@ -35,5 +35,9 @@ export class StdioClient extends StreamClient {
     this.child.removeAllListeners('exit')
     this.child.kill()
     return Promise.resolve()
+  }
+
+  static discover(): StdioClient[] {
+    return []
   }
 }

@@ -167,4 +167,9 @@ export class WebSocketClient extends Client {
     if (this.socket !== undefined) this.socket.close()
     return Promise.resolve()
   }
+
+  static discover(): WebSocketClient[] {
+    log.warn('No peer discovery available for WebSockets clients')
+    return []
+  }
 }

@@ -1,6 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import Ajv from 'ajv'
-import { ClientType } from './Client'
+import { ClientType, clientTypeToTransport } from './Client'
 import { Executor, Manifest, Method, Call } from './Executor'
 import { InternalError } from './InternalError'
 import { Transport } from './Transports'
@@ -228,22 +228,7 @@ export class Peer {
     // Connect to remote executor in order of preference of
     // transports
     for (const ClientType of this.clientTypes) {
-      // Get the transport for the client type
-      // There should be a better way to do this
-      const transportMap: { [key: string]: Transport } = {
-        DirectClient: Transport.direct,
-        StdioClient: Transport.stdio,
-        VsockClient: Transport.vsock,
-        TcpClient: Transport.tcp,
-        HttpClient: Transport.http,
-        WebSocketClient: Transport.ws
-      }
-      const transport = transportMap[ClientType.name]
-      //  istanbul ignore next
-      if (transport === undefined)
-        throw new InternalError(
-          `Wooah! A key is missing for "${ClientType.name}" in transportMap.`
-        )
+      const transport = clientTypeToTransport(ClientType)
 
       // See if the peer has an address for the transport
       if (manifest.addresses === undefined) return false

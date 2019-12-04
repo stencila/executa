@@ -3,7 +3,8 @@ import { Executor, Method } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { JsonRpcErrorCode, JsonRpcError } from './JsonRpcError'
+import { JsonRpcError } from './JsonRpcError'
+import { Transport, TcpAddressInitializer, parseTcpAddress, AddressInitializer, parseAddress } from './Transports'
 
 const log = getLogger('executa:client')
 
@@ -133,4 +134,52 @@ export abstract class Client extends Executor {
 
 export interface ClientType {
   new (address: any): Client
+  discover: (address?: string) => Client[]
+}
+
+const clientTypeTransportMap: { [key: string]: Transport } = {
+  'DirectClient': Transport.direct,
+  'StdioClient': Transport.stdio,
+  'VsockClient': Transport.vsock,
+  'TcpClient': Transport.tcp,
+  'HttpClient': Transport.http,
+  'WebSocketClient': Transport.ws
+}
+
+export function clientTypeToTransport (client: string | Function): Transport {
+  const name = typeof client === 'string' ? client : client.name
+  const transport = clientTypeTransportMap[name]
+  if (transport !== undefined) return transport
+  //  istanbul ignore next
+  throw new InternalError(
+    `Wooah! A key is missing for client name "${name}" in transport map.`
+  )
+}
+
+export function transportToClientType (transport: Transport): string {
+  for (const [name, trans] of Object.entries(clientTypeTransportMap)) {
+    if (transport === trans) return name
+  }
+  //  istanbul ignore next
+  throw new InternalError(
+    `OMG! An entry is missing for transport "${transport}" in transport map.`
+  )
+}
+
+export function addressToClient (addressInitializer: string, clientTypes: ClientType[]): Client | undefined {
+  const address = parseAddress(addressInitializer)
+  if (address === undefined) return
+
+  const clientTypeName = transportToClientType(address.type)
+  const clientType = clientTypes.filter(clientType => clientType.name === clientTypeName)[0]
+  if (clientType === undefined) return
+
+  else return new clientType(address)
+}
+
+export function addressesToClients (addresses: string[], clientTypes: ClientType[]): Client[] {
+  return addresses.reduce((clients: Client[], address) => {
+    const client = addressToClient(address, clientTypes)
+    return client !== undefined ? [...clients, client] : clients
+  }, [])
 }

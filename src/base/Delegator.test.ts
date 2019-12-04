@@ -187,12 +187,12 @@ describe('Peer', () => {
     }
     const peer1 = new Peer(
       undefined,
-      [DirectClient as ClientType, StdioClient as ClientType],
+      [DirectClient, StdioClient],
       manifest
     )
     const peer2 = new Peer(
       undefined,
-      [StdioClient as ClientType, DirectClient as ClientType],
+      [StdioClient, DirectClient],
       manifest
     )
 

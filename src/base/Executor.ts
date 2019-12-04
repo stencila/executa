@@ -67,11 +67,9 @@ export interface Addresses {
  */
 export interface Manifest {
   /**
-   * The id of the `Executor`, or
-   * the `Executor` instance itself if it
-   * is in-process.
+   * The id of the `Executor`
    */
-  id?: string | Executor
+  id?: string
 
   /**
    * The capabilities of the executor

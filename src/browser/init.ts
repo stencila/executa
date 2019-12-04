@@ -3,7 +3,6 @@ import { getLogger } from '@stencila/logga'
 import { CodeChunk, softwareSession, SoftwareSession } from '@stencila/schema'
 import { Manager } from '../base/Manager'
 import { HttpAddressInitializer } from '../base/Transports'
-import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
 
@@ -38,8 +37,6 @@ const onReadyHandler = (): void => {
 
 export const init = (address: HttpAddressInitializer): void => {
   executor = new Manager()
-  // [() => discover(address)],
-  // [HttpClient, WebSocketClient]
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', onReadyHandler)

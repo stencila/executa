@@ -1,10 +1,11 @@
-import { getLogger } from '@stencila/logga'
-import { Method } from './Executor'
-import { Listener } from './Listener'
-import { Worker } from './Worker'
-import { Queuer } from './Queuer'
-import { Delegator } from './Delegator'
-import { CapabilityError } from './CapabilityError'
+import { getLogger } from '@stencila/logga';
+import { CapabilityError } from './CapabilityError';
+import { Delegator } from './Delegator';
+import { Method } from './Executor';
+import { Listener } from './Listener';
+import { Queuer } from './Queuer';
+import { Server } from './Server';
+import { Worker } from './Worker';
 
 const log = getLogger('executa:manager')
 
@@ -17,10 +18,11 @@ export class Manager extends Listener {
   queuer: Queuer
 
   constructor(
+    servers: Server[] = [],
     delegator: Delegator = new Delegator([new Worker()]),
     queuer: Queuer = new Queuer()
   ) {
-    super()
+    super(servers)
     this.delegator = delegator
     this.queuer = queuer
   }

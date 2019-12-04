@@ -28,4 +28,9 @@ export class TcpClient extends StreamClient {
     this.socket.destroy()
     return Promise.resolve()
   }
+
+  static discover(): TcpClient[] {
+    log.warn('No peer discovery available for TCP clients')
+    return []
+  }
 }
