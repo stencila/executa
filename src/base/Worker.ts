@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import { Executor, Manifest, Method, Capabilities, Params } from './Executor'
 import { InternalError } from './InternalError'
 import { CapabilityError } from './CapabilityError'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:worker')
 

@@ -285,5 +285,5 @@ export function parseAddress(address: string): Address | undefined {
         return new HttpAddress(address)
     }
   }
-  console.error(`Unable to parse address: ${address}`)
+  // TODO console.error(`Unable to parse address: ${address}`)
 }

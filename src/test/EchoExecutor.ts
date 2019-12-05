@@ -1,4 +1,4 @@
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { Claims } from '../base/Executor'
 import { Worker } from '../base/Worker'
 

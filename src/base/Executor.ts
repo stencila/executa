@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import {
   DirectAddress,

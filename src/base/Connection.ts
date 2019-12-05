@@ -1,4 +1,4 @@
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 /**
  * A `Server` side connection to a `Client`.

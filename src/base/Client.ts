@@ -11,7 +11,7 @@ import {
   AddressInitializer,
   parseAddress
 } from './Transports'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:client')
 

@@ -11,7 +11,7 @@
  * - `client.decode('crash now!')`
  */
 
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { Worker } from '../base/Worker'
 import { StdioServer } from './StdioServer'
 

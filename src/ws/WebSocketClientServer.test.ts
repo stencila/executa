@@ -1,5 +1,5 @@
 import { addHandler, LogData } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import JWT from 'jsonwebtoken'
 import { Claims } from '../base/Executor'
 import { EchoExecutor } from '../test/EchoExecutor'

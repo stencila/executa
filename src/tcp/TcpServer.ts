@@ -6,7 +6,7 @@ import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
 import { Connection } from '../base/Connection'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:tcp:server')
 

@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { Manager } from './Manager'
 import { Executor, Claims } from './Executor'
 import { InternalError } from './InternalError'

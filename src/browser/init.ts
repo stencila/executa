@@ -1,6 +1,6 @@
 import '@stencila/components'
 import { getLogger } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { Manager } from '../base/Manager'
 import { HttpAddressInitializer } from '../base/Transports'
 import { HttpClient } from '../http/HttpClient'

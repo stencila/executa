@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
 import WebSocket from 'isomorphic-ws'

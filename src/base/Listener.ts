@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import { Executor, Addresses } from './Executor'
 import { Server } from './Server'
 import { uid } from './uid'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:listener')
 

@@ -1,4 +1,4 @@
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
