@@ -6,7 +6,7 @@ import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
 import { Connection } from '../base/Connection'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 
 const log = getLogger('executa:tcp:server')
 
@@ -119,7 +119,7 @@ export class TcpServer extends Server {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients?: string[]
   ): void {
     if (clients === undefined) clients = Object.keys(this.connections)

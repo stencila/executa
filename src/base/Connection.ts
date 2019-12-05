@@ -1,4 +1,4 @@
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 
 /**
  * A `Server` side connection to a `Client`.
@@ -25,7 +25,7 @@ export interface Connection {
    * @see {@link Client.notify}
    * @see {@link Server.notify}
    */
-  notify(level: string, message: string, node?: Node): void
+  notify(level: string, message: string, node?: schema.Node): void
 
   /**
    * Stop the connection.

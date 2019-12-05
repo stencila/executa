@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import { Executor, Manifest, Method, Call, Capabilities } from './Executor'
 import { InternalError } from './InternalError'
 import { CapabilityError } from './CapabilityError'
-import { Node, nodeType } from '@stencila/schema'
+import schema from '@stencila/schema'
 
 const log = getLogger('executa:worker')
 
@@ -65,43 +65,43 @@ export class Worker extends Executor {
     })
   }
 
-  public decode(content: string, format: string): Promise<Node> {
+  public decode(content: string, format: string): Promise<schema.Node> {
     if (format === 'json') return Promise.resolve(JSON.parse(content))
     throw new CapabilityError(`Unable to decode content of format "${format}"`)
   }
 
-  public encode(node: Node, format = 'json'): Promise<string> {
+  public encode(node: schema.Node, format = 'json'): Promise<string> {
     if (format === 'json') return Promise.resolve(JSON.stringify(node))
     throw new CapabilityError(`Unable to encode node to format "${format}"`)
   }
 
-  public compile<Node>(node: Node): Promise<Node> {
+  public compile<Type extends schema.Node>(node: Type): Promise<Type> {
     throw new CapabilityError(
-      `Unable to compile node of type "${nodeType(node)}"`
+      `Unable to compile node of type "${schema.nodeType(node)}"`
     )
   }
 
-  public build<Node>(node: Node): Promise<Node> {
+  public build<Type extends schema.Node>(node: Type): Promise<Type> {
     throw new CapabilityError(
-      `Unable to build node of type "${nodeType(node)}"`
+      `Unable to build node of type "${schema.nodeType(node)}"`
     )
   }
 
-  public execute<Node>(node: Node): Promise<Node> {
+  public execute<Type extends schema.Node>(node: Type): Promise<Type> {
     throw new CapabilityError(
-      `Unable to execute node of type "${nodeType(node)}"`
+      `Unable to execute node of type "${schema.nodeType(node)}"`
     )
   }
 
-  public begin<Node>(node: Node): Promise<Node> {
+  public begin<Type extends schema.Node>(node: Type): Promise<Type> {
     throw new CapabilityError(
-      `Unable to begin node of type "${nodeType(node)}"`
+      `Unable to begin node of type "${schema.nodeType(node)}"`
     )
   }
 
-  public end<Node>(node: Node): Promise<Node> {
+  public end<Type extends schema.Node>(node: Type): Promise<Type> {
     throw new CapabilityError(
-      `Unable to begin node of type "${nodeType(node)}"`
+      `Unable to begin node of type "${schema.nodeType(node)}"`
     )
   }
 }

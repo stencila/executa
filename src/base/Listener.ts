@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import { Executor, Addresses } from './Executor'
 import { Server } from './Server'
 import { uid } from './uid'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 
 const log = getLogger('executa:listener')
 
@@ -53,7 +53,7 @@ export abstract class Listener extends Executor {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients: string[] = []
   ) {
     for (const server of this.servers)

@@ -1,6 +1,6 @@
-import { Worker } from '../base/Worker'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 import { Claims } from '../base/Executor'
+import { Worker } from '../base/Worker'
 
 /**
  * A test `Executor` which echos back the arguments
@@ -8,11 +8,9 @@ import { Claims } from '../base/Executor'
  * `Server` implementations pass through arguments correctly.
  */
 export class EchoExecutor extends Worker {
-  begin<NodeType extends Node>(
-    node: NodeType,
-    claims: Claims = {}
-  ): Promise<NodeType> {
-    // This intentionally breaks contract to return the same node type as received
-    return Promise.resolve(({ node, claims } as unknown) as NodeType)
+  begin<Type extends schema.Node>(node: Type, claims?: Claims): Promise<Type> {
+    // This intentionally breaks contract to return the same node
+    // type as received
+    return Promise.resolve(({ node, claims } as unknown) as Type)
   }
 }

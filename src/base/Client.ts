@@ -11,7 +11,7 @@ import {
   AddressInitializer,
   parseAddress
 } from './Transports'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 
 const log = getLogger('executa:client')
 
@@ -104,7 +104,7 @@ export abstract class Client extends Executor {
    * notifications received by this client instead on just
    * logging them.
    */
-  notified(subject: string, message: string, node?: Node): void {
+  notified(subject: string, message: string, node?: schema.Node): void {
     const { notifications, notificationsLength } = this
     this.notificationsCount += 1
     notifications.push({

@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 import { Manager } from './Manager'
 import { Executor, Claims } from './Executor'
 import { InternalError } from './InternalError'
@@ -41,7 +41,7 @@ export abstract class Server {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients?: string[]
   ): void {
     // Only servers that have persistent connections can implement this

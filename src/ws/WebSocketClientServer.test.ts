@@ -1,5 +1,5 @@
 import { addHandler, LogData } from '@stencila/logga'
-import { softwareEnvironment, softwareSession } from '@stencila/schema'
+import schema from '@stencila/schema'
 import JWT from 'jsonwebtoken'
 import { Claims } from '../base/Executor'
 import { EchoExecutor } from '../test/EchoExecutor'
@@ -43,14 +43,14 @@ test('WebSocketClient and WebSocketServer', async () => {
 
   {
     // JWT with session limits to be used for begin() method
-    const sessionRequests = softwareSession({
-      environment: softwareEnvironment('some-eviron'),
+    const sessionRequests = schema.softwareSession({
+      environment: schema.softwareEnvironment('some-eviron'),
       cpuRequest: 4,
       memoryRequest: 5
     })
     const claims: Claims = {
-      session: softwareSession({
-        environment: softwareEnvironment('some-eviron'),
+      session: schema.softwareSession({
+        environment: schema.softwareEnvironment('some-eviron'),
         cpuLimit: 2,
         memoryLimit: 2
       })

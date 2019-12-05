@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 // @ts-ignore
 import fastifyWebsocket from 'fastify-websocket'
 import WebSocket from 'isomorphic-ws'
@@ -51,7 +51,11 @@ export class WebSocketConnection implements Connection {
    * WebSocket that is still open (i.e. will ignore failures for
    * connections that are closing or have closed).
    */
-  public notify(level: string, message: string, node: Node): Promise<void> {
+  public notify(
+    level: string,
+    message: string,
+    node: schema.Node
+  ): Promise<void> {
     const notification = new JsonRpcRequest(level, { message, node }, false)
     const json = JSON.stringify(notification)
     try {

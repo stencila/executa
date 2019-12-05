@@ -1,4 +1,4 @@
-import { codeChunk, codeExpression, isA, Node } from '@stencila/schema'
+import schema from '@stencila/schema'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
@@ -228,10 +228,8 @@ class DeepThought extends Worker {
     })
   }
 
-  public async execute<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType> {
-    if (isA('CodeChunk', node) && node.text === DeepThought.question) {
+  public async execute<Type extends schema.Node>(node: Type): Promise<Type> {
+    if (schema.isA('CodeChunk', node) && node.text === DeepThought.question) {
       return Promise.resolve({ ...node, outputs: [42] })
     }
     return Promise.resolve(node)
@@ -265,10 +263,8 @@ class Calculator extends Worker {
     })
   }
 
-  public async execute<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType> {
-    if (isA('CodeExpression', node)) {
+  public async execute<Type extends schema.Node>(node: Type): Promise<Type> {
+    if (schema.isA('CodeExpression', node)) {
       // eslint-disable-next-line no-eval
       return Promise.resolve({ ...node, output: eval(node.text) })
     }
@@ -301,19 +297,23 @@ describe('Delegator', () => {
 
     // Delegates executable nodes to peers
 
-    expect(await delegator.execute(codeChunk(DeepThought.question))).toEqual({
+    expect(
+      await delegator.execute(schema.codeChunk(DeepThought.question))
+    ).toEqual({
       type: 'CodeChunk',
       text: DeepThought.question,
       outputs: [42]
     })
 
-    expect(await delegator.execute(codeExpression('6 * 7'))).toEqual({
+    expect(await delegator.execute(schema.codeExpression('6 * 7'))).toEqual({
       type: 'CodeExpression',
       text: '6 * 7',
       output: 42
     })
 
-    expect(await delegator.execute(codeExpression('2 * Math.PI'))).toEqual({
+    expect(
+      await delegator.execute(schema.codeExpression('2 * Math.PI'))
+    ).toEqual({
       type: 'CodeExpression',
       text: '2 * Math.PI',
       output: 2 * Math.PI
@@ -325,13 +325,13 @@ describe('Delegator', () => {
     // Throws a capability error if we change a peers capabilities
     delegator.update('deepThought', {})
     await expect(
-      delegator.execute(codeChunk(DeepThought.question))
+      delegator.execute(schema.codeChunk(DeepThought.question))
     ).rejects.toThrow(CapabilityError)
 
     // Throws a capability error if we remove a peer
     delegator.remove('calculator')
-    await expect(delegator.execute(codeExpression('6 * 7'))).rejects.toThrow(
-      CapabilityError
-    )
+    await expect(
+      delegator.execute(schema.codeExpression('6 * 7'))
+    ).rejects.toThrow(CapabilityError)
   })
 })

@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Node, SoftwareSession } from '@stencila/schema'
+import schema from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import {
   DirectAddress,
@@ -104,7 +104,7 @@ export interface Claims {
     type: Transport
     id: string
   }
-  session?: SoftwareSession
+  session?: schema.SoftwareSession
 
   // Allow for other arbitrary properties
   [key: string]: any
@@ -131,8 +131,8 @@ export abstract class Executor {
    * @param format The format of the content
    * @returns The decoded node
    */
-  public async decode(content: string, format?: string): Promise<Node> {
-    return this.call<Node>(Method.decode, { content, format })
+  public async decode(content: string, format?: string): Promise<schema.Node> {
+    return this.call<schema.Node>(Method.decode, { content, format })
   }
 
   /**
@@ -142,7 +142,7 @@ export abstract class Executor {
    * @param format The format to encode
    * @returns The node encoded in the format
    */
-  public async encode(node: Node, format?: string): Promise<string> {
+  public async encode(node: schema.Node, format?: string): Promise<string> {
     return this.call<string>(Method.encode, { node, format })
   }
 
@@ -152,10 +152,8 @@ export abstract class Executor {
    * @param node The node to compile
    * @returns The compiled node
    */
-  public async compile<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.compile, { node })
+  public async compile<Type extends schema.Node>(node: Type): Promise<Type> {
+    return this.call<Type>(Method.compile, { node })
   }
 
   /**
@@ -164,8 +162,8 @@ export abstract class Executor {
    * @param node The node to build
    * @returns The build node
    */
-  public async build<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.build, { node })
+  public async build<Type extends schema.Node>(node: Type): Promise<Type> {
+    return this.call<Type>(Method.build, { node })
   }
 
   /**
@@ -176,12 +174,12 @@ export abstract class Executor {
    * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has been executed
    */
-  public async execute<NodeType extends Node>(
-    node: NodeType,
-    session?: SoftwareSession,
+  public async execute<Type extends schema.Node>(
+    node: Type,
+    session?: schema.SoftwareSession,
     claims?: Claims
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.execute, { node, session, claims })
+  ): Promise<Type> {
+    return this.call<Type>(Method.execute, { node, session, claims })
   }
 
   /**
@@ -201,11 +199,11 @@ export abstract class Executor {
    * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has begun running
    */
-  public async begin<NodeType extends Node>(
-    node: NodeType,
+  public async begin<Type extends schema.Node>(
+    node: Type,
     claims?: Claims
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.begin, { node, claims })
+  ): Promise<Type> {
+    return this.call<Type>(Method.begin, { node, claims })
   }
 
   /**
@@ -215,11 +213,11 @@ export abstract class Executor {
    * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has ended running
    */
-  public async end<NodeType extends Node>(
-    node: NodeType,
+  public async end<Type extends schema.Node>(
+    node: Type,
     claims?: Claims
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.end, { node, claims })
+  ): Promise<Type> {
+    return this.call<Type>(Method.end, { node, claims })
   }
 
   /**
