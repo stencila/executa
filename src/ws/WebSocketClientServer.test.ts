@@ -7,7 +7,7 @@ import { testClient } from '../test/testClient'
 import { WebSocketClient } from './WebSocketClient'
 import { WebSocketServer } from './WebSocketServer'
 import { delay } from '../test/delay'
-import { Worker } from '../base/Worker';
+import { Worker } from '../base/Worker'
 
 test('WebSocketClient and WebSocketServer', async () => {
   let serverLogs: LogData[] = []
