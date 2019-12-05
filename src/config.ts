@@ -60,6 +60,14 @@ export class Config {
   ws: boolean | string = false
 
   /**
+   * List of peer addresses.
+   *
+   * Each string in this list is parsed as an address to
+   * a peer executor. e.g. `https://123.45.67.89/`, `docker://image`
+   */
+  peers: string[] = ['stdio://*']
+
+  /**
    * Maximum length of the request queue.
    *
    * When queue reaches this length, subsequent requests will
