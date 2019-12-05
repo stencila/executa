@@ -30,7 +30,7 @@ export const testClient = async (client: Client): Promise<void> => {
    * Check that calls to methods that the executor is not
    * capable of throw a `CapabilityError`
    */
-  await expect(client.execute({})).rejects.toThrow(CapabilityError)
+  await expect(client.decode('', 'pdf')).rejects.toThrow(CapabilityError)
 
   /**
    * Check that erroneous requests return a `JsonRpcError`.

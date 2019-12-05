@@ -1,11 +1,11 @@
 import { DirectClient } from './DirectClient'
 import { DirectServer } from './DirectServer'
-import { Manager } from '../base/Manager'
 import { testClient } from '../test/testClient'
+import { Worker } from '../base/Worker'
 
 test('DirectClient and DirectServer', async () => {
   const server = new DirectServer()
-  const executor = new Manager()
+  const executor = new Worker()
   await server.start(executor)
 
   const client = new DirectClient(server.address)

@@ -8,6 +8,7 @@ import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
 import { CapabilityError } from './CapabilityError'
+import { Worker } from './Worker'
 
 const log = getLogger('executa:server')
 
@@ -159,10 +160,9 @@ export abstract class Server {
    * Start the server
    *
    * When overriding this method, derived classes should
-   * call this method, or ensure that `executor` is set themselves.
+   * call this method, or ensure that `this.executor` is set themselves.
    */
-  public start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new Manager()
+  public start(executor: Executor): Promise<void> {
     this.executor = executor
     return Promise.resolve()
   }
@@ -174,22 +174,5 @@ export abstract class Server {
    */
   public stop(): Promise<void> {
     return Promise.resolve()
-  }
-
-  /**
-   * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
-   */
-  public run(): Promise<void> {
-    const stop = (): void => {
-      this.stop()
-        .then(() => process.exit())
-        .catch(error =>
-          log.error(`Error when stopping server: ${error.message}`)
-        )
-    }
-    process.on('SIGINT', stop)
-    process.on('SIGTERM', stop)
-
-    return this.start()
   }
 }

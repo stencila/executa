@@ -213,8 +213,7 @@ export class HttpServer extends TcpServer {
     })
   }
 
-  public async start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new Manager()
+  public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
     const url = this.address.url()
