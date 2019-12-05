@@ -90,7 +90,7 @@ export class Queuer extends Executor {
   notify(subject: string, message: string, job: Job<any>) {
     const { call, delegator } = job
     if (delegator !== undefined) {
-      const { claims: { clients = []} = {}} = call.params
+      const { claims: { clients = [] } = {} } = call.params
       delegator.notify(subject, message, undefined, clients)
     }
   }

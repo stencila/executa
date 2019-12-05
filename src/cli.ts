@@ -1,10 +1,20 @@
 #!/usr/bin/env node
 
 import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
-import { defaultHandler, LogLevel, replaceHandlers } from '@stencila/logga'
-import { CodeChunk } from '@stencila/schema'
+import {
+  defaultHandler,
+  LogLevel,
+  replaceHandlers,
+  Logger
+} from '@stencila/logga'
+import {
+  CodeChunk,
+  SoftwareSession,
+  softwareSession,
+  codeChunk
+} from '@stencila/schema'
 import * as readline from 'readline'
-import { ClientType, addressesToClients } from './base/Client'
+import { ClientType, addressesToClients, Client } from './base/Client'
 import { Delegator } from './base/Delegator'
 import { Executor } from './base/Executor'
 import { Manager } from './base/Manager'
@@ -24,21 +34,15 @@ import { WebSocketClient } from './ws/WebSocketClient'
 import { TcpClient } from './tcp/TcpClient'
 import chalk from 'chalk'
 import ora, { Ora } from 'ora'
+import { DirectClient } from './direct/DirectClient'
+import { DirectServer } from './direct/DirectServer'
+import { Listener } from './base/Listener'
 
 const main = async (): Promise<void> => {
   // Collect configuration options
   const { args = ['help'], config, valid, log } = collectOptions<Config>(
     'executa',
     configSchema
-  )
-
-  // Configure log handler
-  const { debug } = config
-  replaceHandlers(data =>
-    defaultHandler(data, {
-      maxLevel: debug ? LogLevel.debug : LogLevel.info,
-      showStack: debug
-    })
   )
 
   // Run the command
@@ -53,7 +57,7 @@ const main = async (): Promise<void> => {
       const executor = init(config)
       switch (command) {
         case 'repl':
-          return repl(executor, args[1], debug)
+          return repl(executor, args[1], config.debug, log)
         case 'start':
         case 'serve':
           return start(executor)
@@ -82,7 +86,7 @@ const conf = (config: Config): void =>
 /**
  * Initialize a root executor based on the config
  */
-const init = (config: Config): Executor => {
+const init = (config: Config): Listener => {
   // Configure log handler
   const { debug } = config
   replaceHandlers(data =>
@@ -133,18 +137,30 @@ const init = (config: Config): Executor => {
  * to the VM and prints it's `outputs` to the console. You can change the
  * language being used by typing a line starting with `<` e.g. `< py`
  */
-const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
+const repl = async (
+  executor: Listener,
+  lang = 'python',
+  debug: boolean,
+  log: Logger
+): Promise<void> => {
   // Reconfigure log handler to only show `info` and `debug` events
-  // and error stacks when `--debug` option is set
-  replaceHandlers(data =>
+  // and error stacks when `--debug` option is set and to ensure
+  // a new line so that does not interfere with notifications etc
+  replaceHandlers(data => {
+    console.error()
     defaultHandler(data, {
       maxLevel: debug ? LogLevel.debug : LogLevel.warn,
       showStack: debug
     })
-  )
+  })
 
-  // Function to create a prompt base don current
-  // language
+  // Create a client and server instead of calling executor
+  // directly so that we can receive notifications
+  const server = new DirectServer()
+  const client = new DirectClient({ server })
+  await executor.start([server])
+
+  // Function to create a prompt based on current language
   const prompt = (): string => `${chalk.green(lang)} ${chalk.grey('> ')}`
 
   // Create the REPL with the starting prompt
@@ -155,6 +171,10 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
   })
   repl.prompt()
 
+  // The session that chunks will be executed in
+  let session: SoftwareSession | undefined
+
+  // The string buffer that is used to collect text for chunks
   let buffer = ''
 
   // Function that handles each line
@@ -189,21 +209,46 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
     // execute a `CodeChunk`
     buffer += line
 
-    // Spinner: it's useful feedback for long cells
-    const spinnerText = (seconds = 0) => chalk.grey(`${seconds}s`)
+    // Spinner to show notifications and elapsed time for
+    // execution
     const spinner = ora({
-      text: spinnerText(),
-      color: 'gray',
       // With this set to true, all input is ignored while
       // the spinner is running and it affects subsequent
       // lines. Instead, we implement out own muting of stdin
       // while command is running.
       discardStdin: false
-    }).start()
+    })
+
+    spinner.start()
     const started = Date.now()
-    const interval = setInterval(() => {
+
+    // Clear notifications before starting execution
+    // giving the user a few seconds to read them.
+    const notificationText = (
+      notification: Client['notifications'][0]
+    ): string => {
+      const { message, date } = notification
+      const age = Math.round((date.valueOf() - started) / 1000)
+      return chalk`{grey ${age}s} ${message}`
+    }
+    const notificationDelay = (seconds = 3): Promise<void> =>
+      new Promise(resolve => setTimeout(resolve, seconds * 1000))
+    if (client.notifications.length > 0) {
+      spinner.spinner = 'circleQuarters'
+      spinner.color = 'yellow'
+      for (const notification of client.notifications) {
+        spinner.text = notificationText(notification)
+        await notificationDelay()
+      }
+      client.notifications = []
+    }
+
+    spinner.spinner = 'dots'
+    spinner.color = 'gray'
+    const waitingSpinnerProps = async (): Promise<void> => {
+      if (!spinner.isSpinning) return
+
       const seconds = Math.round((Date.now() - started) / 1000)
-      spinner.text = spinnerText(seconds)
       spinner.color = [
         'gray',
         'blue',
@@ -212,20 +257,47 @@ const repl = (executor: Executor, lang = 'python', debug: boolean): void => {
         'yellow',
         'magenta',
         'red'
-      ][Math.min(Math.round(Math.log(seconds)), 6)] as Ora['color']
-    }, 1000)
+      ][Math.max(0, Math.min(Math.round(Math.log(seconds)), 6))] as Ora['color']
 
-    const result = (await executor.execute({
-      type: 'CodeChunk',
-      programmingLanguage: lang,
-      text: buffer
-    })) as CodeChunk
+      while (client.notifications.length > 0 && spinner.isSpinning) {
+        const last = client.notifications.splice(0, 1)[0]
+        spinner.text = notificationText(last)
+        await notificationDelay()
+      }
+
+      spinner.text = chalk.grey(`+${seconds}s`)
+
+      setTimeout(() => {
+        waitingSpinnerProps().catch(error => log.error(error))
+      }, 1000)
+    }
+    await waitingSpinnerProps()
+
+    // Begin session if necessary and ensure that it will be ended
+    // before this process is existed
+    if (session === undefined) {
+      log.info('Beggining REPL session')
+      session = await client.begin(softwareSession())
+      repl.on('SIGINT', () => {
+        log.info('Ending REPL session')
+        if (session !== undefined)
+          client.end(session).catch(error => log.error(error))
+        process.exit(0)
+      })
+    }
+
+    // Execute chunk in session
+    const result = await client.execute(
+      codeChunk(buffer, {
+        programmingLanguage: lang
+      }),
+      session
+    )
 
     // Clear the buffer
     buffer = ''
 
     // Stop the spinner
-    clearInterval(interval)
     spinner.stop()
 
     // Display any errors
