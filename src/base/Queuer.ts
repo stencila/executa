@@ -34,9 +34,14 @@ export class Queuer extends Executor {
   public readonly config: Config
 
   /**
-   * Identifier for the interval used to call `clean`
+   * Timer used to call `check`
    */
-  private cleanInterval?: Interval
+  private checkInterval?: NodeJS.Timer
+
+  /**
+   * Timer used to call `clean`
+   */
+  private cleanInterval?: NodeJS.Timer
 
   constructor(config: Config = new Config()) {
     super()
@@ -107,9 +112,9 @@ export class Queuer extends Executor {
    *                 to complete jobs.
    * @returns A timeout that can be used to cancel the checks
    */
-  public async check(executor: Executor): Promise<Interval> {
+  public async check(executor: Executor): Promise<void> {
     await this.reduce(executor)
-    return setInterval(() => {
+    this.checkInterval = setInterval(() => {
       this.reduce(executor).catch(error => log.error(error))
     }, this.config.queueInterval)
   }
@@ -183,6 +188,7 @@ export class Queuer extends Executor {
    */
   public stop(): Promise<void> {
     if (this.cleanInterval !== undefined) clearInterval(this.cleanInterval)
+    if (this.checkInterval !== undefined) clearInterval(this.checkInterval)
     for (const { reject } of this.queue)
       reject(new Error('Executor is stopping'))
     return Promise.resolve()
