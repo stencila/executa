@@ -55,7 +55,7 @@
     "typescript": "3.6.4"
   },
   "dependencies": {
-    "@stencila/configa": "^0.2.1",
+    "@stencila/configa": "^0.3.0",
     "@stencila/logga": "^2.1.0",
     "@stencila/schema": "^0.31.0",
     "@types/ws": "^6.0.3",
