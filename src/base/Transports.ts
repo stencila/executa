@@ -281,6 +281,7 @@ export function parseAddress(address: string): Address | undefined {
       case 'docker':
         return new StdioAddress(`docker run --interactive ${rest}`)
       case 'http':
+      case 'https':
         return new HttpAddress(address)
     }
   }
