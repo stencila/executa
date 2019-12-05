@@ -1,8 +1,8 @@
-import { Config } from '../config'
-import { Method, Call, Executor } from './Executor'
-import { uid } from './uid'
 import { getLogger } from '@stencila/logga'
+import { Config } from '../config'
 import { CapabilityError } from './CapabilityError'
+import { Call, Executor, Method } from './Executor'
+import { uid } from './uid'
 
 const log = getLogger('executa:queuer')
 
@@ -79,15 +79,15 @@ export class Queuer extends Executor {
         }
       }
       const position = queue.push(job)
-      this.notify(
+      this.notifyDelegator(
+        job,
         'info',
-        `Job has been added to queue at position ${position}`,
-        job
+        `Job has been added to queue at position ${position}`
       )
     })
   }
 
-  notify(subject: string, message: string, job: Job<any>) {
+  notifyDelegator(job: Job<any>, subject: string, message: string) {
     const { call, delegator } = job
     if (delegator !== undefined) {
       const { claims: { clients = [] } = {} } = call.params
