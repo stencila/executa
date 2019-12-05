@@ -7,12 +7,7 @@ import {
   replaceHandlers,
   Logger
 } from '@stencila/logga'
-import {
-  CodeChunk,
-  SoftwareSession,
-  softwareSession,
-  codeChunk
-} from '@stencila/schema'
+import schema from '@stencila/schema'
 import * as readline from 'readline'
 import { ClientType, addressesToClients, Client } from './base/Client'
 import { Delegator } from './base/Delegator'
@@ -172,7 +167,7 @@ const repl = async (
   repl.prompt()
 
   // The session that chunks will be executed in
-  let session: SoftwareSession | undefined
+  let session: schema.SoftwareSession | undefined
 
   // The string buffer that is used to collect text for chunks
   let buffer = ''
@@ -277,7 +272,7 @@ const repl = async (
     // before this process is existed
     if (session === undefined) {
       log.info('Beggining REPL session')
-      session = await client.begin(softwareSession())
+      session = await client.begin(schema.softwareSession())
       repl.on('SIGINT', () => {
         log.info('Ending REPL session')
         if (session !== undefined)
@@ -287,12 +282,20 @@ const repl = async (
     }
 
     // Execute chunk in session
-    const result = await client.execute(
-      codeChunk(buffer, {
-        programmingLanguage: lang
-      }),
-      session
-    )
+    let outputs
+    let errors
+    try {
+      ;({ outputs, errors } = await client.execute(
+        schema.codeChunk(buffer, {
+          programmingLanguage: lang
+        }),
+        session
+      ))
+    } catch (error) {
+      // This will usually only occur if there is a capability
+      // error because manager is unable to delegate.
+      errors = [error]
+    }
 
     // Clear the buffer
     buffer = ''
@@ -301,15 +304,19 @@ const repl = async (
     spinner.stop()
 
     // Display any errors
-    if (result.errors !== undefined && result.errors.length > 0) {
-      for (const error of result.errors)
+    if (errors !== undefined && errors.length > 0) {
+      for (const error of errors)
         if (error.message !== undefined)
-          console.error(`${chalk.red(error.message)}`)
+          console.error(`${chalk.yellow(error.message)}`)
     }
 
     // Display any outputs
-    if (result.outputs !== undefined && result.outputs.length > 0) {
-      for (const output of result.outputs) console.log(`${chalk.blue(output)}`)
+    if (outputs !== undefined && outputs.length > 0) {
+      for (const output of outputs) {
+        const indent = Array.isArray(output) ? '' : '  '
+        const json = JSON.stringify(output, null, indent)
+        console.log(chalk.blue(json))
+      }
     }
 
     // Provide a new prompt
