@@ -32,12 +32,16 @@ export class Manager extends Listener {
    * places the call on the queue if it is unable to
    * be delegated.
    */
-  public call(method: Method, params: { [key: string]: any }): Promise<any> {
+  public async call(
+    method: Method,
+    params: { [key: string]: any }
+  ): Promise<any> {
     try {
-      return this.delegator.call(method, params)
+      const result = await this.delegator.call(method, params)
+      return result
     } catch (error) {
       if (error instanceof CapabilityError) {
-        return this.queuer.call(method, params)
+        return this.queuer.call(method, params, this)
       }
       throw error
     }
@@ -47,8 +51,8 @@ export class Manager extends Listener {
    * @override Override of {@link Listener.start} which
    * also starts periodic checking of the queue
    */
-  async start(): Promise<void> {
-    await super.start()
+  async start(servers: Server[] = []): Promise<void> {
+    await super.start(servers)
     await this.queuer.check(this.delegator)
   }
 }

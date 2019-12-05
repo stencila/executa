@@ -9,6 +9,7 @@ const log = getLogger('executa:queuer')
 interface Job<Type> {
   id: string
   call: Call
+  delegator?: Executor
   date: Date
   resolve: (result: Type) => void
   reject: (error: Error) => void
@@ -44,10 +45,14 @@ export class Queuer extends Executor {
   /**
    * @implements Implements {@link Executor.call} by placing
    * all requests on the queue.
+   *
+   * @param delegator The executor, if any that delegated this call.
+   * Used to notify that executor's clients on the status of the job.
    */
   public async call<Type>(
     method: Method,
-    params: Call['params'] = {}
+    params: Call['params'] = {},
+    delegator?: Executor
   ): Promise<Type> {
     const {
       queue,
@@ -59,9 +64,10 @@ export class Queuer extends Executor {
 
     return new Promise<Type>((resolve, reject) => {
       const id = `job-${uid()}`
-      queue.push({
+      const job = {
         id,
         call: { method, params },
+        delegator,
         date: new Date(),
         resolve: (result: Type) => {
           this.remove(id)
@@ -71,8 +77,22 @@ export class Queuer extends Executor {
           this.remove(id)
           reject(error)
         }
-      })
+      }
+      const position = queue.push(job)
+      this.notify(
+        'info',
+        `Job has been added to queue at position ${position}`,
+        job
+      )
     })
+  }
+
+  notify(subject: string, message: string, job: Job<any>) {
+    const { call, delegator } = job
+    if (delegator !== undefined) {
+      const { claims: { clients = []} = {}} = call.params
+      delegator.notify(subject, message, undefined, clients)
+    }
   }
 
   /**
@@ -139,7 +159,7 @@ export class Queuer extends Executor {
     const now = Date.now()
     for (const { date, reject } of [...this.queue]) {
       if ((now - date.valueOf()) / 1000 >= this.config.queueStale) {
-        reject(new Error('Request has become stale'))
+        reject(new Error('Job has become stale'))
       }
     }
   }
