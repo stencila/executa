@@ -11,6 +11,7 @@ import {
   AddressInitializer,
   parseAddress
 } from './Transports'
+import { Node } from '@stencila/schema'
 
 const log = getLogger('executa:client')
 
@@ -19,6 +20,13 @@ interface Request<Type> {
   date: Date
   resolve: (result: Type) => void
   reject: (error: Error) => void
+}
+
+interface Notification {
+  id: number
+  date: Date
+  subject: string
+  message: string
 }
 
 /**
@@ -32,6 +40,30 @@ export abstract class Client extends Executor {
    * A map of requests to which responses can be paired against
    */
   private requests: { [key: number]: Request<any> } = {}
+
+  /**
+   * Notifications cache
+   *
+   * Intended to be consumed by by applications
+   * e.g. by displaying them to the user.
+   */
+  notifications: Notification[] = []
+
+  /**
+   * Count of notifications received
+   *
+   * Used to give a unique, sequential, identifier to each
+   * new notification.
+   */
+  notificationsCount = 0
+
+  /**
+   * Maximum length of the notifications cache
+   *
+   * Used to avoid excessive memory usage for unhandled
+   * notifications.
+   */
+  notificationsLength = 1000
 
   /**
    * @implements Implements {@link Executor.call} by sending a
@@ -59,12 +91,31 @@ export abstract class Client extends Executor {
   }
 
   /**
-   * @override Overrides {@link Executor.notify} by sending a notification
-   * to the remote `Executor` that this client is connected to.
+   * @override Override of {@link Executor.notify} to send a notification
+   * to the `Executor` that this client is connected to.
    */
-  public notify(level: string, message: string) {
-    const notification = new JsonRpcRequest(level, { message }, false)
+  public notify(subject: string, message: string) {
+    const notification = new JsonRpcRequest(subject, { message }, false)
     this.send(notification)
+  }
+
+  /**
+   * @override Override of {@link Executor.notified} to cache
+   * notifications received by this client instead on just
+   * logging them.
+   */
+  notified(subject: string, message: string, node?: Node): void {
+    const { notifications, notificationsLength } = this
+    this.notificationsCount += 1
+    notifications.push({
+      id: this.notificationsCount,
+      date: new Date(),
+      subject,
+      message
+    })
+    if (notifications.length > notificationsLength) {
+      notifications.splice(0, notifications.length - notificationsLength)
+    }
   }
 
   /**

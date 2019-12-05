@@ -88,7 +88,7 @@ export class TcpServer extends Server {
     delete this.connections[connection.id]
   }
 
-  public async start(executor?: Executor): Promise<void> {
+  public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
       log.info(`Starting server: ${this.address.url()}`)
 

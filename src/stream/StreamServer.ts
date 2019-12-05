@@ -19,7 +19,7 @@ export abstract class StreamServer extends Server {
   }
 
   public async start(
-    executor?: Executor,
+    executor: Executor,
     incoming: Readable = process.stdin,
     outgoing: Writable = process.stdout
   ): Promise<void> {

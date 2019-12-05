@@ -7,6 +7,7 @@ import { testClient } from '../test/testClient'
 import { WebSocketClient } from './WebSocketClient'
 import { WebSocketServer } from './WebSocketServer'
 import { delay } from '../test/delay'
+import { Worker } from '../base/Worker';
 
 test('WebSocketClient and WebSocketServer', async () => {
   let serverLogs: LogData[] = []
@@ -20,13 +21,6 @@ test('WebSocketClient and WebSocketServer', async () => {
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:client') {
       clientLogs = [...clientLogs, logData]
-    }
-  })
-
-  let clientNotifs: LogData[] = []
-  addHandler((logData: LogData) => {
-    if (logData.tag === 'executa:executor') {
-      clientNotifs = [...clientNotifs, logData]
     }
   })
 
@@ -125,7 +119,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await server.stop()
     expect(serverConnections()).toBe(0)
 
-    await server.start()
+    await server.start(new Worker())
     await delay(100)
 
     expect(serverConnections()).toBe(3)
@@ -150,18 +144,20 @@ test('WebSocketClient and WebSocketServer', async () => {
     await delay(25)
 
     // Server notification to several clients
-    clientNotifs = []
     server.notify('debug', 'To all clients')
     await delay(25)
-    expect(clientNotifs.length).toBe(3)
+    expect(client1.notifications.length).toBe(1)
+    expect(client2.notifications.length).toBe(1)
+    expect(client3.notifications.length).toBe(1)
 
     // Server notification to some clients
     // @ts-ignore that connections is protected
     const clients = Object.keys(server.connections).slice(0, 2)
-    clientNotifs = []
-    server.notify('debug', 'To all clients', undefined, clients)
+    server.notify('debug', 'To some clients', undefined, clients)
     await delay(25)
-    expect(clientNotifs.length).toEqual(clients.length)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(1)
 
     // Server notification after clients disconnect
     await client1.stop()
@@ -169,7 +165,6 @@ test('WebSocketClient and WebSocketServer', async () => {
 
     serverLogs = []
     clientLogs = []
-    clientNotifs = []
     server.notify('debug', 'Hello, who is still there?')
     // Server has sent notification to 2 closing sockets
     await delay(25)
@@ -177,13 +172,14 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
-    expect(clientNotifs.length).toBe(1)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(2)
 
     await client3.stop()
 
     serverLogs = []
     clientLogs = []
-    clientNotifs = []
     server.notify('debug', 'Anybody?')
     // Server has sent notification to 2 closed sockets and one closing
     await delay(25)
@@ -191,7 +187,9 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
-    expect(clientNotifs.length).toBe(0)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(2)
   }
 
   await server.stop()
