@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import Ajv from 'ajv'
 import { ClientType, clientTypeToTransport } from './Client'
-import { Executor, Manifest, Method, Call } from './Executor'
+import { Executor, Manifest, Method, Params } from './Executor'
 import { InternalError } from './InternalError'
 import { Transport } from './Transports'
 import { CapabilityError } from './CapabilityError'
@@ -45,10 +45,7 @@ export class Delegator extends Executor {
    * @implements Implements {@link Executor.call} by delegating
    * all requests to peers.
    */
-  public async call<Type>(
-    method: Method,
-    params: Call['params'] = {}
-  ): Promise<Type> {
+  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
     for (const peer of Object.values(this.peers)) {
       if (await peer.capable(method, params)) {
         if (await peer.connect()) {

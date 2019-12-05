@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Executor, Manifest, Method, Call, Capabilities } from './Executor'
+import { Executor, Manifest, Method, Capabilities, Params } from './Executor'
 import { InternalError } from './InternalError'
 import { CapabilityError } from './CapabilityError'
 import schema from '@stencila/schema'
@@ -13,7 +13,7 @@ export class Worker extends Executor {
   /**
    * @implements Implements {@link Executor.call} by
    */
-  public call(method: Method, params: Call['params'] = {}): Promise<any> {
+  public call(method: Method, params: Params = {}): Promise<any> {
     switch (method) {
       case Method.manifest:
         return this.manifest()

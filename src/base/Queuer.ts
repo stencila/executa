@@ -1,14 +1,15 @@
 import { getLogger } from '@stencila/logga'
 import { Config } from '../config'
 import { CapabilityError } from './CapabilityError'
-import { Call, Executor, Method } from './Executor'
+import { Executor, Method, Params } from './Executor'
 import { uid } from './uid'
 
 const log = getLogger('executa:queuer')
 
 interface Job<Type> {
   id: string
-  call: Call
+  method: Method
+  params: Params
   delegator?: Executor
   date: Date
   resolve: (result: Type) => void
@@ -51,7 +52,7 @@ export class Queuer extends Executor {
    */
   public async call<Type>(
     method: Method,
-    params: Call['params'] = {},
+    params: Params = {},
     delegator?: Executor
   ): Promise<Type> {
     const {
@@ -66,7 +67,8 @@ export class Queuer extends Executor {
       const id = `job-${uid()}`
       const job = {
         id,
-        call: { method, params },
+        method,
+        params,
         delegator,
         date: new Date(),
         resolve: (result: Type) => {
@@ -88,9 +90,9 @@ export class Queuer extends Executor {
   }
 
   notifyDelegator(job: Job<any>, subject: string, message: string) {
-    const { call, delegator } = job
+    const { params, delegator } = job
     if (delegator !== undefined) {
-      const { claims: { clients = [] } = {} } = call.params
+      const { claims: { clients = [] } = {} } = params
       delegator.notify(subject, message, undefined, clients)
     }
   }
@@ -122,8 +124,7 @@ export class Queuer extends Executor {
    */
   public async reduce(executor: Executor): Promise<number> {
     let resolved = 0
-    for (const { call, resolve, reject } of [...this.queue]) {
-      const { method, params } = call
+    for (const { method, params, resolve, reject } of [...this.queue]) {
       let result
       try {
         result = await executor.call(method, params)

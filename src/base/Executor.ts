@@ -29,10 +29,10 @@ export enum Method {
   end = 'end'
 }
 
-export interface Call {
-  method: Method
-  params: { [key: string]: any }
-}
+/**
+ * The parameters of a call to a method
+ */
+export type Params = { [key: string]: any }
 
 /**
  * The capabilities of an `Executor` class as
@@ -121,7 +121,7 @@ export abstract class Executor {
    * @see {@link Addresses}
    */
   public async manifest(): Promise<Manifest> {
-    return this.call<Manifest>(Method.manifest)
+    return this.call<Manifest>(Method.manifest, {})
   }
 
   /**
@@ -226,10 +226,7 @@ export abstract class Executor {
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  abstract async call<Type>(
-    method: Method,
-    params?: { [key: string]: any }
-  ): Promise<Type>
+  abstract async call<Type>(method: Method, params: Params): Promise<Type>
 
   /**
    * Send a notification
