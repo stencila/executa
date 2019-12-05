@@ -2,6 +2,7 @@ import { getLogger } from '@stencila/logga'
 import { Executor, Addresses } from './Executor'
 import { Server } from './Server'
 import { uid } from './uid'
+import { Node } from '@stencila/schema'
 
 const log = getLogger('executa:listener')
 
@@ -26,7 +27,7 @@ export abstract class Listener extends Executor {
    * Servers that will listen on behalf of
    * this executor and pass on requests to it.
    */
-  protected readonly servers: Server[] = []
+  protected servers: Server[] = []
 
   public constructor(servers: Server[] = []) {
     super()
@@ -52,7 +53,7 @@ export abstract class Listener extends Executor {
   public notify(
     level: string,
     message: string,
-    node: Node,
+    node?: Node,
     clients: string[] = []
   ) {
     for (const server of this.servers)
@@ -61,8 +62,12 @@ export abstract class Listener extends Executor {
 
   /**
    * Start listening by starting all servers.
+   *
+   * @param servers Any additional servers to start.
    */
-  public async start(): Promise<void> {
+  public async start(servers: Server[] = []): Promise<void> {
+    this.servers = [...this.servers, ...servers]
+
     if (this.servers.length === 0) {
       log.warn('No servers configured; executor will not be accessible.')
       return
