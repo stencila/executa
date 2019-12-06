@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { Config } from '../config'
 import { CapabilityError } from './CapabilityError'
-import { Executor, Method, Params } from './Executor'
+import { Executor, Method, Params, Manifest } from './Executor'
 import { uid } from './uid'
 
 const log = getLogger('executa:queuer')
@@ -48,6 +48,16 @@ export class Queuer extends Executor {
     this.config = config
   }
 
+  public manifest(): Promise<Manifest> {
+    const queue = this.queue.map(job => {
+      const { id, date, method, params } = job
+      return { id, date, method, params }
+    })
+    return Promise.resolve({
+      queue
+    })
+  }
+
   /**
    * @implements Implements {@link Executor.call} by placing
    * all requests on the queue.
@@ -60,6 +70,8 @@ export class Queuer extends Executor {
     params: Params = {},
     delegator?: Executor
   ): Promise<Type> {
+    if (method === Method.manifest) return this.manifest() as Promise<Type>
+
     const {
       queue,
       config: { queueLength }

@@ -41,27 +41,49 @@ export class Delegator extends Executor {
     for (const executor of executors) this.add(executor)
   }
 
+  public manifest(): Promise<Manifest> {
+    const clientTypes = this.clientTypes.map(clienType => clienType.name)
+    const peers = Object.entries(this.peers).reduce(
+      (prev, [key, peer]) => ({
+        ...prev,
+        ...{ [key]: peer.manifest !== undefined ? peer.manifest : null }
+      }),
+      {}
+    )
+    return Promise.resolve({
+      clientTypes,
+      peers
+    })
+  }
+
   /**
    * @implements Implements {@link Executor.call} by delegating
    * all requests to peers.
    */
-  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
+  public async call(method: Method, params: Params = {}): Promise<any> {
+    if (method === Method.manifest) return this.manifest()
+
     for (const peer of Object.values(this.peers)) {
       if (await peer.capable(method, params)) {
         if (await peer.connect()) {
-          return peer.call<Type>(method, params)
+          return peer.call(method, params)
         }
       }
     }
     return Promise.reject(
-      new CapabilityError(`Unable to delegate method "${method}"`)
+      new CapabilityError(
+        `Unable to delegate method "${method}" with params "${JSON.stringify(
+          params
+        )}"`
+      )
     )
   }
 
   /* eslint-disable @typescript-eslint/no-use-before-define */
 
   public add(executor: Executor, id?: string): string {
-    id = id !== undefined ? id : `mem://${uid()}`
+    id = id !== undefined ? id : uid()
+    log.debug(`Adding peer ${id}`)
     const peer = new Peer(executor, this.clientTypes)
     this.peers[id] = peer
     return id

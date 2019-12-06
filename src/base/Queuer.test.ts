@@ -28,7 +28,7 @@ test('call', async () => {
   const p4 = queuer.end({})
   expect(queue.length).toBe(5)
 
-  const p5 = queuer.manifest()
+  const p5 = queuer.decode('')
   await expect(p5).rejects.toThrow(
     new CapabilityError('Queue is at maximum length')
   )
