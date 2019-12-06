@@ -76,9 +76,7 @@
       "items": {
         "type": "string"
       },
-      "default": [
-        "stdio://*"
-      ]
+      "default": ["stdio://*"]
     },
     "queueLength": {
       "description": "Maximum length of the request queue.",

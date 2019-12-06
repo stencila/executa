@@ -56,8 +56,8 @@ export class StdioClient extends StreamClient {
    */
   public stop(): Promise<void> {
     log.debug(`Stopping StdioServer`)
-    // Avoid unnecessary log errors by removing listener
     if (this.child !== undefined) {
+      // Avoid unnecessary log errors by removing listener
       this.child.removeAllListeners('exit')
       this.child.kill()
     }

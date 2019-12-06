@@ -83,7 +83,7 @@ export interface Manifest {
   addresses?: Addresses
 
   /**
-   * Other properties that the `Executor`
+   * Other properties that `Executor`
    * implementations may wish to add
    * e.g. package name and version
    */

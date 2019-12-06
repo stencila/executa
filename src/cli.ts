@@ -7,7 +7,7 @@ import {
   replaceHandlers,
   Logger
 } from '@stencila/logga'
-import schema from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import * as readline from 'readline'
 import { ClientType, addressesToClients, Client } from './base/Client'
 import { Delegator } from './base/Delegator'

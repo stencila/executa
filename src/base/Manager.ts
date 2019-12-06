@@ -1,11 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import { CapabilityError } from './CapabilityError'
 import { Delegator } from './Delegator'
-import { Method } from './Executor'
+import { Method, Claims, Manifest } from './Executor'
 import { Listener } from './Listener'
 import { Queuer } from './Queuer'
 import { Server } from './Server'
 import { Worker } from './Worker'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:manager')
 
@@ -27,24 +28,81 @@ export class Manager extends Listener {
     this.queuer = queuer
   }
 
+  async manifest(): Promise<Manifest> {
+    const delegator = await this.delegator.manifest()
+    const queuer = await this.queuer.manifest()
+    return {
+      delegator,
+      queuer
+    }
+  }
+
   /**
-   * @override Override of {@link Executor.call} which
-   * places the call on the queue if it is unable to
+   * @override Override of {@link Executor.call} that
+   * places a call on the queue if it is unable to
    * be delegated.
    */
   public async call(
     method: Method,
     params: { [key: string]: any }
   ): Promise<any> {
+    if (method === Method.manifest) return this.manifest()
+
+    // TODO: Call endHere
+
     try {
       const result = await this.delegator.call(method, params)
       return result
     } catch (error) {
       if (error instanceof CapabilityError) {
-        return this.queuer.call(method, params, this)
+        try {
+          switch (method) {
+            case Method.begin:
+              return this.beginHere(params.node)
+          }
+        } catch (error) {
+          if (error instanceof CapabilityError) {
+            return this.queuer.call(method, params, this)
+          }
+          throw error
+        }
       }
       throw error
     }
+  }
+
+  /**
+   * Implements {@link Executor.begin} to
+   * begin a `SoftwareSession` in the current
+   * environment.
+   *
+   * This method should only be called if
+   * unable to delegate to a peer.
+   */
+  public beginHere(node: schema.Node): Promise<schema.SoftwareSession> {
+    if (schema.isA('SoftwareSession', node)) {
+      // TODO: Assign id and dateStart etc to session
+      return Promise.resolve(node)
+    }
+    throw new CapabilityError(
+      `Unable to compile node of type "${schema.nodeType(node)}"`
+    )
+  }
+
+  /**
+   * End a `SoftwareSession` that was begun by
+   * this manager.
+   *
+   * This method should not be used for
+   * sessions that were begun elsewhere.
+   *
+   * @see {@link Executor.end}
+   */
+  public endHere(
+    session: schema.SoftwareSession
+  ): Promise<schema.SoftwareSession> {
+    // TODO
+    return Promise.resolve(session)
   }
 
   /**

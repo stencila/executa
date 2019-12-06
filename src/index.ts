@@ -1,12 +1,22 @@
-export {
-  Executor,
-  Method,
-  Manifest,
-  Addresses,
-  Capabilities,
-  Claims
-} from './base/Executor'
+// The following re-exports are provided for dependant packages
+// so that they can re-use them instead on creating another dependency
+
+import * as logga from '@stencila/logga'
+
+import * as schema from '@stencila/schema'
+
+export * from './base/Executor'
+
+export { Delegator } from './base/Delegator'
+export { Listener } from './base/Listener'
 export { Manager } from './base/Manager'
+export { Queuer } from './base/Queuer'
+export { Worker } from './base/Worker'
+
+export { CapabilityError } from './base/CapabilityError'
+
+export { Server } from './base/Server'
+export { Client } from './base/Client'
 
 export { StreamClient } from './stream/StreamClient'
 export { StreamServer } from './stream/StreamServer'
@@ -33,3 +43,7 @@ export { WebSocketClient } from './ws/WebSocketClient'
 export { WebSocketServer, WebSocketConnection } from './ws/WebSocketServer'
 
 export { uid } from './base/uid'
+export { logga }
+export { schema }
+
+export { JSONSchema7 } from 'json-schema'
