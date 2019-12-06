@@ -307,15 +307,30 @@ const repl = async (
     if (errors !== undefined && errors.length > 0) {
       for (const error of errors)
         if (error.message !== undefined)
-          console.error(`${chalk.yellow(error.message)}`)
+          console.error(`${chalk.red(error.message)}`)
     }
 
     // Display any outputs
     if (outputs !== undefined && outputs.length > 0) {
       for (const output of outputs) {
-        const indent = Array.isArray(output) ? '' : '  '
-        const json = JSON.stringify(output, null, indent)
-        console.log(chalk.blue(json))
+        let display
+        switch (typeof output) {
+          case 'number':
+            display = chalk.cyan(output)
+            break
+          case 'string':
+            display = chalk.white(output)
+            break
+          default: {
+            const json = JSON.stringify(
+              output,
+              null,
+              Array.isArray(output) ? '' : '  '
+            )
+            display = chalk.blue(json)
+          }
+        }
+        console.log(display)
       }
     }
 
