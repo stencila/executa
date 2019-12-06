@@ -283,7 +283,9 @@ export function parseAddress(address: string): Address | undefined {
       case 'http':
       case 'https':
         return new HttpAddress(address)
+      case 'stdio':
+        return new StdioAddress(rest)
     }
   }
-  // TODO console.error(`Unable to parse address: ${address}`)
+  console.error(`Unable to parse address: ${address}`)
 }

@@ -11,6 +11,7 @@ export class StdioClient extends StreamClient {
   public constructor(address: StdioAddressInitializer) {
     const { command, args = [] } = new StdioAddress(address)
 
+    log.debug(`Starting StdioServer: ${command} ${args.join(' ')}`)
     const child = spawn(command, args)
 
     child.on('error', (error: Error) => {
@@ -35,14 +36,15 @@ export class StdioClient extends StreamClient {
     const { stdin, stdout, stderr } = child
     super(stdin, stdout)
 
-    // TODO: stderr.pipe(process.stderr)
+    // TODO: Parse and emit in own log events.
+    // stderr.pipe(process.stderr)
 
     this.child = child
   }
 
   /**
    * @override Override of {@link StreamClient.send} to log
-   * an error if the client was not able to be started
+   * an error if the child server has failed or exited.
    */
   protected send(request: JsonRpcRequest): void {
     if (this.child !== undefined) super.send(request)
@@ -53,6 +55,7 @@ export class StdioClient extends StreamClient {
    * Stop the child server process
    */
   public stop(): Promise<void> {
+    log.debug(`Stopping StdioServer`)
     // Avoid unnecessary log errors by removing listener
     if (this.child !== undefined) {
       this.child.removeAllListeners('exit')
