@@ -1,8 +1,16 @@
 import { getLogger } from '@stencila/logga'
 import { ChildProcess, spawn } from 'child_process'
+import fs from 'fs'
+import glob_ from 'glob'
+import path from 'path'
+import util from 'util'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
+import { Manifest } from '../base/Executor';
+import { home } from './util';
+
+const glob = util.promisify(glob_)
 
 const log = getLogger('executa:stdio:client')
 export class StdioClient extends StreamClient {
@@ -64,7 +72,35 @@ export class StdioClient extends StreamClient {
     return Promise.resolve()
   }
 
-  static discover(): StdioClient[] {
-    return []
+  static async discover(): Promise<StdioClient[]> {
+    const dir = home()
+
+    // Check the folder exists (they may not e.g. if no executors have been registered)
+    try {
+      fs.accessSync(dir, fs.constants.R_OK)
+    } catch (error) {
+      return []
+    }
+
+    const clients: StdioClient[] = []
+    for (const file of await glob(path.join(dir, '*.json'))) {
+      let json
+      try {
+        json = fs.readFileSync(file, { encoding: 'utf8' })
+      } catch (error) {
+        log.warn(`Warning: error reading file "${file}": ${error.message}`)
+        continue
+      }
+
+      try {
+        const manifest = JSON.parse(json) as Manifest
+        const client = new StdioClient(manifest.addresses.stdio)
+        clients.push(client)
+      } catch (error) {
+        log.warn(`Warning: error parsing file "${file}": ${error.message}`)
+      }
+    }
+
+    return clients
   }
 }

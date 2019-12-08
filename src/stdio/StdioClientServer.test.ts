@@ -18,6 +18,7 @@ describe('StdioClient and StdioServer', () => {
 
   test('main', async () => {
     const client = new StdioClient(testServer())
+
     await testClient(client)
 
     // Do not await the next two calls to `decode` - they do not
@@ -29,6 +30,10 @@ describe('StdioClient and StdioServer', () => {
     expect(await nextMessage()).toMatch(
       /^Error parsing message as JSON: ah hah/
     )
+  })
+
+  test('crash', async () => {
+    const client = new StdioClient(testServer())
 
     client.decode('crash now!').catch(error => {
       throw error

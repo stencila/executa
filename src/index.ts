@@ -22,7 +22,6 @@ export { StreamClient } from './stream/StreamClient'
 export { StreamServer } from './stream/StreamServer'
 
 export { StdioAddress } from './base/Transports'
-export { discover as stdioDiscover } from './stdio/discover'
 export { StdioClient } from './stdio/StdioClient'
 export { StdioServer } from './stdio/StdioServer'
 
