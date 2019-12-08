@@ -7,8 +7,8 @@ import util from 'util'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
-import { Manifest } from '../base/Executor';
-import { home } from './util';
+import { Manifest } from '../base/Executor'
+import { home } from './util'
 
 const glob = util.promisify(glob_)
 
@@ -72,35 +72,50 @@ export class StdioClient extends StreamClient {
     return Promise.resolve()
   }
 
+  /**
+   * @implements Implements {@link ClientType.discover}.
+   *
+   * @description Scans a know directory on the current machine
+   * for manifest files and instantiates a client from there.
+   */
   static async discover(): Promise<StdioClient[]> {
     const dir = home()
 
-    // Check the folder exists (they may not e.g. if no executors have been registered)
+    // Check the folder exists (it may not e.g. if no executors
+    // have been registered)
     try {
       fs.accessSync(dir, fs.constants.R_OK)
     } catch (error) {
       return []
     }
 
+    // Read each manifest file...
     const clients: StdioClient[] = []
     for (const file of await glob(path.join(dir, '*.json'))) {
       let json
       try {
         json = fs.readFileSync(file, { encoding: 'utf8' })
       } catch (error) {
-        log.warn(`Warning: error reading file "${file}": ${error.message}`)
+        log.warn(`Error reading file "${file}": ${error.message}`)
         continue
       }
 
+      let manifest: Manifest = {}
       try {
-        const manifest = JSON.parse(json) as Manifest
-        const client = new StdioClient(manifest.addresses.stdio)
-        clients.push(client)
+        manifest = JSON.parse(json)
       } catch (error) {
-        log.warn(`Warning: error parsing file "${file}": ${error.message}`)
+        log.warn(`Error parsing file "${file}": ${error.message}`)
+      }
+
+      const { addresses = {} } = manifest
+      const { stdio } = addresses
+      if (stdio !== undefined) {
+        const client = new StdioClient(stdio)
+        clients.push(client)
+      } else {
+        log.warn(`Manifest in "${file}" does not contain a stdio address`)
       }
     }
-
     return clients
   }
 }

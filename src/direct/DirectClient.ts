@@ -1,7 +1,10 @@
+import { getLogger } from '@stencila/logga'
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { DirectAddress } from '../base/Transports'
 import { DirectServer } from './DirectServer'
+
+const log = getLogger('executa:direct:client')
 
 export class DirectClient extends Client {
   private server: DirectServer
@@ -24,7 +27,14 @@ export class DirectClient extends Client {
       })
   }
 
-  static discover(): DirectClient[] {
-    return []
+  /**
+   * @implements Implements {@link ClientType.discover}.
+   *
+   * @description Discovery is not possible for direct
+   * servers, so logs a warning and returns an empty array.
+   */
+  static discover(): Promise<DirectClient[]> {
+    log.warn('Discovery not available for direct client')
+    return Promise.resolve([])
   }
 }

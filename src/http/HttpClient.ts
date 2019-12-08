@@ -76,8 +76,15 @@ export class HttpClient extends Client {
       .catch(err => log.error(err))
   }
 
-  static discover(): HttpClient[] {
-    log.warn('No peer discovery available for HTTP clients')
-    return []
+  /**
+   * @implements Implements {@link ClientType.discover}.
+   *
+   * @description Not implemented yet. In the future
+   * could be implemented using port scanning on the
+   * localhost.
+   */
+  static discover(): Promise<HttpClient[]> {
+    log.warn('Discovery not available for HTTP client')
+    return Promise.resolve([])
   }
 }

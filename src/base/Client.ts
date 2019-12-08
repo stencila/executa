@@ -189,9 +189,23 @@ export abstract class Client extends Executor {
   }
 }
 
+/**
+ * Interface for a client type.
+ */
 export interface ClientType {
+  /**
+   * Construct a client of this type.
+   */
   new (address: any): Client
-  discover: (address?: string) => Client[]
+
+  /**
+   * Discover servers for this type of client.
+   *
+   * This static method should be implemented by
+   * client classes and return an array of clients
+   * having that type.
+   */
+  discover: (address?: string) => Promise<Client[]>
 }
 
 const clientTypeTransportMap: { [key: string]: Transport } = {

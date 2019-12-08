@@ -29,8 +29,15 @@ export class TcpClient extends StreamClient {
     return Promise.resolve()
   }
 
-  static discover(): TcpClient[] {
-    log.warn('No peer discovery available for TCP clients')
-    return []
+  /**
+   * @implements Implements {@link ClientType.discover}.
+   *
+   * @description Not implemented yet. In the future
+   * could be implemented using port scanning on the
+   * localhost.
+   */
+  static discover(): Promise<TcpClient[]> {
+    log.warn('Discovery not available for TCP client')
+    return Promise.resolve([])
   }
 }

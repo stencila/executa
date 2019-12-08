@@ -138,7 +138,7 @@ describe('Peer', () => {
   })
 
   test('connect: no addresses', async () => {
-    const peer = new Peer(undefined, [DirectClient as ClientType], {
+    const peer = new Peer(undefined, [DirectClient], {
       capabilities: {},
       addresses: {}
     })
@@ -156,19 +156,15 @@ describe('Peer', () => {
   })
 
   test('connect: no addresses match client types', async () => {
-    const peer = new Peer(
-      undefined,
-      [DirectClient as ClientType, StdioClient as ClientType],
-      {
-        capabilities: {},
-        addresses: {
-          http: {
-            host: '127.0.0.1',
-            port: 8000
-          }
+    const peer = new Peer(undefined, [DirectClient, StdioClient], {
+      capabilities: {},
+      addresses: {
+        http: {
+          host: '127.0.0.1',
+          port: 8000
         }
       }
-    )
+    })
 
     expect(await peer.connect()).toBe(false)
   })

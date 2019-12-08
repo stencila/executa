@@ -168,8 +168,15 @@ export class WebSocketClient extends Client {
     return Promise.resolve()
   }
 
-  static discover(): WebSocketClient[] {
-    log.warn('No peer discovery available for WebSockets clients')
-    return []
+  /**
+   * @implements Implements {@link ClientType.discover}.
+   *
+   * @description Not implemented yet. In the future
+   * could be implemented using port scanning on the
+   * localhost.
+   */
+  static discover(): Promise<WebSocketClient[]> {
+    log.warn('Discovery not available for WebSocket client')
+    return Promise.resolve([])
   }
 }
