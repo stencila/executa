@@ -248,6 +248,10 @@ export class Peer {
     // transports
     for (const ClientType of this.clientTypes) {
       const transport = clientTypeToTransport(ClientType)
+      if (transport === undefined) {
+        // Likely config error, logged in the above function
+        continue
+      }
 
       // See if the peer has an address for the transport
       if (manifest.addresses === undefined) return false

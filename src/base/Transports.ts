@@ -287,5 +287,5 @@ export function parseAddress(address: string): Address | undefined {
         return new StdioAddress(rest)
     }
   }
-  console.error(`Unable to parse address: ${address}`)
+  return undefined
 }

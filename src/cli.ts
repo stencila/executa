@@ -49,7 +49,7 @@ const main = async (): Promise<void> => {
       return conf(config)
     default: {
       if (!valid) process.exit(1)
-      const executor = init(config)
+      const executor = await init(config)
       switch (command) {
         case 'repl':
           return repl(executor, args[1], config.debug, log)
@@ -81,7 +81,7 @@ const conf = (config: Config): void =>
 /**
  * Initialize a root executor based on the config
  */
-const init = (config: Config): Listener => {
+const init = async (config: Config): Promise<Listener> => {
   // Configure log handler
   const { debug } = config
   replaceHandlers(data =>
@@ -115,8 +115,8 @@ const init = (config: Config): Listener => {
 
   // Configure the delegator with clients for each peer
   const { peers } = config
-  const executors: Executor[] = addressesToClients(peers, clientTypes)
-  const delegator = new Delegator(executors, clientTypes)
+  const clients: Client[] = await addressesToClients(peers, clientTypes)
+  const delegator = new Delegator(clients, clientTypes)
 
   // Configure the queue
   const queuer = new Queuer(config)

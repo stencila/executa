@@ -4,14 +4,7 @@ import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { JsonRpcError } from './JsonRpcError'
-import {
-  Transport,
-  TcpAddressInitializer,
-  parseTcpAddress,
-  AddressInitializer,
-  parseAddress
-} from './Transports'
-import * as schema from '@stencila/schema'
+import { Transport, parseAddress, Address } from './Transports'
 
 const log = getLogger('executa:client')
 
@@ -86,7 +79,7 @@ export abstract class Client extends Executor {
         reject
       }
     })
-    await this.send(request)
+    this.send(request)
     return promise
   }
 
@@ -94,7 +87,7 @@ export abstract class Client extends Executor {
    * @override Override of {@link Executor.notify} to send a notification
    * to the `Executor` that this client is connected to.
    */
-  public notify(subject: string, message: string) {
+  public notify(subject: string, message: string): void {
     const notification = new JsonRpcRequest(subject, { message }, false)
     this.send(notification)
   }
@@ -104,7 +97,7 @@ export abstract class Client extends Executor {
    * notifications received by this client instead on just
    * logging them.
    */
-  notified(subject: string, message: string, node?: schema.Node): void {
+  notified(subject: string, message: string): void {
     const { notifications, notificationsLength } = this
     this.notificationsCount += 1
     notifications.push({
@@ -121,7 +114,7 @@ export abstract class Client extends Executor {
   /**
    * Send a request to the server.
    *
-   * This method must be overriden by derived client classes to
+   * This method must be overridden by derived client classes to
    * send the request over the transport used by that class.
    *
    * @param request The JSON-RPC request
@@ -156,7 +149,7 @@ export abstract class Client extends Executor {
       // A notification request
       const { method, params = [] } = message as JsonRpcRequest
       const args = Object.values(params)
-      return this.notified(method, args[0], args[1])
+      return this.notified(method, args[0])
     }
 
     // Must be a response....
@@ -217,46 +210,116 @@ const clientTypeTransportMap: { [key: string]: Transport } = {
   WebSocketClient: Transport.ws
 }
 
-export function clientTypeToTransport(client: string | Function): Transport {
-  const name = typeof client === 'string' ? client : client.name
+/**
+ * Get the transport for a client type
+ *
+ * @param client The client type name, constructor or instance
+ */
+export function clientTypeToTransport(
+  client: string | Function | Client
+): Transport | undefined {
+  const name =
+    typeof client === 'string'
+      ? client
+      : typeof client === 'function'
+      ? client.name
+      : client.constructor.name
   const transport = clientTypeTransportMap[name]
   if (transport !== undefined) return transport
-  //  istanbul ignore next
-  throw new InternalError(
-    `Wooah! A key is missing for client name "${name}" in transport map.`
-  )
+
+  // If this happens, it's likely due to a missing
+  // entry in the above `clientTypeTransportMap`.
+  log.error(`Client type not in map: ${name}`)
+  return undefined
 }
 
-export function transportToClientType(transport: Transport): string {
+/**
+ * Get the client type for a transport.
+ *
+ * @param transport The transport to translate.
+ */
+export function transportToClientType(
+  transport: Transport | string
+): string | undefined {
   for (const [name, trans] of Object.entries(clientTypeTransportMap)) {
     if (transport === trans) return name
   }
-  //  istanbul ignore next
-  throw new InternalError(
-    `OMG! An entry is missing for transport "${transport}" in transport map.`
-  )
+
+  // if this happens, it could be due to missing entry
+  // in `clientTypeTransportMap`, or a bad string from by user
+  log.error(`Unrecognized address transport: ${transport}`)
+  return undefined
 }
 
-export function addressToClient(
-  addressInitializer: string,
+/**
+ * Translate an address string into one or more clients.
+ *
+ * If the address is a "discovery address" e.g. `stdio://*`
+ * then discovery for the transport will be done and zero
+ * or more clients returns. For other addresses, a single
+ * client will be returned, unless there is an error in the
+ * address in which case none will be returned.
+ *
+ * @param addressStr Address string to translate.
+ * @param clientTypes Array of client types available to be translated to.
+ */
+export function addressToClients(
+  addressStr: string,
   clientTypes: ClientType[]
-): Client | undefined {
-  const address = parseAddress(addressInitializer)
-  if (address === undefined) return
+): Promise<Client[]> {
+  let address: Address | undefined
+  let transport: Transport | string
 
-  const clientTypeName = transportToClientType(address.type)
+  // Check if this is a discovery address (e.g. `stdio://*`)
+  const match = /^([a-z]{2,}):\/\/\*/.exec(addressStr)
+  if (match !== null) {
+    transport = match[1]
+  } else {
+    address = parseAddress(addressStr)
+    if (address === undefined) {
+      log.error(`Unable to parse address: ${addressStr}`)
+      return Promise.resolve([])
+    }
+    transport = address.type
+  }
+
+  const clientTypeName = transportToClientType(transport)
+  if (clientTypeName === undefined) {
+    return Promise.resolve([])
+  }
+
   const ClientType = clientTypes.filter(
     clientType => clientType.name === clientTypeName
   )[0]
-  if (ClientType !== undefined) return new ClientType(address)
+  if (ClientType === undefined) {
+    log.error(`Client type not available: ${clientTypeName}`)
+    return Promise.resolve([])
+  }
+
+  // If a discovery address then  do discovery, otherwise return a single client
+  return address === undefined
+    ? ClientType.discover()
+    : Promise.resolve([new ClientType(address)])
 }
 
+/**
+ * Translate an array of address strings into an array of
+ * clients.
+ *
+ * @param addresses Array of address strings to translate.
+ * @param clientTypes Array of client types available to be translated to.
+ */
 export function addressesToClients(
   addresses: string[],
   clientTypes: ClientType[]
-): Client[] {
-  return addresses.reduce((clients: Client[], address) => {
-    const client = addressToClient(address, clientTypes)
-    return client !== undefined ? [...clients, client] : clients
-  }, [])
+): Promise<Client[]> {
+  return addresses.reduce(
+    async (clients: Promise<Client[]>, address: string) => {
+      return [
+        ...(await clients),
+        ...(await addressToClients(address, clientTypes))
+      ]
+    },
+    Promise.resolve([])
+  )
 }
