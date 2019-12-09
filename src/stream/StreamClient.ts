@@ -18,19 +18,22 @@ export class StreamClient extends Client {
   public constructor(outgoing: Writable, incoming: Readable) {
     super()
 
-    // Do not keep reference to streams since they
-    // are provided to this constructor, so probably
-    // don't want to destroy them in this class
-
     this.encoder = lps.encode()
-    this.encoder.pipe(outgoing)
-
     const decoder = lps.decode()
-    incoming.pipe(decoder)
     decoder.on('data', (data: Buffer) => {
       const json = data.toString()
       this.receive(json)
     })
+
+    // Do not keep reference to streams since they
+    // are provided to this constructor, so probably
+    // don't want to destroy them in this class
+    //
+    // Although these streams are required parameters
+    // they can be undefined (e.g. if a `StdioClient span fails)
+    // so check for that here
+    if (outgoing !== undefined) this.encoder.pipe(outgoing)
+    if (incoming !== undefined) incoming.pipe(decoder)
   }
 
   protected send(request: JsonRpcRequest): void {

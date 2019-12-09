@@ -1,12 +1,13 @@
 import { addHandler, LogData } from '@stencila/logga'
-import { softwareEnvironment, softwareSession } from '@stencila/schema'
+import * as schema from '@stencila/schema'
 import JWT from 'jsonwebtoken'
-import { User } from '../base/Executor'
+import { Claims } from '../base/Executor'
 import { EchoExecutor } from '../test/EchoExecutor'
 import { testClient } from '../test/testClient'
 import { WebSocketClient } from './WebSocketClient'
 import { WebSocketServer } from './WebSocketServer'
 import { delay } from '../test/delay'
+import { Worker } from '../base/Worker'
 
 test('WebSocketClient and WebSocketServer', async () => {
   let serverLogs: LogData[] = []
@@ -20,13 +21,6 @@ test('WebSocketClient and WebSocketServer', async () => {
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:client') {
       clientLogs = [...clientLogs, logData]
-    }
-  })
-
-  let clientNotifs: LogData[] = []
-  addHandler((logData: LogData) => {
-    if (logData.tag === 'executa:client:notifs') {
-      clientNotifs = [...clientNotifs, logData]
     }
   })
 
@@ -49,25 +43,25 @@ test('WebSocketClient and WebSocketServer', async () => {
 
   {
     // JWT with session limits to be used for begin() method
-    const sessionRequests = softwareSession({
-      environment: softwareEnvironment('some-eviron'),
+    const sessionRequests = schema.softwareSession({
+      environment: schema.softwareEnvironment('some-eviron'),
       cpuRequest: 4,
       memoryRequest: 5
     })
-    const user: User = {
-      session: softwareSession({
-        environment: softwareEnvironment('some-eviron'),
+    const claims: Claims = {
+      session: schema.softwareSession({
+        environment: schema.softwareEnvironment('some-eviron'),
         cpuLimit: 2,
         memoryLimit: 2
       })
     }
     // Sign with the server's secret
-    const jwt = JWT.sign(user, server.jwtSecret)
+    const jwt = JWT.sign(claims, server.jwtSecret)
     const client = new WebSocketClient({ ...server.address, jwt })
     const echoed = (await client.begin(sessionRequests)) as any
     expect(echoed.node).toEqual(sessionRequests)
 
-    const userclient = echoed.user.client
+    const userclient = echoed.claims.client
     expect(userclient.type).toEqual('ws')
     expect(userclient).toHaveProperty('id')
 
@@ -80,43 +74,33 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // Client with malformed JWT
     clientLogs = []
-    const client = new WebSocketClient(
-      { ...server.address, jwt: 'jwhaaaat?' },
-      'malformed-jwt'
-    )
+    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(
-      /Failed to authenticate with server: jwt malformed/
-    )
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
   }
 
   {
     // Client with invalid JWT
     clientLogs = []
-    const client = new WebSocketClient(
-      {
-        ...server.address,
-        jwt: JWT.sign({}, 'not-the-right-secret')
-      },
-      'invalid-jwt'
-    )
+    const client = new WebSocketClient({
+      ...server.address,
+      jwt: JWT.sign({}, 'not-the-right-secret')
+    })
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(
-      /Failed to authenticate with server: invalid signature/
-    )
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
   }
 
   {
     // Clients reconnect after disconnection
-    const client1 = new WebSocketClient(server.address, 'client1')
-    const client2 = new WebSocketClient(server.address, 'client2')
-    const client3 = new WebSocketClient(server.address, 'client3')
+    const client1 = new WebSocketClient(server.address)
+    const client2 = new WebSocketClient(server.address)
+    const client3 = new WebSocketClient(server.address)
     await delay(25)
     expect(serverConnections()).toBe(3)
 
@@ -125,7 +109,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await server.stop()
     expect(serverConnections()).toBe(0)
 
-    await server.start()
+    await server.start(new Worker())
     await delay(100)
 
     expect(serverConnections()).toBe(3)
@@ -150,18 +134,20 @@ test('WebSocketClient and WebSocketServer', async () => {
     await delay(25)
 
     // Server notification to several clients
-    clientNotifs = []
     server.notify('debug', 'To all clients')
     await delay(25)
-    expect(clientNotifs.length).toBe(3)
+    expect(client1.notifications.length).toBe(1)
+    expect(client2.notifications.length).toBe(1)
+    expect(client3.notifications.length).toBe(1)
 
     // Server notification to some clients
     // @ts-ignore that connections is protected
     const clients = Object.keys(server.connections).slice(0, 2)
-    clientNotifs = []
-    server.notify('debug', 'To all clients', undefined, clients)
+    server.notify('debug', 'To some clients', undefined, clients)
     await delay(25)
-    expect(clientNotifs.length).toEqual(clients.length)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(1)
 
     // Server notification after clients disconnect
     await client1.stop()
@@ -169,7 +155,6 @@ test('WebSocketClient and WebSocketServer', async () => {
 
     serverLogs = []
     clientLogs = []
-    clientNotifs = []
     server.notify('debug', 'Hello, who is still there?')
     // Server has sent notification to 2 closing sockets
     await delay(25)
@@ -177,13 +162,14 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
-    expect(clientNotifs.length).toBe(1)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(2)
 
     await client3.stop()
 
     serverLogs = []
     clientLogs = []
-    clientNotifs = []
     server.notify('debug', 'Anybody?')
     // Server has sent notification to 2 closed sockets and one closing
     await delay(25)
@@ -191,7 +177,9 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
     )
-    expect(clientNotifs.length).toBe(0)
+    expect(client1.notifications.length).toBe(2)
+    expect(client2.notifications.length).toBe(2)
+    expect(client3.notifications.length).toBe(2)
   }
 
   await server.stop()

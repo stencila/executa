@@ -11,19 +11,19 @@
  * - `client.decode('crash now!')`
  */
 
+import * as schema from '@stencila/schema'
+import { Worker } from '../base/Worker'
 import { StdioServer } from './StdioServer'
-import { BaseExecutor } from '../base/BaseExecutor'
-import { Node } from '@stencila/schema'
 
-class TestExecutor extends BaseExecutor {
-  decode(content: string): Promise<Node> {
+class TestExecutor extends Worker {
+  decode(content: string, format: string): Promise<schema.Node> {
     if (content === 'send bad message') {
       process.stdout.write('Hah hah, a bad message to try to crash you!')
       return Promise.resolve('bad message sent')
     } else if (content === 'crash now!') {
       setTimeout(() => process.exit(1), 100)
       return Promise.resolve('crashing soon')
-    } else return super.decode(content)
+    } else return super.decode(content, format)
   }
 }
 

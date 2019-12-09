@@ -9,7 +9,7 @@ import fastify, {
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import { Executor } from '../base/Executor'
-import { BaseExecutor } from '../base/BaseExecutor'
+import { Manager } from '../base/Manager'
 import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
@@ -89,8 +89,8 @@ export class HttpServer extends TcpServer {
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
       // @ts-ignore that user does not exist on request
-      const { body, user = {} } = request
-      reply.send(await this.receive(body, user, false))
+      const { body, user: claims = {} } = request
+      reply.send(await this.receive(body, claims, false))
     })
 
     // RESTful-like JSON-RPC wrapped in HTTP
@@ -100,9 +100,13 @@ export class HttpServer extends TcpServer {
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
         // @ts-ignore that user does not exist on request
-        const { body, user = {} } = request
+        const { body, user: claims = {} } = request
         const jsonRpcRequest = new JsonRpcRequest(method, body)
-        const jsonRpcResponse = await this.receive(jsonRpcRequest, user, false)
+        const jsonRpcResponse = await this.receive(
+          jsonRpcRequest,
+          claims,
+          false
+        )
 
         reply.header('Content-Type', 'application/json')
         const { result, error } = jsonRpcResponse as JsonRpcResponse
@@ -209,8 +213,7 @@ export class HttpServer extends TcpServer {
     })
   }
 
-  public async start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new BaseExecutor()
+  public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
     const url = this.address.url()

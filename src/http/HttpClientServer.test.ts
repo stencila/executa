@@ -1,10 +1,11 @@
 import { testClient } from '../test/testClient'
 import { HttpClient } from './HttpClient'
 import { HttpServer } from './HttpServer'
+import { Worker } from '../base/Worker'
 
 test('HttpClient and HttpServer', async () => {
   const server = new HttpServer(undefined, 'not-a-secret-at-all')
-  await server.start()
+  await server.start(new Worker())
 
   // Client using JSON RPC protocol
   const clientJ = new HttpClient(server.address)

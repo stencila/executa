@@ -1,12 +1,14 @@
 import { getLogger } from '@stencila/logga'
-import { Node } from '@stencila/schema'
-import { BaseExecutor } from './BaseExecutor'
-import { Executor, User } from './Executor'
+import * as schema from '@stencila/schema'
+import { Manager } from './Manager'
+import { Executor, Claims } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { Address } from './Transports'
+import { CapabilityError } from './CapabilityError'
+import { Worker } from './Worker'
 
 const log = getLogger('executa:server')
 
@@ -39,7 +41,7 @@ export abstract class Server {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients?: string[]
   ): void {
     // Only servers that have persistent connections can implement this
@@ -49,8 +51,8 @@ export abstract class Server {
    * Receive a request or notification
    *
    * @param request A JSON-RPC request from a client
-   * @param user An object representing the user and their rights,
-   *             usually a JWT payload
+   * @param claims An object representing the claims for the request,
+   *             usually a from a JWT payload
    * @param stringify Should the response be stringified?
    * @returns If receiving a request then a JSON-RPC response as an
    *          object or string (default).
@@ -58,7 +60,7 @@ export abstract class Server {
    */
   protected async receive(
     request: string | JsonRpcRequest,
-    user: User = {},
+    claims: Claims = {},
     stringify = true
   ): Promise<string | JsonRpcResponse | void> {
     if (this.executor === undefined)
@@ -104,18 +106,18 @@ export abstract class Server {
           result = await this.executor.execute(
             request.param(0, 'node'),
             request.param(1, 'session', false),
-            // Any `user` parameter requested is ignored and instead
-            // the user from the server (e.g. based on a JWT) is applied
-            user
+            // Any `claims` parameter is ignored and instead
+            // the claims from the server (e.g. based on a JWT) is applied
+            claims
           )
           break
         case 'begin':
         case 'end':
           result = await this.executor[method](
             request.param(0, 'node'),
-            // Any `user` parameter requested is ignored and instead
-            // the user from the server (e.g. based on a JWT) is applied
-            user
+            // Any `claims` parameter is ignored and instead
+            // the claims from the server (e.g. based on a JWT) is applied
+            claims
           )
           break
         case 'compile':
@@ -133,6 +135,9 @@ export abstract class Server {
         // A JSON-RPC client error (e.g. missing parameters), do
         // not log it (to avoid noisy logs), just send to the client.
         error = exc
+      } else if (exc instanceof CapabilityError) {
+        // Executor not capable of performing call so return special code
+        error = new JsonRpcError(JsonRpcErrorCode.CapabilityError, exc.message)
       } else {
         // Some sort of internal error, so log it and wrap
         // it into a JSON RPC error to send to the client.
@@ -155,10 +160,9 @@ export abstract class Server {
    * Start the server
    *
    * When overriding this method, derived classes should
-   * call this method, or ensure that `executor` is set themselves.
+   * call this method, or ensure that `this.executor` is set themselves.
    */
-  public start(executor?: Executor): Promise<void> {
-    if (executor === undefined) executor = new BaseExecutor()
+  public start(executor: Executor): Promise<void> {
     this.executor = executor
     return Promise.resolve()
   }
@@ -170,22 +174,5 @@ export abstract class Server {
    */
   public stop(): Promise<void> {
     return Promise.resolve()
-  }
-
-  /**
-   * Run the server with graceful shutdown on `SIGINT` or `SIGTERM`
-   */
-  public run(): Promise<void> {
-    const stop = (): void => {
-      this.stop()
-        .then(() => process.exit())
-        .catch(error =>
-          log.error(`Error when stopping server: ${error.message}`)
-        )
-    }
-    process.on('SIGINT', stop)
-    process.on('SIGTERM', stop)
-
-    return this.start()
   }
 }

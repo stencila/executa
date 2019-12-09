@@ -2,10 +2,11 @@ import { TcpClient } from './TcpClient'
 import { TcpServer } from './TcpServer'
 import { testClient } from '../test/testClient'
 import { delay } from '../test/delay'
+import { Worker } from '../base/Worker'
 
 test('TcpClient and TcpServer', async () => {
   const server = new TcpServer()
-  await server.start()
+  await server.start(new Worker())
 
   const client1 = new TcpClient(server.address)
   const client2 = new TcpClient(server.address)

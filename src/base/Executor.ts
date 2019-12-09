@@ -1,4 +1,5 @@
-import { Node, SoftwareSession } from '@stencila/schema'
+import { getLogger } from '@stencila/logga'
+import * as schema from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
 import {
   DirectAddress,
@@ -10,6 +11,9 @@ import {
   VsockAddress,
   WebSocketAddressInitializer
 } from './Transports'
+import { InternalError } from './InternalError'
+
+const log = getLogger('executa:executor')
 
 /**
  * The methods of an `Executor` class.
@@ -24,6 +28,11 @@ export enum Method {
   begin = 'begin',
   end = 'end'
 }
+
+/**
+ * The parameters of a call to a method
+ */
+export type Params = { [key: string]: any }
 
 /**
  * The capabilities of an `Executor` class as
@@ -58,11 +67,9 @@ export interface Addresses {
  */
 export interface Manifest {
   /**
-   * The id of the `Executor`, or
-   * the `Executor` instance itself if it
-   * is in-process.
+   * The id of the `Executor`
    */
-  id?: string | Executor
+  id?: string
 
   /**
    * The capabilities of the executor
@@ -76,7 +83,7 @@ export interface Manifest {
   addresses?: Addresses
 
   /**
-   * Other properties that the `Executor`
+   * Other properties that `Executor`
    * implementations may wish to add
    * e.g. package name and version
    */
@@ -84,17 +91,23 @@ export interface Manifest {
 }
 
 /**
- * User information used in some methods for
- * authorization (e.g. limiting the number of
- * session that a user can have)
+ * Information used in some methods for
+ * authorization (e.g. limiting the number
+ * of users accessing a session, limiting
+ * the resources used by a session)
  */
-export interface User {
-  id?: string
+export interface Claims {
+  user?: {
+    id: string
+  }
   client?: {
     type: Transport
     id: string
   }
-  session?: SoftwareSession
+  session?: schema.SoftwareSession
+
+  // Allow for other arbitrary properties
+  [key: string]: any
 }
 
 /**
@@ -107,7 +120,9 @@ export abstract class Executor {
    * @see {@link Capabilities}
    * @see {@link Addresses}
    */
-  abstract async manifest(): Promise<Manifest>
+  public async manifest(): Promise<Manifest> {
+    return this.call<Manifest>(Method.manifest, {})
+  }
 
   /**
    * Decode content to a `Node`.
@@ -116,7 +131,9 @@ export abstract class Executor {
    * @param format The format of the content
    * @returns The decoded node
    */
-  abstract async decode(content: string, format?: string): Promise<Node>
+  public async decode(content: string, format?: string): Promise<schema.Node> {
+    return this.call<schema.Node>(Method.decode, { content, format })
+  }
 
   /**
    * Encode a `Node` in a format.
@@ -125,7 +142,9 @@ export abstract class Executor {
    * @param format The format to encode
    * @returns The node encoded in the format
    */
-  abstract async encode(node: Node, format?: string): Promise<string>
+  public async encode(node: schema.Node, format?: string): Promise<string> {
+    return this.call<string>(Method.encode, { node, format })
+  }
 
   /**
    * Compile a `Node`.
@@ -133,9 +152,9 @@ export abstract class Executor {
    * @param node The node to compile
    * @returns The compiled node
    */
-  abstract async compile<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType>
+  public async compile<Type extends schema.Node>(node: Type): Promise<Type> {
+    return this.call<Type>(Method.compile, { node })
+  }
 
   /**
    * Build a `Node`.
@@ -143,21 +162,25 @@ export abstract class Executor {
    * @param node The node to build
    * @returns The build node
    */
-  abstract async build<NodeType extends Node>(node: NodeType): Promise<NodeType>
+  public async build<Type extends schema.Node>(node: Type): Promise<Type> {
+    return this.call<Type>(Method.build, { node })
+  }
 
   /**
    * Execute a `Node`.
    *
    * @param node The node to execute
    * @param session The session that the node will be executed in
-   * @param user The `User` making the call
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has been executed
    */
-  abstract async execute<NodeType extends Node>(
-    node: NodeType,
-    session?: SoftwareSession,
-    user?: User
-  ): Promise<NodeType>
+  public async execute<Type extends schema.Node>(
+    node: Type,
+    session?: schema.SoftwareSession,
+    claims?: Claims
+  ): Promise<Type> {
+    return this.call<Type>(Method.execute, { node, session, claims })
+  }
 
   /**
    * Begin running a `Node`.
@@ -173,25 +196,29 @@ export abstract class Executor {
    * `session` property, or default session if that property is missing.
    *
    * @param node The node to run, usually but not necessarily, a `SoftwareSession`
-   * @param user The `User` making the call
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has begun running
    */
-  abstract async begin<NodeType extends Node>(
-    node: NodeType,
-    user?: User
-  ): Promise<NodeType>
+  public async begin<Type extends schema.Node>(
+    node: Type,
+    claims?: Claims
+  ): Promise<Type> {
+    return this.call<Type>(Method.begin, { node, claims })
+  }
 
   /**
    * End running a `Node`.
    *
    * @param node The running node, usually but not necessarily, a `SoftwareSession`
-   * @param user The `User` making the request
+   * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has ended running
    */
-  abstract async end<NodeType extends Node>(
-    node: NodeType,
-    user?: User
-  ): Promise<NodeType>
+  public async end<Type extends schema.Node>(
+    node: Type,
+    claims?: Claims
+  ): Promise<Type> {
+    return this.call<Type>(Method.end, { node, claims })
+  }
 
   /**
    * Call one of the above methods.
@@ -199,10 +226,7 @@ export abstract class Executor {
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  abstract async call<Type>(
-    method: Method,
-    params: { [key: string]: any }
-  ): Promise<Type>
+  abstract async call<Type>(method: Method, params: Params): Promise<Type>
 
   /**
    * Send a notification
@@ -212,12 +236,16 @@ export abstract class Executor {
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    * @param clients The ids of the clients to send the notification to. If missing send to all clients.
    */
-  abstract notify(
+  public notify(
     level: string,
     message: string,
     node?: Node,
     clients?: string[]
-  ): void
+  ): void {
+    throw new InternalError(
+      'Method notify should be implemented in derived classes'
+    )
+  }
 
   /**
    * Receive a notification
@@ -226,5 +254,34 @@ export abstract class Executor {
    * @param message The notification message
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    */
-  abstract notified(level: string, message: string, node?: Node): void
+  public notified(level: string, message: string, node?: Node): void {
+    switch (level) {
+      case 'debug':
+      case 'info':
+      case 'warn':
+      case 'error':
+        log[level](message)
+        break
+      default:
+        log.info(message)
+    }
+  }
+
+  /**
+   * Start the executor
+   *
+   * Derived classes may override this method.
+   */
+  public start(): Promise<void> {
+    return Promise.resolve()
+  }
+
+  /**
+   * Stop the executor
+   *
+   * Derived classes may override this method.
+   */
+  public stop(): Promise<void> {
+    return Promise.resolve()
+  }
 }

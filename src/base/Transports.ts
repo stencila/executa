@@ -19,6 +19,15 @@ export type Address =
   | HttpAddress
   | WebSocketAddress
 
+export type AddressInitializer =
+  | DirectAddress
+  | StdioAddressInitializer
+  | UdsAddress
+  | VsockAddress
+  | TcpAddressInitializer
+  | HttpAddressInitializer
+  | WebSocketAddressInitializer
+
 export class DirectAddress {
   public readonly type: Transport.direct = Transport.direct
   public readonly server: any
@@ -121,7 +130,7 @@ export class TcpAddress {
       port: 7000
     }
   ) {
-    const { scheme, host, port } = parseAddress(address, defaults)
+    const { scheme, host, port } = parseTcpAddress(address, defaults)
     this.scheme = scheme
     this.host = host
     this.port = port
@@ -185,7 +194,7 @@ export class HttpAddress extends TcpAddress {
     }
   ) {
     super(address, defaults)
-    const { path } = parseAddress(address, defaults)
+    const { path } = parseTcpAddress(address, defaults)
     this.path = path
     if (typeof address === 'object') {
       const { protocol, jwt } = address
@@ -224,7 +233,7 @@ export class WebSocketAddress extends HttpAddress {
   }
 }
 
-export function parseAddress(
+export function parseTcpAddress(
   address: undefined | TcpAddressInitializer | HttpAddressInitializer,
   defaults: TcpAddressProperties | HttpAddressProperties
 ): Pick<HttpAddressProperties, 'scheme' | 'host' | 'port' | 'path'> {
@@ -261,4 +270,22 @@ export function parseAddress(
     else port = defaults.port
   }
   return { scheme, host, port, path }
+}
+
+export function parseAddress(address: string): Address | undefined {
+  const match = /^([a-zA-Z]+):\/\/(.*)$/.exec(address)
+  if (match !== null) {
+    const scheme = match[1]
+    const rest = match[2]
+    switch (scheme) {
+      case 'docker':
+        return new StdioAddress(`docker run --interactive ${rest}`)
+      case 'http':
+      case 'https':
+        return new HttpAddress(address)
+      case 'stdio':
+        return new StdioAddress(rest)
+    }
+  }
+  return undefined
 }

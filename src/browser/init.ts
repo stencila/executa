@@ -1,20 +1,21 @@
 import '@stencila/components'
 import { getLogger } from '@stencila/logga'
-import { CodeChunk, softwareSession, SoftwareSession } from '@stencila/schema'
-import { BaseExecutor } from '../base/BaseExecutor'
+import * as schema from '@stencila/schema'
+import { Manager } from '../base/Manager'
 import { HttpAddressInitializer } from '../base/Transports'
-import { discover } from '../http/discover'
 import { HttpClient } from '../http/HttpClient'
 import { WebSocketClient } from '../ws/WebSocketClient'
 
 const log = getLogger('executa:browser')
 
-let executor: BaseExecutor
-let session: null | SoftwareSession = null
+let executor: Manager
+let session: null | schema.SoftwareSession = null
 
-const executeCodeChunk = async (codeChunk: CodeChunk): Promise<CodeChunk> => {
+const executeCodeChunk = async (
+  codeChunk: schema.CodeChunk
+): Promise<schema.CodeChunk> => {
   if (session === null) {
-    session = await executor.begin(softwareSession())
+    session = await executor.begin(schema.softwareSession())
   }
   try {
     return executor.execute(codeChunk, session)
@@ -37,10 +38,7 @@ const onReadyHandler = (): void => {
 }
 
 export const init = (address: HttpAddressInitializer): void => {
-  executor = new BaseExecutor(
-    [() => discover(address)],
-    [HttpClient, WebSocketClient]
-  )
+  executor = new Manager()
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', onReadyHandler)

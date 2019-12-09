@@ -1,93 +1,66 @@
-import { Node, SoftwareSession } from '@stencila/schema'
-import { Executor, Manifest, Method, User } from './Executor'
-import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
+import { getLogger } from '@stencila/logga'
+import { Executor, Method } from './Executor'
+import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { InternalError } from './InternalError'
-import { getLogger } from '@stencila/logga'
+import { JsonRpcError } from './JsonRpcError'
+import { Transport, parseAddress, Address } from './Transports'
 
 const log = getLogger('executa:client')
 
-const notifications = getLogger('executa:client:notifs')
+interface Request<Type> {
+  id: number
+  date: Date
+  resolve: (result: Type) => void
+  reject: (error: Error) => void
+}
+
+interface Notification {
+  id: number
+  date: Date
+  subject: string
+  message: string
+}
 
 /**
  * A client to a remote, out of process, `Executor`.
  *
- * Implements asynchronous, methods for `Executor` methods `compile`, `build`, `execute`, etc.
+ * Implements asynchronous, methods for `Executor` methods `call` and `notify`
  * which send JSON-RPC requests to a `Server` that is serving the remote `Executor`.
  */
-export abstract class Client implements Executor {
+export abstract class Client extends Executor {
   /**
    * A map of requests to which responses can be paired against
    */
-  private requests: { [key: number]: (response: JsonRpcResponse) => void } = {}
+  private requests: { [key: number]: Request<any> } = {}
 
   /**
-   * Call the remote `Executor`'s `manifest` method
-   */
-  public async manifest(): Promise<Manifest> {
-    return this.call<Manifest>(Method.manifest)
-  }
-
-  /**
-   * Call the remote `Executor`'s `decode` method
-   */
-  public async decode(content: string, format = 'json'): Promise<Node> {
-    return this.call<string>(Method.decode, { content, format })
-  }
-
-  /**
-   * Call the remote `Executor`'s `encode` method
-   */
-  public async encode(node: Node, format = 'json'): Promise<string> {
-    return this.call<string>(Method.encode, { node, format })
-  }
-
-  /**
-   * Call the remote `Executor`'s `compile` method
-   */
-  public async compile<NodeType extends Node>(
-    node: NodeType
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.compile, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `build` method
-   */
-  public async build<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.build, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `execute` method
-   */
-  public async execute<NodeType extends Node>(
-    node: NodeType,
-    session?: SoftwareSession
-  ): Promise<NodeType> {
-    return this.call<NodeType>(Method.execute, { node, session })
-  }
-
-  /**
-   * Call the remote `Executor`'s `begin` method
-   */
-  public async begin<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.begin, { node })
-  }
-
-  /**
-   * Call the remote `Executor`'s `end` method
-   */
-  public async end<NodeType extends Node>(node: NodeType): Promise<NodeType> {
-    return this.call<NodeType>(Method.end, { node })
-  }
-
-  /**
-   * Call a method of a remote `Executor`.
+   * Notifications cache
    *
-   * @param method The name of the method
-   * @param params Values of parameters (i.e. arguments)
+   * Intended to be consumed by by applications
+   * e.g. by displaying them to the user.
+   */
+  notifications: Notification[] = []
+
+  /**
+   * Count of notifications received
+   *
+   * Used to give a unique, sequential, identifier to each
+   * new notification.
+   */
+  notificationsCount = 0
+
+  /**
+   * Maximum length of the notifications cache
+   *
+   * Used to avoid excessive memory usage for unhandled
+   * notifications.
+   */
+  notificationsLength = 1000
+
+  /**
+   * @implements Implements {@link Executor.call} by sending a
+   * a request to the remote `Executor` that this client is connected to.
    */
   public async call<Type>(
     method: Method,
@@ -99,50 +72,49 @@ export abstract class Client implements Executor {
       throw new InternalError('Request should have id defined')
 
     const promise = new Promise<Type>((resolve, reject) => {
-      this.requests[id] = (response: JsonRpcResponse) => {
-        const { result, error } = response
-        if (error !== undefined) reject(error)
-        else resolve(result)
+      this.requests[id] = {
+        id,
+        date: new Date(),
+        resolve,
+        reject
       }
     })
-    await this.send(request)
+    this.send(request)
     return promise
   }
 
   /**
-   * @implements Implements {@link Executor.notify} to send a notification
-   * to the remote executor that this client is connected to.
+   * @override Override of {@link Executor.notify} to send a notification
+   * to the `Executor` that this client is connected to.
    */
-  public notify(level: string, message: string) {
-    const notification = new JsonRpcRequest(level, { message }, false)
+  public notify(subject: string, message: string): void {
+    const notification = new JsonRpcRequest(subject, { message }, false)
     this.send(notification)
   }
 
   /**
-   * @implements Implements {@link Executor.notified} to receive a notification
-   * from the remote executor that this client is connected to.
-   *
-   * @description Currently simply calls the appropriate method of
-   * the `notifications` log instance. Override this to provide more fancy
-   * notification to users.
+   * @override Override of {@link Executor.notified} to cache
+   * notifications received by this client instead on just
+   * logging them.
    */
-  public notified(level: string, message: string, node?: Node): void {
-    switch (level) {
-      case 'debug':
-      case 'info':
-      case 'warn':
-      case 'error':
-        notifications[level](message)
-        break
-      default:
-        notifications.info(message)
+  notified(subject: string, message: string): void {
+    const { notifications, notificationsLength } = this
+    this.notificationsCount += 1
+    notifications.push({
+      id: this.notificationsCount,
+      date: new Date(),
+      subject,
+      message
+    })
+    if (notifications.length > notificationsLength) {
+      notifications.splice(0, notifications.length - notificationsLength)
     }
   }
 
   /**
    * Send a request to the server.
    *
-   * This method must be overriden by derived client classes to
+   * This method must be overridden by derived client classes to
    * send the request over the transport used by that class.
    *
    * @param request The JSON-RPC request
@@ -177,7 +149,7 @@ export abstract class Client implements Executor {
       // A notification request
       const { method, params = [] } = message as JsonRpcRequest
       const args = Object.values(params)
-      return this.notified(method, args[0], args[1])
+      return this.notified(method, args[0])
     }
 
     // Must be a response....
@@ -188,37 +160,166 @@ export abstract class Client implements Executor {
       return
     }
 
-    const resolve = this.requests[id]
-    if (resolve === undefined) {
+    const request = this.requests[id]
+    if (request === undefined) {
       log.error(`No request found for response with id: ${id}`)
       return
     }
 
-    try {
-      resolve(message as JsonRpcResponse)
-    } catch (error) {
-      const { message: errorMessage, stack } = error
-      log.error({
-        message: `Error thrown when handling message: ${errorMessage}\n${JSON.stringify(
-          message
-        )}`,
-        stack
-      })
+    const { resolve, reject } = request
+    const { result, error } = message as JsonRpcResponse
+
+    if (error !== undefined) reject(JsonRpcError.toError(error))
+    else {
+      try {
+        resolve(result)
+      } catch (error) {
+        log.error(`Unhandled error when resolving result: ${error}`)
+      }
     }
 
     delete this.requests[id]
   }
-
-  /**
-   * Stop the client
-   *
-   * Derived classes may override this method.
-   */
-  public stop(): Promise<void> {
-    return Promise.resolve()
-  }
 }
 
+/**
+ * Interface for a client type.
+ */
 export interface ClientType {
+  /**
+   * Construct a client of this type.
+   */
   new (address: any): Client
+
+  /**
+   * Discover servers for this type of client.
+   *
+   * This static method should be implemented by
+   * client classes and return an array of clients
+   * having that type.
+   */
+  discover: (address?: string) => Promise<Client[]>
+}
+
+const clientTypeTransportMap: { [key: string]: Transport } = {
+  DirectClient: Transport.direct,
+  StdioClient: Transport.stdio,
+  VsockClient: Transport.vsock,
+  TcpClient: Transport.tcp,
+  HttpClient: Transport.http,
+  WebSocketClient: Transport.ws
+}
+
+/**
+ * Get the transport for a client type
+ *
+ * @param client The client type name, constructor or instance
+ */
+export function clientTypeToTransport(
+  client: string | Function | Client
+): Transport | undefined {
+  const name =
+    typeof client === 'string'
+      ? client
+      : typeof client === 'function'
+      ? client.name
+      : client.constructor.name
+  const transport = clientTypeTransportMap[name]
+  if (transport !== undefined) return transport
+
+  // If this happens, it's likely due to a missing
+  // entry in the above `clientTypeTransportMap`.
+  log.error(`Client type not in map: ${name}`)
+  return undefined
+}
+
+/**
+ * Get the client type for a transport.
+ *
+ * @param transport The transport to translate.
+ */
+export function transportToClientType(
+  transport: Transport | string
+): string | undefined {
+  for (const [name, trans] of Object.entries(clientTypeTransportMap)) {
+    if (transport === trans) return name
+  }
+
+  // if this happens, it could be due to missing entry
+  // in `clientTypeTransportMap`, or a bad string from by user
+  log.error(`Unrecognized address transport: ${transport}`)
+  return undefined
+}
+
+/**
+ * Translate an address string into one or more clients.
+ *
+ * If the address is a "discovery address" e.g. `stdio://*`
+ * then discovery for the transport will be done and zero
+ * or more clients returns. For other addresses, a single
+ * client will be returned, unless there is an error in the
+ * address in which case none will be returned.
+ *
+ * @param addressStr Address string to translate.
+ * @param clientTypes Array of client types available to be translated to.
+ */
+export function addressToClients(
+  addressStr: string,
+  clientTypes: ClientType[]
+): Promise<Client[]> {
+  let address: Address | undefined
+  let transport: Transport | string
+
+  // Check if this is a discovery address (e.g. `stdio://*`)
+  const match = /^([a-z]{2,}):\/\/\*/.exec(addressStr)
+  if (match !== null) {
+    transport = match[1]
+  } else {
+    address = parseAddress(addressStr)
+    if (address === undefined) {
+      log.error(`Unable to parse address: ${addressStr}`)
+      return Promise.resolve([])
+    }
+    transport = address.type
+  }
+
+  const clientTypeName = transportToClientType(transport)
+  if (clientTypeName === undefined) {
+    return Promise.resolve([])
+  }
+
+  const ClientType = clientTypes.filter(
+    clientType => clientType.name === clientTypeName
+  )[0]
+  if (ClientType === undefined) {
+    log.error(`Client type not available: ${clientTypeName}`)
+    return Promise.resolve([])
+  }
+
+  // If a discovery address then  do discovery, otherwise return a single client
+  return address === undefined
+    ? ClientType.discover()
+    : Promise.resolve([new ClientType(address)])
+}
+
+/**
+ * Translate an array of address strings into an array of
+ * clients.
+ *
+ * @param addresses Array of address strings to translate.
+ * @param clientTypes Array of client types available to be translated to.
+ */
+export function addressesToClients(
+  addresses: string[],
+  clientTypes: ClientType[]
+): Promise<Client[]> {
+  return addresses.reduce(
+    async (clients: Promise<Client[]>, address: string) => {
+      return [
+        ...(await clients),
+        ...(await addressToClients(address, clientTypes))
+      ]
+    },
+    Promise.resolve([])
+  )
 }

@@ -1,3 +1,5 @@
+import { CapabilityError } from './CapabilityError'
+
 /**
  * A JSON-RPC 2.0 response error
  *
@@ -15,29 +17,43 @@ export enum JsonRpcErrorCode {
    * An error occurred on the server while parsing the JSON text.
    */
   ParseError = -32700,
+
   /**
    * The JSON sent is not a valid Request object.
    */
   InvalidRequest = -32600,
+
   /**
    * The method does not exist / is not available.
    */
   MethodNotFound = -32601,
+
   /**
    * Invalid method parameter(s).
    */
   InvalidParams = -32602,
+
   /**
    * Internal JSON-RPC error.
    */
   InternalError = -32603,
+
+  // Implementation defined server-errors...
+
   /**
-   * Implementation defined server error.
+   * Generic server error.
    */
-  ServerError = -32000
+  ServerError = -32000,
+
+  /**
+   * Capability error
+   **/
+  CapabilityError = -32005
 }
 
 export class JsonRpcError {
+  public readonly name = 'JsonRpcError'
+
   /**
    * A Number that indicates the error type that occurred.
    * This MUST be an integer.
@@ -62,5 +78,19 @@ export class JsonRpcError {
     this.code = code
     this.message = message
     this.data = data
+  }
+
+  /**
+   * Translate a `JsonRpcError` into other application
+   * specific errors.
+   */
+  static toError(error: JsonRpcError): Error {
+    const { code, message } = error
+    switch (code) {
+      case JsonRpcErrorCode.CapabilityError:
+        return new CapabilityError(message)
+      default:
+        return error
+    }
   }
 }

@@ -1,12 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
 import net from 'net'
-import { Executor, User } from '../base/Executor'
+import { Executor, Claims } from '../base/Executor'
 import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
 import { Connection } from '../base/Connection'
-import { Node } from '@stencila/schema'
+import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:tcp:server')
 
@@ -88,7 +88,7 @@ export class TcpServer extends Server {
     delete this.connections[connection.id]
   }
 
-  public async start(executor?: Executor): Promise<void> {
+  public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
       log.info(`Starting server: ${this.address.url()}`)
 
@@ -119,7 +119,7 @@ export class TcpServer extends Server {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients?: string[]
   ): void {
     if (clients === undefined) clients = Object.keys(this.connections)

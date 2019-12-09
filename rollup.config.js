@@ -14,16 +14,7 @@ export default [
         tsconfig: 'tsconfig.browser.json'
       }),
       commonjs({
-        extensions: ['.js', '.ts'],
-        namedExports: {
-          '@stencila/schema': [
-            'nodeType',
-            'isPrimitive',
-            'codeChunk',
-            'softwareEnvironment',
-            'softwareSession'
-          ]
-        }
+        extensions: ['.js', '.ts']
       }),
       json(),
       babel({

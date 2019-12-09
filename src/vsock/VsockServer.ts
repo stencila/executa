@@ -22,7 +22,7 @@ export class VsockServer extends StreamServer {
     return new VsockAddress(this.port)
   }
 
-  public async start(executor?: Executor): Promise<void> {
+  public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
       const server = (this.server = spawn(
         path.join(__dirname, 'vsock-server'),

@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "description": "Executa 0.14.3",
+  "description": "Executa 0.15.0",
   "$comment": "",
   "properties": {
     "debug": {
@@ -68,6 +68,36 @@
         }
       ],
       "default": false
+    },
+    "peers": {
+      "description": "List of peer addresses.",
+      "$comment": "Each string in this list is parsed as an address to\na peer executor. e.g. `https://123.45.67.89/`, `docker://image`",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": ["stdio://*"]
+    },
+    "queueLength": {
+      "description": "Maximum length of the request queue.",
+      "$comment": "When queue reaches this length, subsequent requests will\nfail with an error response to client.",
+      "type": "number",
+      "minimum": 0,
+      "default": 1000
+    },
+    "queueInterval": {
+      "description": "Interval between attempts to reduce request queue.",
+      "$comment": "Seconds.",
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 1
+    },
+    "queueStale": {
+      "description": "Duration after which a request is removed from queue.",
+      "$comment": "Seconds. Client will be notified when a request is removed.",
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "default": 3600
     }
   }
 }

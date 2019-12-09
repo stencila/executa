@@ -7,10 +7,11 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "${workspaceFolder}/index.js",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      "name": "REPL",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "repl:debug"],
+      "port": 9229,
+      "console": "integratedTerminal"
     },
     {
       "type": "node",
