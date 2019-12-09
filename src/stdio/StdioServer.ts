@@ -1,10 +1,11 @@
+import { getLogger } from '@stencila/logga'
 import fs from 'fs'
+import mkdirp from 'mkdirp'
 import path from 'path'
 import { Manifest } from '../base/Executor'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { home } from './util'
-import { getLogger } from '@stencila/logga'
 
 const log = getLogger('executa:stdio:server')
 
@@ -40,9 +41,7 @@ export class StdioServer extends StreamServer {
     const dir = home()
 
     log.info(`Registering executor "${name}" in folder "${dir}"`)
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir)
-    }
+    mkdirp.sync(dir)
 
     const { addresses = {} } = manifest
     if (addresses.stdio === undefined) {

@@ -40,6 +40,7 @@
     "@types/json-schema": "7.0.3",
     "@types/lolex": "^5.1.0",
     "@types/minimist": "1.2.0",
+    "@types/mkdirp": "^0.5.2",
     "@types/nanoid": "2.1.0",
     "jest": "24.9.0",
     "lolex": "^5.1.1",
@@ -72,6 +73,7 @@
     "glob": "^7.1.4",
     "isomorphic-ws": "^4.0.1",
     "length-prefixed-stream": "^2.0.0",
+    "mkdirp": "^0.5.1",
     "nanoid": "^2.1.6",
     "ora": "^4.0.3",
     "p-retry": "^4.2.0"
