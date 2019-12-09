@@ -5,7 +5,7 @@ import { Executor, Manifest, Method, Params } from './Executor'
 import { InternalError } from './InternalError'
 import { Transport } from './Transports'
 import { CapabilityError } from './CapabilityError'
-import { uid } from './uid'
+import { generate } from './uid'
 
 const ajv = new Ajv()
 
@@ -82,7 +82,7 @@ export class Delegator extends Executor {
   /* eslint-disable @typescript-eslint/no-use-before-define */
 
   public add(executor: Executor, id?: string): string {
-    id = id !== undefined ? id : uid()
+    id = id !== undefined ? id : generate('ex').toString()
     log.debug(`Adding peer ${id}`)
     const peer = new Peer(executor, this.clientTypes)
     this.peers[id] = peer

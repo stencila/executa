@@ -1,18 +1,83 @@
-import generate from 'nanoid/generate'
+import nanoid from 'nanoid/generate'
+
+export class Id<Family> extends String {
+  family: Family
+
+  constructor(family: Family, value: string) {
+    super(value)
+    this.family = family
+  }
+}
 
 /**
- * Generate a unique id.
+ * The epoch used for calculating
+ * the time stamp. Chosen as a recent time
+ * that was easily remembered.
+ * Happens to correspond to 2017-07-14T02:40:00.000Z.
+ */
+export const epoch = 1500000000000
+
+/**
+ * Generate a unique identifier.
  *
- * Generates an id of 22 characters using Roman digits + lowercase and uppercase letters
- * (i.e. is URL safe and excludes the characters like hyphen or underscore).
- * This makes the ids a little more readable than those from the default `nanoid` settings
- * while still having an extremely low collision probability on par with UUID v4.
+ * Generated identifiers:
  *
+ * - are URL safe
+ * - contain information on the type of object that they
+ *   are identifying
+ * - are roughly sortable by time of generation
+ * - have an extremely low probability of collision
+ *
+ * Generated identifiers have a fixed length of 32 characters made up
+ * of the following parts:
+ *
+ * - 2 characters in the range `[a-z]` that identifying the "family" of
+ *   identifiers, usually the type of object
+ *   the identifier is for e.g. `rq` = request
+ *
+ * - 10 characters in the range `[0-9a-f]` that are the hexadecimal encoding of the
+ *   seconds since `2017-07-14T02:40:00.000Z`the hexadecimal
+ *
+ * - 20 characters in the range `[0-9A-Za-z]` that are randomly generated
+ *
+ * @see {@link https://segment.com/blog/a-brief-history-of-the-uuid/|A brief history of the UUID}
  * @see {@link https://zelark.github.io/nano-id-cc/|Nano ID Collision Calculator}
  */
-export function uid(): string {
-  return generate(
+export function generate<Family extends string>(code: Family): Id<Family> {
+  const family =
+    code.length === 2
+      ? code
+      : code.length === 0
+      ? 'uu'
+      : code.length === 1
+      ? code.repeat(2)
+      : code.slice(0, 2)
+  const time = (Date.now() - epoch).toString(16).padStart(10, '0')
+  const rand = nanoid(
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-    22
+    20
   )
+  const value = `${family}${time}${rand}`
+  return new Id<Family>(family as Family, value)
+}
+
+export function parse(
+  id: string
+):
+  | {
+      family: string
+      time: Date
+      rand: string
+    }
+  | undefined {
+  const match = /^([a-z]{2})([0-9a-f]{8})([0-9A-Za-z]{20})$/.exec(id.toString())
+  if (match === null) return
+  let seconds
+  try {
+    seconds = parseInt(match[2], 16)
+  } catch (error) {
+    return undefined
+  }
+  const time = new Date(seconds + epoch)
+  return { family: match[1], time, rand: match[3] }
 }

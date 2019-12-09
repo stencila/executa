@@ -1,7 +1,7 @@
 import { getLogger } from '@stencila/logga'
 import { Executor, Addresses } from './Executor'
 import { Server } from './Server'
-import { uid } from './uid'
+import { generate, Id } from './uid'
 import * as schema from '@stencila/schema'
 
 const log = getLogger('executa:listener')
@@ -21,7 +21,7 @@ export abstract class Listener extends Executor {
    * executor (e.g. due to having multiple servers
    * and therefore multiple addresses)
    */
-  public readonly id: string
+  public readonly id: Id<'li'>
 
   /**
    * Servers that will listen on behalf of
@@ -31,7 +31,7 @@ export abstract class Listener extends Executor {
 
   public constructor(servers: Server[] = []) {
     super()
-    this.id = uid()
+    this.id = generate('li')
     this.servers = servers
   }
 

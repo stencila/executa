@@ -2,13 +2,13 @@ import { getLogger } from '@stencila/logga'
 import WebSocket, { CloseEvent, ErrorEvent, MessageEvent } from 'isomorphic-ws'
 import retry from 'p-retry'
 import { Client } from '../base/Client'
-import { uid } from '../base/uid'
+import { generate } from '../base/uid'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
-import { isOpen, send, generateProtocol } from './util'
+import { isOpen, send, generateProtocol, WebSocketClientId } from './util'
 
 const log = getLogger('executa:ws:client')
 
@@ -49,7 +49,7 @@ export class WebSocketClient extends Client {
   /**
    * A unique identifier for this client.
    */
-  public readonly id: string
+  public readonly id: WebSocketClientId
 
   /**
    * Options for this client.
@@ -73,7 +73,7 @@ export class WebSocketClient extends Client {
 
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress(),
-    id: string = uid(),
+    id: WebSocketClientId = generate('ws'),
     options: Partial<WebSocketClientOptions> = defaultWebSocketClientOptions
   ) {
     super()

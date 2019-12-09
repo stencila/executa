@@ -3,6 +3,9 @@
  */
 
 import WebSocket from 'isomorphic-ws'
+import { Id } from '../base/uid'
+
+export type WebSocketClientId = Id<'ws'>
 
 /**
  * Generate the `Sec-Websocket-Protocol` header.
@@ -16,7 +19,7 @@ import WebSocket from 'isomorphic-ws'
  * @param id The id of the client
  * @param jwt A JWT
  */
-export function generateProtocol(id: string, jwt?: string): string {
+export function generateProtocol(id: WebSocketClientId, jwt?: string): string {
   return `executa.stenci.la+1+${id}` + (jwt !== undefined ? `+${jwt}` : '')
 }
 

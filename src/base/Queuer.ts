@@ -2,12 +2,14 @@ import { getLogger } from '@stencila/logga'
 import { Config } from '../config'
 import { CapabilityError } from './CapabilityError'
 import { Executor, Method, Params, Manifest } from './Executor'
-import { uid } from './uid'
+import { generate, Id } from './uid'
 
 const log = getLogger('executa:queuer')
 
+type JobId = Id<'jo'>
+
 interface Job<Type> {
-  id: string
+  id: JobId
   method: Method
   params: Params
   delegator?: Executor
@@ -81,7 +83,7 @@ export class Queuer extends Executor {
       throw new CapabilityError('Queue is at maximum length')
 
     return new Promise<Type>((resolve, reject) => {
-      const id = `job-${uid()}`
+      const id = generate('jo')
       const job = {
         id,
         method,
@@ -165,7 +167,7 @@ export class Queuer extends Executor {
    * This method is `protected` because jobs should only
    * be removed by a call to `job.resolve` or `job.reject`.
    */
-  protected remove(id: string): void {
+  protected remove(id: JobId): void {
     const index = this.queue.findIndex(job => job.id === id)
     this.queue.splice(index, 1)
   }

@@ -1,12 +1,14 @@
 import { parseProtocol, generateProtocol } from './util'
+import { generate } from '../base/uid';
 
 test('generate and parse protocol header', () => {
-  expect(parseProtocol(generateProtocol('an-id'))).toEqual({
-    id: 'an-id',
+  const id = generate('ws')
+  expect(parseProtocol(generateProtocol(id))).toEqual({
+    id,
     jwt: undefined
   })
-  expect(parseProtocol(generateProtocol('an-id', 'a-jwt'))).toEqual({
-    id: 'an-id',
+  expect(parseProtocol(generateProtocol(id, 'a-jwt'))).toEqual({
+    id,
     jwt: 'a-jwt'
   })
 })
