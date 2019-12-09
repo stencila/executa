@@ -33,6 +33,6 @@ deploy:
     skip_cleanup: true
     script: npx semantic-release
     on:
-      branch: master
-      condition: $TRAVIS_OS_NAME = linux
+      all_branches: true
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_BRANCH =~ ^(master|next)$
 
