@@ -1,3 +1,47 @@
+# [1.0.0](https://github.com/stencila/executa/compare/v0.15.0...v1.0.0) (2019-12-09)
+
+
+### Bug Fixes
+
+* **Config:** Update config ([3cf0c57](https://github.com/stencila/executa/commit/3cf0c570a8ca5f134cbf4694d12dc97f20c2cc6f))
+* **Deps:**  Upgrade Configa ([f9aa3eb](https://github.com/stencila/executa/commit/f9aa3eb0699f3b1ec6824252d37c922dc42c8b27))
+* **Queuer:** Avoid API conflict with notify ([ab8f2bf](https://github.com/stencila/executa/commit/ab8f2bf27304e48196b1d07f0cb95b36803b0022))
+* **REPL:** Handle capability errors ([9652451](https://github.com/stencila/executa/commit/9652451fab78fd07ddc3e842e4fa3f2c37d57654))
+* **Server:** Do not create default executor; use Worker in tests ([ce737fb](https://github.com/stencila/executa/commit/ce737fbf31f089dcc0d7324515e8dae8340d824c))
+* **Servers:** Adjust to no default executor ([81ac37d](https://github.com/stencila/executa/commit/81ac37d3e873ebbf7e938515678d25d66f748dd1))
+* **StdioClient:** Add debugging and address parsing ([34b7e77](https://github.com/stencila/executa/commit/34b7e774e72a020166ee4aecebf91f58ab2c1908))
+* **StdioClient:** Improve handling of failed server ([6fa5fbf](https://github.com/stencila/executa/commit/6fa5fbff47794853df020f90e0d4d4f0858aa1c4))
+* **StdioServer.register:** Create parent directory if neccessary ([ee8e385](https://github.com/stencila/executa/commit/ee8e38593d71295523ac33150529a4a5d6660ca6))
+* **Transports:** Include https ([de5508a](https://github.com/stencila/executa/commit/de5508a7ab8bdbc5bd228b82e56893d54f1e9bed))
+
+
+### Code Refactoring
+
+* **Manager:** Rename BaseExecutor ([1bd91e6](https://github.com/stencila/executa/commit/1bd91e6c6dd5640a509ca7581ee65b0a452fa366))
+
+
+### Features
+
+* **CapabilityError:** Describe method and params ([054c124](https://github.com/stencila/executa/commit/054c1248fdbf499cfe5b26be8876ec7d925c9239))
+* **CLI:** Add line and chunk continuation ([397771d](https://github.com/stencila/executa/commit/397771dd2b85c0630dff64f2fa4da28cdc17671a))
+* **Client:** Keep a notifications cache ([5ccfc38](https://github.com/stencila/executa/commit/5ccfc38fab698d9f792a2ef5101170db92db884c))
+* **Discover:** Integrate discovery addresses ([732fe28](https://github.com/stencila/executa/commit/732fe28c284c480662f5b689975b88fe69c993f4))
+* **Ids:** Improve readability, sorting and type-saftey of unique ids ([8057a88](https://github.com/stencila/executa/commit/8057a880dbfe9b668efa34a5843aaebfacc79fda))
+* **Listener:** Allow servers to be added on start ([100f001](https://github.com/stencila/executa/commit/100f0013412c4e6df39fba9c1fe35719ce0fca3a))
+* **Queuer:** Add check and reduce functions ([fb51f89](https://github.com/stencila/executa/commit/fb51f89ebaac85ae1c1293910c478ce86796cd22))
+* **Queuer:** Send notifications via delegator ([b0193c7](https://github.com/stencila/executa/commit/b0193c76bdc4bec28bb4c93cbe16daab4f54efcc))
+* **Queuer & Delegator:** Add custom manifests ([6ba4353](https://github.com/stencila/executa/commit/6ba435301549038c253b1bd762481e54af99c145))
+* **REPL:** Add spinner and colors ([bcf160f](https://github.com/stencila/executa/commit/bcf160f8aac41445afa3937bce50b921b7148d00))
+* **REPL:** Alternative displays for output types ([ee43154](https://github.com/stencila/executa/commit/ee43154e3955549be780aac989086dd274092d89))
+* **StdioServer:** Add register method ([819067a](https://github.com/stencila/executa/commit/819067a8eb8f9185e30d9a3aacce7d1b397e1b31))
+
+
+### BREAKING CHANGES
+
+* **Manager:** Package exports `Manager` instead of `BaseExecutor`.
+
+This renaming is in preparaton for encapsulating `Manager`'s functionality into several separate classes.
+
 # [0.15.0](https://github.com/stencila/executa/compare/v0.14.3...v0.15.0) (2019-12-02)
 
 
