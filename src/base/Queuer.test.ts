@@ -1,8 +1,10 @@
+import lolex from 'lolex'
 import { Queuer } from './Queuer'
 import { Config } from '../config'
-import { delay } from '../test/delay'
 import { Worker } from './Worker'
 import { CapabilityError } from './CapabilityError'
+
+const clock = lolex.install()
 
 test('construct', () => {
   const queuer1 = new Queuer()
@@ -52,7 +54,7 @@ test('call', async () => {
 })
 
 test('check', async () => {
-  const queuer = new Queuer()
+  const queuer = new Queuer({ ...new Config(), queueInterval: 1 })
   const worker = new Worker()
 
   const p0 = queuer.decode('0', 'json')
@@ -62,6 +64,8 @@ test('check', async () => {
 
   const p2 = queuer.decode('2', 'json')
   const p3 = queuer.decode('3', 'json')
+
+  clock.tick(1001)
 
   expect(await p0).toBe(0)
   expect(await p1).toBe(1)
@@ -86,13 +90,13 @@ test('reduce', async () => {
 })
 
 test('clean', async () => {
-  const queuer = new Queuer({ ...new Config(), queueStale: 0.001 })
+  const queuer = new Queuer({ ...new Config(), queueStale: 1 })
   const { queue } = queuer
 
   const p0 = queuer.decode('')
   expect(queue.length).toBe(1)
 
-  await delay(20)
+  clock.tick(1001)
 
   queuer.clean()
   await expect(p0).rejects.toThrow(/Job has become stale/)
@@ -108,8 +112,8 @@ test('clean', async () => {
 test('start + stop', async () => {
   const queuer = new Queuer({
     ...new Config(),
-    queueStale: 0.001,
-    queueInterval: 0.0001
+    queueInterval: 1,
+    queueStale: 0.5
   })
   const { queue } = queuer
 
@@ -117,6 +121,8 @@ test('start + stop', async () => {
 
   const p0 = queuer.decode('')
   expect(queue.length).toBe(1)
+
+  clock.tick(1001)
 
   await expect(p0).rejects.toThrow(/Job has become stale/)
 
