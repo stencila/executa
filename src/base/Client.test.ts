@@ -69,7 +69,7 @@ test('receiving bad response', async () => {
   // Because there is no async tick between the client receiving
   // the request and generating the log entry, we need to create
   // the promise for the next message before.
-  const nextMessage = async () => (await nextLogData()).message
+  const nextMessage = async () => (await nextLogData())[0].message
   let message
 
   message = nextMessage()

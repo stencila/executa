@@ -74,33 +74,25 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // Client with malformed JWT
     clientLogs = []
-    const client = new WebSocketClient(
-      { ...server.address, jwt: 'jwhaaaat?' }
-    )
+    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(
-      /Failed to authenticate with server/
-    )
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
   }
 
   {
     // Client with invalid JWT
     clientLogs = []
-    const client = new WebSocketClient(
-      {
-        ...server.address,
-        jwt: JWT.sign({}, 'not-the-right-secret')
-      }
-    )
+    const client = new WebSocketClient({
+      ...server.address,
+      jwt: JWT.sign({}, 'not-the-right-secret')
+    })
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
-    expect(clientLogs[0].message).toMatch(
-      /Failed to authenticate with server/
-    )
+    expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
   }
 

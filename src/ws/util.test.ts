@@ -1,5 +1,5 @@
 import { parseProtocol, generateProtocol } from './util'
-import { generate } from '../base/uid';
+import { generate } from '../base/uid'
 
 test('generate and parse protocol header', () => {
   const id = generate('ws')

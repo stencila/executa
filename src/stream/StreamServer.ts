@@ -6,7 +6,7 @@ import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { Server } from '../base/Server'
 
-const log = getLogger('stream:server')
+const log = getLogger('executa:stream:server')
 export abstract class StreamServer extends Server {
   /**
    * Encoder to send length prefixed messages over outgoing stream.
