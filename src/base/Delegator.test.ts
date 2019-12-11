@@ -2,10 +2,9 @@ import * as schema from '@stencila/schema'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
-import { ClientType } from './Client'
 import { Delegator, Peer } from './Delegator'
 import { Manifest, Method, Capabilities } from './Executor'
-import { Transport } from './Transports'
+import { DirectAddress } from './Transports'
 import { Worker } from './Worker'
 import { CapabilityError } from './CapabilityError'
 
@@ -176,15 +175,11 @@ describe('Peer', () => {
   })
 
   test('connect: order of client types equals preference', async () => {
-    const directServer = new DirectServer()
     const manifest: Manifest = {
       version: 1,
       capabilities: {},
       addresses: {
-        direct: {
-          type: Transport.direct,
-          server: directServer
-        },
+        direct: new DirectAddress(new DirectServer()),
         stdio: 'echo'
       }
     }
