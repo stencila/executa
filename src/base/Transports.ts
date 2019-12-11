@@ -52,6 +52,8 @@ export class StdioAddress {
 
   public constructor(address: StdioAddressInitializer) {
     if (typeof address === 'string') {
+      const match = /^stdio:\/\/(.*)$/.exec(address)
+      if (match !== null) address = match[1]
       const parts = address.split(/\s/)
       this.command = parts[0]
       this.args = parts.slice(1)
@@ -310,7 +312,7 @@ export function parseAddress(address: string): Address | undefined {
       case 'https':
         return new HttpAddress(address)
       case 'stdio':
-        return new StdioAddress(rest)
+        return new StdioAddress(address)
     }
   }
   return undefined
