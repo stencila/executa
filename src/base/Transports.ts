@@ -65,9 +65,9 @@ export class StdioAddress {
   }
 
   public url(): string {
-    const {command, args} = this
+    const { command, args } = this
     let url = `stdio://${command}`
-    if (args != undefined) url += ' ' + args.join(' ')
+    if (args !== undefined) url += ' ' + args.join(' ')
     return url
   }
 }
@@ -122,9 +122,9 @@ export class VsockAddress {
   }
 
   public url(): string {
-    const {port, path} = this
+    const { port, path } = this
     let url = `vock://${port}`
-    if (path != undefined) url += ' ' + path
+    if (path !== undefined) url += ' ' + path
     return url
   }
 }

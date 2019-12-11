@@ -20,7 +20,7 @@ export abstract class Listener extends Executor {
    */
   protected servers: Server[] = []
 
-  public constructor(family: string = 'li', servers: Server[] = []) {
+  public constructor(family = 'li', servers: Server[] = []) {
     super(family)
     this.servers = servers
   }
@@ -30,11 +30,10 @@ export abstract class Listener extends Executor {
    */
   public addresses(): Promise<Addresses> {
     return Promise.resolve(
-      this.servers
-        .reduce((prev, server) => {
-          const { address } = server
-          return { ...prev, ...{ [address.type]: address.url() } }
-        }, {})
+      this.servers.reduce((prev, server) => {
+        const { address } = server
+        return { ...prev, ...{ [address.type]: address.url() } }
+      }, {})
     )
   }
 
