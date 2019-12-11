@@ -13,6 +13,7 @@ import {
 } from './Transports'
 import { InternalError } from './InternalError'
 import { Id, generate } from './uid'
+import { CapabilityError } from './CapabilityError'
 
 const log = getLogger('executa:executor')
 
@@ -282,10 +283,16 @@ export abstract class Executor {
   /**
    * Call one of the above methods.
    *
+   * Since this base executor, has no capabilities, this method
+   * simply throws a `CapabilityError`. Derived classes, may
+   * override this method, and /or one of the methods above.
+   *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  abstract async call<Type>(method: Method, params: Params): Promise<Type>
+  public call<Type>(method: Method, params: Params): Promise<Type> {
+    throw new CapabilityError(method, params)
+  }
 
   /**
    * Send a notification
