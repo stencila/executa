@@ -258,8 +258,16 @@ export class Peer {
 
       // See if the peer has an address for the transport
       if (manifest.addresses === undefined) return false
-      const address = manifest.addresses[transport]
-      if (address !== undefined) {
+      const addresses = manifest.addresses[transport]
+      if (addresses !== undefined) {
+        let address
+        if (Array.isArray(addresses)) {
+          // TODO: choose the best address for this client
+          // e.g. based on network localhost, local, global
+          address = addresses[0]
+        } else {
+          address = addresses
+        }
         this.interface = new ClientType(address)
         return true
       }

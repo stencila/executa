@@ -56,9 +56,9 @@ export interface Addresses {
   stdio?: StdioAddressInitializer
   uds?: UdsAddress
   vsock?: VsockAddress
-  tcp?: TcpAddressInitializer
-  http?: HttpAddressInitializer
-  ws?: WebSocketAddressInitializer
+  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
+  http?: HttpAddressInitializer | HttpAddressInitializer[]
+  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
 }
 
 /**
