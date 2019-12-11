@@ -4,14 +4,14 @@ import { DirectServer } from '../direct/DirectServer'
 import { StdioClient } from '../stdio/StdioClient'
 import { ClientType } from './Client'
 import { Delegator, Peer } from './Delegator'
-import { Manifest, Method } from './Executor'
+import { Manifest, Method, Capabilities } from './Executor'
 import { Transport } from './Transports'
 import { Worker } from './Worker'
 import { CapabilityError } from './CapabilityError'
 
 describe('Peer', () => {
   test('capable: no capabilities', async () => {
-    const peer = new Peer(undefined, [], {})
+    const peer = new Peer(undefined, [], { version: 1 })
 
     expect(await peer.capable(Method.compile, { foo: 'bar' })).toBe(false)
     expect(await peer.capable(Method.execute, {})).toBe(false)
@@ -19,6 +19,7 @@ describe('Peer', () => {
 
   test('capable: boolean capabilities', async () => {
     const peer = new Peer(undefined, [], {
+      version: 1,
       capabilities: {
         decode: false,
         compile: true,
@@ -33,6 +34,7 @@ describe('Peer', () => {
 
   test('capable: schema object capabilities', async () => {
     const peer = new Peer(undefined, [], {
+      version: 1,
       capabilities: {
         decode: {
           required: ['content', 'format'],
@@ -101,6 +103,7 @@ describe('Peer', () => {
 
   test('capable: multiple capabilities', async () => {
     const peer = new Peer(undefined, [], {
+      version: 1,
       capabilities: {
         decode: [
           {
@@ -139,6 +142,7 @@ describe('Peer', () => {
 
   test('connect: no addresses', async () => {
     const peer = new Peer(undefined, [DirectClient], {
+      version: 1,
       capabilities: {},
       addresses: {}
     })
@@ -148,6 +152,7 @@ describe('Peer', () => {
 
   test('connect: no client types', async () => {
     const peer = new Peer(undefined, [], {
+      version: 1,
       capabilities: {},
       addresses: {}
     })
@@ -157,6 +162,7 @@ describe('Peer', () => {
 
   test('connect: no addresses match client types', async () => {
     const peer = new Peer(undefined, [DirectClient, StdioClient], {
+      version: 1,
       capabilities: {},
       addresses: {
         http: {
@@ -172,6 +178,7 @@ describe('Peer', () => {
   test('connect: order of client types equals preference', async () => {
     const directServer = new DirectServer()
     const manifest: Manifest = {
+      version: 1,
       capabilities: {},
       addresses: {
         direct: {
@@ -201,21 +208,19 @@ class DeepThought extends Worker {
   public static readonly question: string =
     'the answer to life the universe and everything'
 
-  public async manifest(): Promise<Manifest> {
+  public capabilities(): Promise<Capabilities> {
     return Promise.resolve({
-      capabilities: {
-        execute: {
-          properties: {
-            node: {
-              type: 'object',
-              required: ['type', 'text'],
-              properties: {
-                type: {
-                  const: 'CodeChunk'
-                },
-                text: {
-                  const: DeepThought.question
-                }
+      execute: {
+        properties: {
+          node: {
+            type: 'object',
+            required: ['type', 'text'],
+            properties: {
+              type: {
+                const: 'CodeChunk'
+              },
+              text: {
+                const: DeepThought.question
               }
             }
           }
@@ -236,21 +241,19 @@ class DeepThought extends Worker {
  * An executor class that acts like a simple Javascript calculator.
  */
 class Calculator extends Worker {
-  public async manifest(): Promise<Manifest> {
+  public async capabilities(): Promise<Capabilities> {
     return Promise.resolve({
-      capabilities: {
-        execute: {
-          properties: {
-            node: {
-              type: 'object',
-              required: ['type', 'text'],
-              properties: {
-                type: {
-                  const: 'CodeExpression'
-                },
-                text: {
-                  type: 'string'
-                }
+      execute: {
+        properties: {
+          node: {
+            type: 'object',
+            required: ['type', 'text'],
+            properties: {
+              type: {
+                const: 'CodeExpression'
+              },
+              text: {
+                type: 'string'
               }
             }
           }
@@ -319,7 +322,7 @@ describe('Delegator', () => {
     await expect(delegator.execute('a string')).rejects.toThrow(CapabilityError)
 
     // Throws a capability error if we change a peers capabilities
-    delegator.update('deepThought', {})
+    delegator.update('deepThought', { version: 1 })
     await expect(
       delegator.execute(schema.codeChunk(DeepThought.question))
     ).rejects.toThrow(CapabilityError)

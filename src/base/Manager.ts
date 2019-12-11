@@ -23,15 +23,21 @@ export class Manager extends Listener {
     delegator: Delegator = new Delegator([new Worker()]),
     queuer: Queuer = new Queuer()
   ) {
-    super(servers)
+    super('ma', servers)
     this.delegator = delegator
     this.queuer = queuer
   }
 
-  async manifest(): Promise<Manifest> {
+  /**
+   * @override Override of {@link Listener.manifest} to
+   * provide additional properties for inspection.
+   */
+  public async manifest(): Promise<Manifest> {
+    const manifest = await super.manifest()
     const delegator = await this.delegator.manifest()
     const queuer = await this.queuer.manifest()
     return {
+      ...manifest,
       delegator,
       queuer
     }
@@ -46,8 +52,6 @@ export class Manager extends Listener {
     method: Method,
     params: { [key: string]: any }
   ): Promise<any> {
-    if (method === Method.manifest) return this.manifest()
-
     // TODO: Call endHere
 
     try {

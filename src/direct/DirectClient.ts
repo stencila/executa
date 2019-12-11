@@ -9,7 +9,7 @@ const log = getLogger('executa:direct:client')
 export class DirectClient extends Client {
   private server: DirectServer
 
-  public constructor(address: Omit<DirectAddress, 'type'>) {
+  public constructor(address: Pick<DirectAddress, 'server'>) {
     super()
     this.server = address.server
     this.server.client = this

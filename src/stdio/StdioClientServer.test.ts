@@ -85,7 +85,7 @@ describe('StdioClient and StdioServer', () => {
     removeManifestFile()
 
     StdioServer.register('stdio-test', {
-      manifest: 1,
+      version: 1,
       addresses: {
         stdio: 'dummy address'
       }
@@ -95,7 +95,7 @@ describe('StdioClient and StdioServer', () => {
     removeManifestFile()
 
     const nextMessages = nextServerMessages(2)
-    StdioServer.register('stdio-test', { manifest: 1 })
+    StdioServer.register('stdio-test', { version: 1 })
     const messages = await nextMessages
     expect(messages[0]).toMatch(/^Registering executor "stdio-test" in folder/)
     expect(messages[1]).toMatch(/^Manifest does not include a STDIO address/)

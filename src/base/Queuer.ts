@@ -46,18 +46,24 @@ export class Queuer extends Executor {
   private cleanInterval?: NodeJS.Timer
 
   constructor(config: Config = new Config()) {
-    super()
+    super('qu')
     this.config = config
   }
 
-  public manifest(): Promise<Manifest> {
+  /**
+   * @override Override of {@link Executor.manifest} to
+   * provide additional properties for inspection.
+   */
+  public async manifest(): Promise<Manifest> {
+    const manifest = await super.manifest()
     const queue = this.queue.map(job => {
       const { id, date, method, params } = job
       return { id, date, method, params }
     })
-    return Promise.resolve({
+    return {
+      ...manifest,
       queue
-    })
+    }
   }
 
   /**
@@ -72,8 +78,6 @@ export class Queuer extends Executor {
     params: Params = {},
     delegator?: Executor
   ): Promise<Type> {
-    if (method === Method.manifest) return this.manifest() as Promise<Type>
-
     const {
       queue,
       config: { queueLength }

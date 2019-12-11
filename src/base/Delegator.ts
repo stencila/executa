@@ -32,17 +32,19 @@ export class Delegator extends Executor {
    */
   protected readonly peers: { [key: string]: Peer } = {}
 
-  public constructor(
-    executors: Executor[] = [],
-    clientTypes: ClientType[] = []
-  ) {
-    super()
+  constructor(executors: Executor[] = [], clientTypes: ClientType[] = []) {
+    super('de')
     this.clientTypes = clientTypes
     for (const executor of executors) this.add(executor)
   }
 
-  public manifest(): Promise<Manifest> {
-    const clientTypes = this.clientTypes.map(clienType => clienType.name)
+  /**
+   * @override Override of {@link Executor.manifest} to
+   * provide additional properties for inspection.
+   */
+  public async manifest(): Promise<Manifest> {
+    const manifest = await super.manifest()
+    const clientTypes = this.clientTypes.map(clientType => clientType.name)
     const peers = Object.entries(this.peers).reduce(
       (prev, [key, peer]) => ({
         ...prev,
@@ -50,10 +52,11 @@ export class Delegator extends Executor {
       }),
       {}
     )
-    return Promise.resolve({
+    return {
+      ...manifest,
       clientTypes,
       peers
-    })
+    }
   }
 
   /**
@@ -168,7 +171,7 @@ export class Peer {
         manifest = this.manifest = await executor.manifest()
       this.interface = executor
     } else {
-      if (manifest === undefined) manifest = this.manifest = {}
+      if (manifest === undefined) manifest = this.manifest = { version: 1 }
     }
 
     return manifest
