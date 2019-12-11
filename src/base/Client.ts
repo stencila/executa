@@ -169,7 +169,8 @@ export abstract class Client extends Executor {
     const { resolve, reject } = request
     const { result, error } = message as JsonRpcResponse
 
-    if (!(error === null || error === undefined)) reject(JsonRpcError.toError(error))
+    if (!(error === null || error === undefined))
+      reject(JsonRpcError.toError(error))
     else {
       try {
         resolve(result)

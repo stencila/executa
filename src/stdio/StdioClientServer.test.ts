@@ -34,10 +34,11 @@ describe('StdioClient and StdioServer', () => {
     // Do not await the next two calls to `decode` - they do not
     // resolve due to the bad message
 
+    const message = nextClientMessage()
     client.decode('send bad message').catch(error => {
       throw error
     })
-    expect(await nextClientMessage()).toMatch(
+    expect(await message).toMatch(
       /^Error parsing message as JSON: ah hah/
     )
   })
@@ -45,10 +46,11 @@ describe('StdioClient and StdioServer', () => {
   test('crash', async () => {
     const client = new StdioClient(testServer())
 
+    const message = nextClientMessage()
     client.decode('crash now!').catch(error => {
       throw error
     })
-    expect(await nextClientMessage()).toMatch(
+    expect(await message).toMatch(
       /^Server exited prematurely with exit code 1 and signal null/
     )
 

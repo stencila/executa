@@ -44,8 +44,12 @@ export class StdioClient extends StreamClient {
     const { stdin, stdout, stderr } = child
     super(stdin, stdout)
 
-    // TODO: Parse and emit in own log events.
-    // stderr.pipe(process.stderr)
+    // Pass and output on stderr to own logs
+    // In the future we could try parsing the stderr data as
+    // newline-delimited JSON (as emitted by `logga`) using `ndjson`.
+    stderr.on('data', (data: Buffer) => {
+      log.info(data.toString('utf8'))
+    })
 
     this.child = child
   }
