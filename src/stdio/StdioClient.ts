@@ -104,7 +104,7 @@ export class StdioClient extends StreamClient {
         continue
       }
 
-      let manifest: Manifest = {}
+      let manifest: Manifest = { version: 1 }
       try {
         manifest = JSON.parse(json)
       } catch (error) {

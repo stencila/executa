@@ -8,10 +8,7 @@ export class DirectServer extends Server {
   client?: Client
 
   public get address(): DirectAddress {
-    return {
-      type: Transport.direct,
-      server: this
-    }
+    return new DirectAddress(this)
   }
 
   public notify(subject: string, message: string): void {

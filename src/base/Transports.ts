@@ -31,6 +31,14 @@ export type AddressInitializer =
 export class DirectAddress {
   public readonly type: Transport.direct = Transport.direct
   public readonly server: any
+
+  public constructor(server: any) {
+    this.server = server
+  }
+
+  public url(): string {
+    return `direct://`
+  }
 }
 
 export type StdioAddressInitializer =
@@ -44,6 +52,8 @@ export class StdioAddress {
 
   public constructor(address: StdioAddressInitializer) {
     if (typeof address === 'string') {
+      const match = /^stdio:\/\/(.*)$/.exec(address)
+      if (match !== null) address = match[1]
       const parts = address.split(/\s/)
       this.command = parts[0]
       this.args = parts.slice(1)
@@ -52,6 +62,13 @@ export class StdioAddress {
       this.args = address.args
       this.cwd = address.cwd
     }
+  }
+
+  public url(): string {
+    const { command, args } = this
+    let url = `stdio://${command}`
+    if (args !== undefined) url += ' ' + args.join(' ')
+    return url
   }
 }
 
@@ -70,6 +87,10 @@ export class UdsAddress {
 
   public constructor(path: string) {
     this.path = path
+  }
+
+  public url(): string {
+    return `uds://${this.path}`
   }
 }
 
@@ -98,6 +119,13 @@ export class VsockAddress {
   public constructor(port = 6000, path?: string) {
     this.port = port
     this.path = path
+  }
+
+  public url(): string {
+    const { port, path } = this
+    let url = `vock://${port}`
+    if (path !== undefined) url += ' ' + path
+    return url
   }
 }
 
@@ -284,7 +312,7 @@ export function parseAddress(address: string): Address | undefined {
       case 'https':
         return new HttpAddress(address)
       case 'stdio':
-        return new StdioAddress(rest)
+        return new StdioAddress(address)
     }
   }
   return undefined

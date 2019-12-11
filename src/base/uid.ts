@@ -1,6 +1,6 @@
 import nanoid from 'nanoid/generate'
 
-export class Id<Family> extends String {
+export class Id<Family extends string> extends String {
   family: Family
 
   constructor(family: Family, value: string) {

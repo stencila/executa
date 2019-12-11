@@ -15,33 +15,26 @@ const log = getLogger('executa:listener')
  */
 export abstract class Listener extends Executor {
   /**
-   * The unique id of this executor.
-   *
-   * Used by peers to avoid duplicate entries for an
-   * executor (e.g. due to having multiple servers
-   * and therefore multiple addresses)
-   */
-  public readonly id: Id<'li'>
-
-  /**
    * Servers that will listen on behalf of
    * this executor and pass on requests to it.
    */
   protected servers: Server[] = []
 
-  public constructor(servers: Server[] = []) {
-    super()
-    this.id = generate('li')
+  public constructor(family = 'li', servers: Server[] = []) {
+    super(family)
     this.servers = servers
   }
 
   /**
    * Get a map of server addresses for this executor.
    */
-  public addresses(): Addresses {
-    return this.servers
-      .map(server => server.address)
-      .reduce((prev, curr) => ({ ...prev, ...{ [curr.type]: curr } }), {})
+  public addresses(): Promise<Addresses> {
+    return Promise.resolve(
+      this.servers.reduce((prev, server) => {
+        const { address } = server
+        return { ...prev, ...{ [address.type]: address.url() } }
+      }, {})
+    )
   }
 
   /**

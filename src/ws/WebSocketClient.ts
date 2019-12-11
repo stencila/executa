@@ -8,7 +8,7 @@ import {
   WebSocketAddress,
   WebSocketAddressInitializer
 } from '../base/Transports'
-import { isOpen, send, generateProtocol, WebSocketClientId } from './util'
+import { isOpen, send, generateProtocol } from './util'
 
 const log = getLogger('executa:ws:client')
 
@@ -47,11 +47,6 @@ export class WebSocketClient extends Client {
   public readonly address: WebSocketAddress
 
   /**
-   * A unique identifier for this client.
-   */
-  public readonly id: WebSocketClientId
-
-  /**
    * Options for this client.
    */
   public readonly options: WebSocketClientOptions
@@ -73,12 +68,10 @@ export class WebSocketClient extends Client {
 
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress(),
-    id: WebSocketClientId = generate('ws'),
     options: Partial<WebSocketClientOptions> = defaultWebSocketClientOptions
   ) {
-    super()
+    super('ws')
     this.address = new WebSocketAddress(address)
-    this.id = id
     this.options = { ...defaultWebSocketClientOptions, ...options }
     this.start().catch(error => log.error(error))
   }

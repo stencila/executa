@@ -12,6 +12,8 @@ import {
   WebSocketAddressInitializer
 } from './Transports'
 import { InternalError } from './InternalError'
+import { Id, generate } from './uid'
+import { CapabilityError } from './CapabilityError'
 
 const log = getLogger('executa:executor')
 
@@ -55,17 +57,31 @@ export interface Addresses {
   stdio?: StdioAddressInitializer
   uds?: UdsAddress
   vsock?: VsockAddress
-  tcp?: TcpAddressInitializer
-  http?: HttpAddressInitializer
-  ws?: WebSocketAddressInitializer
+  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
+  http?: HttpAddressInitializer | HttpAddressInitializer[]
+  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
 }
 
 /**
  * The manifest for an `Executor` class
- * describing it's capabilities, how to spawn it
- * etc
+ * describing it's capabilities, addresses that
+ * can be used to connect to it etc.
+ *
+ * All properties are optional to reduce the
+ * number of assumptions that need to be made
+ * in handling manifests read from file, or received
+ * over the network.
+ *
+ * Executor implementations may add other properties
+ * to the manifest for inspection purposes
+ * (e.g. debugging, monitoring).
  */
 export interface Manifest {
+  /**
+   * The version of the manifest schema
+   */
+  version: number
+
   /**
    * The id of the `Executor`
    */
@@ -115,13 +131,57 @@ export interface Claims {
  */
 export abstract class Executor {
   /**
-   * Get the manifest of the executor
+   * The unique id of this executor.
+   *
+   * Used for better tracing and to avoid duplicate
+   * entries for an executor (e.g. due to having multiple servers
+   * and therefore multiple addresses)
+   */
+  public readonly id: string
+
+  /**
+   * Construct an executor.
+   *
+   * @param family A two letter code used to help
+   * identify the type of executor
+   */
+  public constructor(family = 'ex') {
+    this.id = generate(family).toString()
+  }
+
+  /**
+   * Get the addresses of this executor.
+   *
+   * Derived classes can override this method
+   * to provide addresses in their manifest.
+   */
+  public addresses(): Promise<Addresses | undefined> {
+    return Promise.resolve(undefined)
+  }
+
+  /**
+   * Get the capabilities of this executor.
+   *
+   * Derived classes can override this method
+   * to provide capabilities in their manifest.
+   */
+  public capabilities(): Promise<Capabilities | undefined> {
+    return Promise.resolve(undefined)
+  }
+
+  /**
+   * Get the manifest of the executor.
    *
    * @see {@link Capabilities}
    * @see {@link Addresses}
    */
   public async manifest(): Promise<Manifest> {
-    return this.call<Manifest>(Method.manifest, {})
+    return {
+      version: 1,
+      id: this.id.toString(),
+      addresses: await this.addresses(),
+      capabilities: await this.capabilities()
+    }
   }
 
   /**
@@ -223,10 +283,16 @@ export abstract class Executor {
   /**
    * Call one of the above methods.
    *
+   * Since this base executor, has no capabilities, this method
+   * simply throws a `CapabilityError`. Derived classes, may
+   * override this method, and /or one of the methods above.
+   *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
    */
-  abstract async call<Type>(method: Method, params: Params): Promise<Type>
+  public call<Type>(method: Method, params: Params): Promise<Type> {
+    throw new CapabilityError(method, params)
+  }
 
   /**
    * Send a notification

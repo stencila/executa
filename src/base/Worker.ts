@@ -11,6 +11,33 @@ const log = getLogger('executa:worker')
  */
 export class Worker extends Executor {
   /**
+   * @override Override of {@link Executor.capabilities} to
+   * declare capabilities of this executor class.
+   */
+  public capabilities(): Promise<Capabilities> {
+    return Promise.resolve({
+      // Can provide this manifest
+      manifest: true,
+      // Can decode string content of JSON format
+      decode: {
+        required: ['content'],
+        properties: {
+          content: { type: 'string' },
+          format: { const: 'json' }
+        }
+      },
+      // Can encode any node to JSON format
+      encode: {
+        required: ['node'],
+        properties: {
+          node: true,
+          format: { const: 'json' }
+        }
+      }
+    })
+  }
+
+  /**
    * @implements Implements {@link Executor.call} by
    */
   public call(method: Method, params: Params = {}): Promise<any> {
@@ -33,36 +60,6 @@ export class Worker extends Executor {
         return this.end(params.node)
     }
     throw new InternalError(`Unhandled method ${method}`)
-  }
-
-  public manifest(): Promise<Manifest> {
-    const capabilities: Capabilities = {
-      // Can provide this manifest
-      manifest: true,
-      // Can decode string content of JSON format
-      decode: [
-        {
-          properties: {
-            content: { type: 'string' },
-            format: { const: 'json' }
-          },
-          required: ['content']
-        }
-      ],
-      // Can encode any node to JSON format
-      encode: [
-        {
-          properties: {
-            node: true,
-            format: { const: 'json' }
-          },
-          required: ['node']
-        }
-      ]
-    }
-    return Promise.resolve({
-      capabilities
-    })
   }
 
   public decode(content: string, format: string): Promise<schema.Node> {

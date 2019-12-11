@@ -44,13 +44,13 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // JWT with session limits to be used for begin() method
     const sessionRequests = schema.softwareSession({
-      environment: schema.softwareEnvironment('some-eviron'),
+      environment: schema.softwareEnvironment('some-environment'),
       cpuRequest: 4,
       memoryRequest: 5
     })
     const claims: Claims = {
       session: schema.softwareSession({
-        environment: schema.softwareEnvironment('some-eviron'),
+        environment: schema.softwareEnvironment('some-environment'),
         cpuLimit: 2,
         memoryLimit: 2
       })
@@ -61,9 +61,9 @@ test('WebSocketClient and WebSocketServer', async () => {
     const echoed = (await client.begin(sessionRequests)) as any
     expect(echoed.node).toEqual(sessionRequests)
 
-    const userclient = echoed.claims.client
-    expect(userclient.type).toEqual('ws')
-    expect(userclient).toHaveProperty('id')
+    const userClient = echoed.claims.client
+    expect(userClient.type).toEqual('ws')
+    expect(userClient).toHaveProperty('id')
 
     await client.stop()
   }
@@ -74,7 +74,7 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // Client with malformed JWT
     clientLogs = []
-    const client = new WebSocketClient({ ...server.address, jwt: 'jwhaaaat?' })
+    const client = new WebSocketClient({ ...server.address, jwt: 'what?' })
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)

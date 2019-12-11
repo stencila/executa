@@ -32,17 +32,19 @@ export class Delegator extends Executor {
    */
   protected readonly peers: { [key: string]: Peer } = {}
 
-  public constructor(
-    executors: Executor[] = [],
-    clientTypes: ClientType[] = []
-  ) {
-    super()
+  constructor(executors: Executor[] = [], clientTypes: ClientType[] = []) {
+    super('de')
     this.clientTypes = clientTypes
     for (const executor of executors) this.add(executor)
   }
 
-  public manifest(): Promise<Manifest> {
-    const clientTypes = this.clientTypes.map(clienType => clienType.name)
+  /**
+   * @override Override of {@link Executor.manifest} to
+   * provide additional properties for inspection.
+   */
+  public async manifest(): Promise<Manifest> {
+    const manifest = await super.manifest()
+    const clientTypes = this.clientTypes.map(clientType => clientType.name)
     const peers = Object.entries(this.peers).reduce(
       (prev, [key, peer]) => ({
         ...prev,
@@ -50,10 +52,11 @@ export class Delegator extends Executor {
       }),
       {}
     )
-    return Promise.resolve({
+    return {
+      ...manifest,
       clientTypes,
       peers
-    })
+    }
   }
 
   /**
@@ -168,7 +171,7 @@ export class Peer {
         manifest = this.manifest = await executor.manifest()
       this.interface = executor
     } else {
-      if (manifest === undefined) manifest = this.manifest = {}
+      if (manifest === undefined) manifest = this.manifest = { version: 1 }
     }
 
     return manifest
@@ -255,8 +258,16 @@ export class Peer {
 
       // See if the peer has an address for the transport
       if (manifest.addresses === undefined) return false
-      const address = manifest.addresses[transport]
-      if (address !== undefined) {
+      const addresses = manifest.addresses[transport]
+      if (addresses !== undefined) {
+        let address
+        if (Array.isArray(addresses)) {
+          // TODO: choose the best address for this client
+          // e.g. based on network localhost, local, global
+          address = addresses[0]
+        } else {
+          address = addresses
+        }
         this.interface = new ClientType(address)
         return true
       }

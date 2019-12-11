@@ -194,7 +194,7 @@ const repl = async (
       return
     }
     // ...continue the chunk on a new line
-    // Useful where nelines are important e.g. `for` loops in Python
+    // Useful where newlines are important e.g. `for` loops in Python
     if (line.endsWith('...')) {
       buffer += line.slice(0, -3) + '\n'
       return
@@ -271,7 +271,7 @@ const repl = async (
     // Begin session if necessary and ensure that it will be ended
     // before this process is existed
     if (session === undefined) {
-      log.info('Beggining REPL session')
+      log.info('Beginning REPL session')
       session = await client.begin(schema.softwareSession())
       repl.on('SIGINT', () => {
         log.info('Ending REPL session')

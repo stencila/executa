@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Executor, Method } from './Executor'
+import { Executor, Method, Manifest } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
@@ -35,6 +35,11 @@ export abstract class Client extends Executor {
   private requests: { [key: number]: Request<any> } = {}
 
   /**
+   * A cached manifest from the remote executor.
+   */
+  manifestCached: Manifest | undefined
+
+  /**
    * Notifications cache
    *
    * Intended to be consumed by by applications
@@ -57,6 +62,17 @@ export abstract class Client extends Executor {
    * notifications.
    */
   notificationsLength = 1000
+
+  /**
+   * @override Override of {@link Executor.manifest} to
+   * return the manifest of the remote executor.
+   */
+  public async manifest() {
+    if (this.manifestCached === undefined) {
+      this.manifestCached = await this.call<Manifest>(Method.manifest)
+    }
+    return this.manifestCached
+  }
 
   /**
    * @implements Implements {@link Executor.call} by sending a
