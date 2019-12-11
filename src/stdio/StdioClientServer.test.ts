@@ -38,9 +38,7 @@ describe('StdioClient and StdioServer', () => {
     client.decode('send bad message').catch(error => {
       throw error
     })
-    expect(await message).toMatch(
-      /^Error parsing message as JSON: ah hah/
-    )
+    expect(await message).toMatch(/^Error parsing message as JSON: ah hah/)
   })
 
   test('crash', async () => {
@@ -87,6 +85,7 @@ describe('StdioClient and StdioServer', () => {
     removeManifestFile()
 
     StdioServer.register('stdio-test', {
+      manifest: 1,
       addresses: {
         stdio: 'dummy address'
       }
@@ -96,7 +95,7 @@ describe('StdioClient and StdioServer', () => {
     removeManifestFile()
 
     const nextMessages = nextServerMessages(2)
-    StdioServer.register('stdio-test', {})
+    StdioServer.register('stdio-test', { manifest: 1 })
     const messages = await nextMessages
     expect(messages[0]).toMatch(/^Registering executor "stdio-test" in folder/)
     expect(messages[1]).toMatch(/^Manifest does not include a STDIO address/)

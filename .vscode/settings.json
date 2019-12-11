@@ -52,5 +52,11 @@
   "typescript.suggest.completeFunctionCalls": true,
   "typescript.updateImportsOnFileMove.enabled": "prompt",
   "workbench.editor.highlightModifiedTabs": true,
-  "cSpell.words": ["executa", "logga", "vsock"]
+  "cSpell.words": [
+    "configa",
+    "executa",
+    "logga",
+    "stenci",
+    "vsock"
+  ]
 }
