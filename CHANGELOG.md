@@ -1,3 +1,16 @@
+# [1.2.0](https://github.com/stencila/executa/compare/v1.1.0...v1.2.0) (2019-12-11)
+
+
+### Bug Fixes
+
+* **StdioAddress:** Accept URL in constructor ([81d0db6](https://github.com/stencila/executa/commit/81d0db64b2816bc79e0f6adb46235893092d44c7))
+
+
+### Features
+
+* **Executor:** Default implem of call throw CapabilityError ([8c4710f](https://github.com/stencila/executa/commit/8c4710f886aee257015fe4859a47c98937bfd13d))
+* **Manifest:** Allow for more than one address for some transports ([dd6a80d](https://github.com/stencila/executa/commit/dd6a80d9b475f66f3ea0f4613a286a04772240a5))
+
 # [1.1.0](https://github.com/stencila/executa/compare/v1.0.0...v1.1.0) (2019-12-11)
 
 
