@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/stencila/executa/compare/v1.0.0...v1.1.0) (2019-12-11)
+
+
+### Bug Fixes
+
+* **Client:** Check for null values too ([cbc70de](https://github.com/stencila/executa/commit/cbc70de7d4b1f3d5b6d1e0380932199f96b7707a))
+
+
+### Features
+
+* **StdioClient:** Aggregated logs from child process ([2723243](https://github.com/stencila/executa/commit/2723243cce4c6ab6c3ff93a0660917d8f1fe342e))
+
 # [1.0.0](https://github.com/stencila/executa/compare/v0.15.0...v1.0.0) (2019-12-09)
 
 
