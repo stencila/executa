@@ -42,7 +42,7 @@ const defaultWebSocketClientOptions: WebSocketClientOptions = {
  */
 export class WebSocketClient extends Client {
   /**
-   * The address that this client connects to.
+   * The address of the server to connect to.
    */
   public readonly address: WebSocketAddress
 
@@ -66,6 +66,11 @@ export class WebSocketClient extends Client {
    */
   private stopped = false
 
+  /**
+   * Construct a `WebSocketClient`.
+   *
+   * @param address The address of the server to connect to
+   */
   public constructor(
     address: WebSocketAddressInitializer = new WebSocketAddress(),
     options: Partial<WebSocketClientOptions> = defaultWebSocketClientOptions
@@ -73,7 +78,6 @@ export class WebSocketClient extends Client {
     super('ws')
     this.address = new WebSocketAddress(address)
     this.options = { ...defaultWebSocketClientOptions, ...options }
-    this.start().catch(error => log.error(error))
   }
 
   /**

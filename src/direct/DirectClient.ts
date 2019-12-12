@@ -1,30 +1,36 @@
 import { getLogger } from '@stencila/logga'
 import { Client } from '../base/Client'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { DirectAddress } from '../base/Transports'
+import { DirectAddress, DirectAddressInitializer } from '../base/Transports'
 import { DirectServer } from './DirectServer'
 
 const log = getLogger('executa:direct:client')
 
 export class DirectClient extends Client {
+  /**
+   * The server to connect to
+   */
   private server: DirectServer
 
-  public constructor(address: Pick<DirectAddress, 'server'>) {
-    super()
+  /**
+   * Construct a `DirectClient`.
+   *
+   * @param address The address of the server to connect to
+   */
+  public constructor(address: DirectAddressInitializer) {
+    super('di')
     this.server = address.server
     this.server.client = this
   }
 
-  protected send(request: JsonRpcRequest): void {
-    this.server
-      // @ts-ignore server.receive is private
-      .receive(request)
-      .then(response => {
-        if (response !== undefined) this.receive(response)
-      })
-      .catch(error => {
-        throw error
-      })
+  /**
+   * @implements Implements {@link Client.send} by sending
+   * the request directly to the server.
+   */
+  protected async send(request: JsonRpcRequest): Promise<void> {
+    // @ts-ignore server.receive is protected
+    const response = await this.server.receive(request)
+    if (response !== undefined) this.receive(response)
   }
 
   /**

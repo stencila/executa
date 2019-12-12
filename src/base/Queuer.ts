@@ -116,7 +116,9 @@ export class Queuer extends Executor {
     const { params, delegator } = job
     if (delegator !== undefined) {
       const { claims: { clients = [] } = {} } = params
-      delegator.notify(subject, message, undefined, clients)
+      delegator
+        .notify(subject, message, undefined, clients)
+        .catch(error => log.error(error))
     }
   }
 

@@ -20,7 +20,7 @@ export type Address =
   | WebSocketAddress
 
 export type AddressInitializer =
-  | DirectAddress
+  | DirectAddressInitializer
   | StdioAddressInitializer
   | UdsAddress
   | VsockAddress
@@ -28,6 +28,7 @@ export type AddressInitializer =
   | HttpAddressInitializer
   | WebSocketAddressInitializer
 
+export type DirectAddressInitializer = Pick<DirectAddress, 'server'>
 export class DirectAddress {
   public readonly type: Transport.direct = Transport.direct
   public readonly server: any

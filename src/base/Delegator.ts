@@ -84,8 +84,9 @@ export class Delegator extends Executor {
 
   /* eslint-disable @typescript-eslint/no-use-before-define */
 
-  public add(executor: Executor, id?: string): string {
-    id = id !== undefined ? id : generate('ex').toString()
+  public add(executor: Executor): string {
+    const id =
+      executor.id !== undefined ? executor.id : generate('pe').toString()
     log.debug(`Adding peer ${id}`)
     const peer = new Peer(executor, this.clientTypes)
     this.peers[id] = peer
@@ -160,12 +161,10 @@ export class Peer {
   }
 
   /**
-   * Initialize the peer manifest and
-   * connection interface.
+   * Initialize the peer.
    */
   async initialize(): Promise<Manifest> {
     let { executor, manifest } = this
-
     if (executor !== undefined) {
       if (manifest === undefined)
         manifest = this.manifest = await executor.manifest()
@@ -173,7 +172,6 @@ export class Peer {
     } else {
       if (manifest === undefined) manifest = this.manifest = { version: 1 }
     }
-
     return manifest
   }
 

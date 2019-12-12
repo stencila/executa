@@ -27,8 +27,8 @@ test('DirectClient and DirectServer', async () => {
   expect(Object.keys(client.requests).length).toEqual(0)
 
   // Notify the server
-  client.notify('info', 'A message from client to server')
+  await client.notify('info', 'A message from client to server')
 
   // Notify the client
-  server.notify('info', 'A message from server to client')
+  await server.notify('info', 'A message from server to client')
 })

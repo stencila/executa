@@ -48,9 +48,10 @@ export abstract class Listener extends Executor {
     message: string,
     node?: schema.Node,
     clients: string[] = []
-  ) {
+  ): Promise<void> {
     for (const server of this.servers)
       server.notify(level, message, node, clients)
+    return Promise.resolve()
   }
 
   /**

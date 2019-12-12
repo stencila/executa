@@ -39,11 +39,14 @@ describe('StdioClient and StdioServer', () => {
       throw error
     })
     expect(await message).toMatch(/^Error parsing message as JSON: ah hah/)
+
+    await client.stop()
   })
 
   test('crash', async () => {
     const client = new StdioClient(testServer())
 
+    await client.start()
     const message = nextClientMessage()
     client.decode('crash now!').catch(error => {
       throw error

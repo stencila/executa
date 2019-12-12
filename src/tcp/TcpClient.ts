@@ -6,26 +6,54 @@ import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
 const log = getLogger('executa:tcp:client')
 
 export class TcpClient extends StreamClient {
-  private socket: Socket
+  /**
+   * The address of the server to connect to.
+   */
+  public readonly address: TcpAddress
 
+  /**
+   * The socket used for the connection.
+   */
+  private socket?: Socket
+
+  /**
+   * Construct a `TcpClient`.
+   *
+   * @param address The address of the server to connect to
+   */
   public constructor(address: TcpAddressInitializer = new TcpAddress()) {
-    const tcpAddress = new TcpAddress(address)
-    const { host, port } = tcpAddress
-
-    const socket = new Socket()
-    socket.connect(port, host, () => {
-      log.debug(`Connection open: ${tcpAddress.url()}`)
-    })
-    socket.on('close', () => {
-      log.debug(`Connection closed: ${host}:${port}`)
-    })
-    super(socket, socket)
-
-    this.socket = socket
+    super('tcp')
+    this.address = new TcpAddress(address)
   }
 
+  /**
+   * @override Override of {@link StreamClient.start} to create
+   * a new socket and set up event handling.
+   */
+  public start(): Promise<void> {
+    // Don't do anything if socket is already created
+    if (this.socket !== undefined) return Promise.resolve()
+
+    const { host, port } = this.address
+    const url = this.address.url()
+
+    const socket = (this.socket = new Socket())
+    socket.connect(port, host, () => {
+      log.debug(`Connection open: ${url}`)
+    })
+    socket.on('close', () => {
+      log.debug(`Connection closed: ${url}`)
+    })
+
+    return super.start(socket, socket)
+  }
+
+  /**
+   * @override Override of {@link Executor.stop} to
+   * destroy the socket.
+   */
   public stop(): Promise<void> {
-    this.socket.destroy()
+    if (this.socket !== undefined) this.socket.destroy()
     return Promise.resolve()
   }
 

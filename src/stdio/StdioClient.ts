@@ -14,13 +14,40 @@ const glob = util.promisify(glob_)
 
 const log = getLogger('executa:stdio:client')
 export class StdioClient extends StreamClient {
+  /**
+   * The address of the server to connect to.
+   */
+  public readonly address: StdioAddress
+
+  /**
+   * The child process of the `StdioServer`.
+   */
   private child?: ChildProcess
 
-  public constructor(address: StdioAddressInitializer) {
-    const { command, args = [] } = new StdioAddress(address)
+  /**
+   * Construct a `StdioClient`.
+   *
+   * @param address The address of the server to connect to
+   * @param manifest The manifest of the server (usually registered to disk)
+   */
+  public constructor(address: StdioAddressInitializer, manifest?: Manifest) {
+    super('io')
+    this.address = new StdioAddress(address)
+    this.manifestCached = manifest
+  }
+
+  /**
+   * @override Override of {@link StreamClient.start} to start
+   * the child server process and set up event handling.
+   */
+  public start(): Promise<void> {
+    // Don't do anything if the child process is already started
+    if (this.child !== undefined) return Promise.resolve()
+
+    const { command, args = [] } = this.address
 
     log.debug(`Starting StdioServer: ${command} ${args.join(' ')}`)
-    const child = spawn(command, args)
+    const child = (this.child = spawn(command, args))
 
     child.on('error', (error: Error) => {
       log.error(
@@ -39,10 +66,7 @@ export class StdioClient extends StreamClient {
       this.child = undefined
     })
 
-    // Use stdin and stout for transport and pipe stderr to
-    // stderr of current process
     const { stdin, stdout, stderr } = child
-    super(stdin, stdout)
 
     // Pass and output on stderr to own logs
     // In the future we could try parsing the stderr data as
@@ -51,20 +75,12 @@ export class StdioClient extends StreamClient {
       log.info(data.toString('utf8'))
     })
 
-    this.child = child
+    return super.start(stdin, stdout)
   }
 
   /**
-   * @override Override of {@link StreamClient.send} to log
-   * an error if the child server has failed or exited.
-   */
-  protected send(request: JsonRpcRequest): void {
-    if (this.child !== undefined) super.send(request)
-    else log.error(`Server failed to start or exited prematurely`)
-  }
-
-  /**
-   * Stop the child server process
+   * @override Overrider of {@link Executor.stop} to
+   * stop the child server process.
    */
   public stop(): Promise<void> {
     log.debug(`Stopping StdioServer`)
@@ -114,7 +130,7 @@ export class StdioClient extends StreamClient {
       const { addresses = {} } = manifest
       const { stdio } = addresses
       if (stdio !== undefined) {
-        const client = new StdioClient(stdio)
+        const client = new StdioClient(stdio, manifest)
         clients.push(client)
       } else {
         log.warn(`Manifest in "${file}" does not contain a stdio address`)

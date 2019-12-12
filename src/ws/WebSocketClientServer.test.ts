@@ -75,6 +75,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     // Client with malformed JWT
     clientLogs = []
     const client = new WebSocketClient({ ...server.address, jwt: 'what?' })
+    await client.start()
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
@@ -89,6 +90,7 @@ test('WebSocketClient and WebSocketServer', async () => {
       ...server.address,
       jwt: JWT.sign({}, 'not-the-right-secret')
     })
+    await client.start()
     await delay(25)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
@@ -101,6 +103,12 @@ test('WebSocketClient and WebSocketServer', async () => {
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
+
+    expect(serverConnections()).toBe(0)
+
+    await client1.start()
+    await client2.start()
+    await client3.start()
     await delay(25)
     expect(serverConnections()).toBe(3)
 
@@ -131,6 +139,10 @@ test('WebSocketClient and WebSocketServer', async () => {
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
+
+    await client1.start()
+    await client2.start()
+    await client3.start()
     await delay(25)
 
     // Server notification to several clients

@@ -281,12 +281,10 @@ describe('Delegator', () => {
 
     // Can add remove and update peers
 
-    const id1 = delegator.add(deepThought, 'deepThought')
-    expect(id1).toBe('deepThought')
+    const id1 = delegator.add(deepThought)
     expect(peersCount()).toBe(1)
 
-    const id2 = delegator.add(calculator, 'calculator')
-    expect(id2).toBe('calculator')
+    const id2 = delegator.add(calculator)
     expect(peersCount()).toBe(2)
 
     // Delegates executable nodes to peers
@@ -317,13 +315,13 @@ describe('Delegator', () => {
     await expect(delegator.execute('a string')).rejects.toThrow(CapabilityError)
 
     // Throws a capability error if we change a peers capabilities
-    delegator.update('deepThought', { version: 1 })
+    delegator.update(id1, { version: 1 })
     await expect(
       delegator.execute(schema.codeChunk(DeepThought.question))
     ).rejects.toThrow(CapabilityError)
 
     // Throws a capability error if we remove a peer
-    delegator.remove('calculator')
+    delegator.remove(id2)
     await expect(
       delegator.execute(schema.codeExpression('6 * 7'))
     ).rejects.toThrow(CapabilityError)

@@ -9,10 +9,11 @@ import { JsonRpcResponse } from './JsonRpcResponse'
  * called method and arguments.
  */
 class EchoClient extends Client {
-  public send(request: JsonRpcRequest): void {
+  public send(request: JsonRpcRequest): Promise<void> {
     const { id, method, params } = request
     const response = new JsonRpcResponse(id, { method, params })
     this.receive(response)
+    return Promise.resolve()
   }
 }
 

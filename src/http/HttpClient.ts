@@ -12,31 +12,33 @@ const log = getLogger('executa:http:client')
  * A `Client` using HTTP/S for communication.
  */
 export class HttpClient extends Client {
-  public readonly url: string
+  /**
+   * The address of the server to connect to.
+   */
+  public readonly address: HttpAddress
 
-  private readonly jwt: HttpAddress['jwt']
-
-  public readonly protocol: HttpAddress['protocol']
-
+  /**
+   * Construct a `HttpClient`.
+   *
+   * @param address The address of the server to connect to
+   */
   public constructor(address: HttpAddressInitializer = new HttpAddress()) {
-    super()
-
-    const httpAddress = new HttpAddress(address)
-    this.url = httpAddress.url()
-    this.jwt = httpAddress.jwt
-    this.protocol = httpAddress.protocol
+    super('ht')
+    this.address = new HttpAddress(address)
   }
 
   protected send(request: JsonRpcRequest): Promise<void> {
+    const { protocol, jwt } = this.address
     const { id, method, params } = request
 
+    const baseUrl = this.address.url()
     let url
     let body
-    if (this.protocol === 'restful') {
-      url = `${this.url}${this.url.endsWith('/') ? '' : '/'}${method}`
+    if (protocol === 'restful') {
+      url = `${baseUrl}${baseUrl.endsWith('/') ? '' : '/'}${method}`
       body = params
     } else {
-      url = this.url
+      url = baseUrl
       body = request
     }
 
@@ -48,9 +50,7 @@ export class HttpClient extends Client {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         Accept: 'application/json; charset=utf-8',
-        ...(this.jwt !== undefined
-          ? { Authorization: `Bearer ${this.jwt}` }
-          : {})
+        ...(jwt !== undefined ? { Authorization: `Bearer ${jwt}` } : {})
       },
       body: JSON.stringify(body)
     })
@@ -63,7 +63,7 @@ export class HttpClient extends Client {
         } catch {
           response = {}
         }
-        if (this.protocol === 'restful') {
+        if (protocol === 'restful') {
           let result, error
           if (reply.status >= 400) error = response
           else result = response

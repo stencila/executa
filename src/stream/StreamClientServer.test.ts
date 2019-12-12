@@ -12,7 +12,8 @@ test('StreamClient and StreamServer', async () => {
   const serverOutgoing = new PassThrough()
   server.start(executor, serverIncoming, serverOutgoing)
 
-  const client = new StreamClient(serverIncoming, serverOutgoing)
+  const client = new StreamClient()
+  await client.start(serverIncoming, serverOutgoing)
 
   await testClient(client)
 

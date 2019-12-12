@@ -64,6 +64,15 @@ export abstract class Client extends Executor {
   notificationsLength = 1000
 
   /**
+   * Construct a `Client`.
+   *
+   * @param family The two letter prefix for the id of this client
+   */
+  public constructor(family = 'cli') {
+    super(family)
+  }
+
+  /**
    * @override Override of {@link Executor.manifest} to
    * return the manifest of the remote executor.
    */
@@ -95,7 +104,7 @@ export abstract class Client extends Executor {
         reject
       }
     })
-    this.send(request)
+    await this.send(request)
     return promise
   }
 
@@ -103,9 +112,9 @@ export abstract class Client extends Executor {
    * @override Override of {@link Executor.notify} to send a notification
    * to the `Executor` that this client is connected to.
    */
-  public notify(subject: string, message: string): void {
+  public notify(subject: string, message: string): Promise<void> {
     const notification = new JsonRpcRequest(subject, { message }, false)
-    this.send(notification)
+    return this.send(notification)
   }
 
   /**
@@ -135,7 +144,7 @@ export abstract class Client extends Executor {
    *
    * @param request The JSON-RPC request
    */
-  protected abstract send(request: JsonRpcRequest): void
+  protected abstract send(request: JsonRpcRequest): Promise<void>
 
   /**
    * Receive a response from the server.
@@ -262,7 +271,7 @@ export function transportToClientType(
     if (transport === trans) return name
   }
 
-  // if this happens, it could be due to missing entry
+  // If this happens, it could be due to missing entry
   // in `clientTypeTransportMap`, or a bad string from by user
   log.error(`Unrecognized address transport: ${transport}`)
   return undefined

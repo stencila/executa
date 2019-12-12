@@ -7,13 +7,38 @@ import { InternalError } from '../base/InternalError'
 const log = getLogger('executa:vsock:client')
 
 export class VsockFirecrackerClient extends StreamClient {
-  private socket: net.Socket
+  /**
+   * The address of the server to connect to.
+   */
+  private readonly address: VsockAddress
 
+  /**
+   * The socket used for the connection.
+   */
+  private socket?: net.Socket
+
+  /**
+   * Construct a `VsockFirecrackerClient`.
+   *
+   * @param address The address of the server to connect to
+   */
   public constructor(address: VsockAddress = new VsockAddress()) {
-    const { path, port } = address
+    super('vs')
+    this.address = address
+  }
+
+  /**
+   * @override Override of {@link StreamClient.start} to create
+   * a new socket and set up event handling.
+   */
+  public start(): Promise<void> {
+    // Don't do anything if socket is already created
+    if (this.socket !== undefined) return Promise.resolve()
+
+    const { path, port } = this.address
     if (path === undefined) throw new InternalError(`Path is required`)
 
-    const socket = net.connect(path)
+    const socket = (this.socket = net.connect(path))
     socket.on('connect', () => {
       log.debug(`${path}:${port}: connecting`)
       socket.write(`CONNECT ${port}\n`)
@@ -25,13 +50,15 @@ export class VsockFirecrackerClient extends StreamClient {
       // If there is no server listening in the VM then the connection will be closed.
       log.debug(`${path}:${port}: connection-closed`)
     })
-
-    super(socket, socket)
-    this.socket = socket
+    return super.start(socket, socket)
   }
 
+  /**
+   * @override Override of {@link Executor.stop} to
+   * destroy the socket.
+   */
   public stop(): Promise<void> {
-    this.socket.destroy()
+    if (this.socket !== undefined) this.socket.destroy()
     return Promise.resolve()
   }
 }

@@ -307,7 +307,7 @@ export abstract class Executor {
     message: string,
     node?: Node,
     clients?: string[]
-  ): void {
+  ): Promise<void> {
     throw new InternalError(
       'Method notify should be implemented in derived classes'
     )
