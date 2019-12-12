@@ -2,11 +2,20 @@ import { getLogger } from '@stencila/logga'
 import crypto from 'crypto'
 import net from 'net'
 import { Executor, Claims } from '../base/Executor'
-import { TcpAddress, TcpAddressInitializer } from '../base/Transports'
+import {
+  TcpAddress,
+  TcpAddressInitializer,
+  HttpAddress,
+  Addresses,
+  Transport,
+  WebSocketAddress
+} from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
 import { Connection } from '../base/Connection'
 import * as schema from '@stencila/schema'
+import { thisExpression } from '@babel/types'
+import { expandAddress } from './util'
 
 const log = getLogger('executa:tcp:server')
 
@@ -24,22 +33,30 @@ export class TcpConnection extends StreamServer implements Connection {
   id: string = crypto.randomBytes(32).toString('hex')
 
   /**
-   * The socket used by this connection
+   * The socket used by this connection.
    */
   socket: net.Socket
 
-  constructor(socket: net.Socket) {
+  /**
+   * The server for this connection.
+   *
+   * Used to implement {@link TcpConnection.addresses}.
+   */
+  server: TcpServer
+
+  constructor(socket: net.Socket, server: TcpServer) {
     super()
     this.socket = socket
+    this.server = server
   }
 
   /**
-   * @override Override of {@link StreamServer.address} necessary
-   * because that is an `abstract` method. Just returns a default
-   * TCP address, not necessarily that of the server!
+   * @implements Implements {@link Server.addresses}. Necessary
+   * because that is an `abstract` method. Just returns addresses
+   * of the server that this connection is to.
    */
-  public get address(): TcpAddress {
-    return new TcpAddress()
+  public addresses(): Promise<Addresses> {
+    return this.server.addresses()
   }
 
   /**
@@ -55,9 +72,13 @@ export class TcpConnection extends StreamServer implements Connection {
 }
 
 export class TcpServer extends Server {
-  protected readonly host: string
-
-  protected readonly port: number
+  /**
+   * The address of this server.
+   *
+   * Can be a `TcpAddress`, or one of the address types
+   * derived from it.
+   */
+  public readonly address: TcpAddress | HttpAddress | WebSocketAddress
 
   protected server?: net.Server
 
@@ -65,16 +86,15 @@ export class TcpServer extends Server {
 
   public constructor(address: TcpAddressInitializer = new TcpAddress()) {
     super()
-
-    const tcpAddress = new TcpAddress(address)
-    this.host = tcpAddress.host
-    this.port = tcpAddress.port
+    this.address = new TcpAddress(address)
   }
 
-  public get address(): TcpAddress {
-    return new TcpAddress({
-      host: this.host,
-      port: this.port
+  /**
+   * @implements Implements {@link Server.addresses}.
+   */
+  public async addresses(): Promise<Addresses> {
+    return Promise.resolve({
+      [Transport.tcp]: await expandAddress(this.address.url())
     })
   }
 
@@ -90,13 +110,13 @@ export class TcpServer extends Server {
 
   public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
-      log.info(`Starting server: ${this.address.url()}`)
+      log.info(`Starting server`)
 
       const server = (this.server = net.createServer())
 
       server.on('connection', (socket: net.Socket): void => {
         // Register connection and disconnection handler
-        const connection = new TcpConnection(socket)
+        const connection = new TcpConnection(socket, this)
         this.onConnected(connection)
         socket.on('close', () => this.onDisconnected(connection))
 
@@ -136,8 +156,7 @@ export class TcpServer extends Server {
     this.connections = {}
 
     if (this.server !== undefined) {
-      const url = this.address.url()
-      log.info(`Stopping server ${url}`)
+      log.info(`Stopping server`)
 
       return new Promise(resolve => {
         if (this.server !== undefined)
@@ -146,7 +165,7 @@ export class TcpServer extends Server {
               this.server.unref()
               this.server = undefined
             }
-            log.info(`Stopped server ${url}`)
+            log.info(`Stopped server`)
             resolve()
           })
       })

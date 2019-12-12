@@ -1,10 +1,7 @@
 // @ts-ignore
 import externalIP from 'external-ip'
 import os from 'os'
-import {
-  parseTcpAddress,
-  deparseTcpAddress
-} from '../base/Transports'
+import { parseTcpAddress, deparseTcpAddress } from '../base/Transports'
 
 // Cached IP values
 let localIP_: string | undefined
@@ -55,20 +52,26 @@ export function globalIP(): Promise<string> {
  * (i.e. share the same network or machine) can connect
  * more directly.
  */
-export async function expandAddress(address: string): Promise<string[]> {
-  const orig = parseTcpAddress(address, {
+export async function expandAddress(
+  address: string,
+  defaults = {
     scheme: 'ws',
     host: '0.0.0.0',
     port: 80
-  })
+  }
+): Promise<string[]> {
+  const orig = parseTcpAddress(address, defaults)
   const { scheme, host, port } = orig
 
   // Use plain http and ws, not https and wss,
   // on local and localhost networks
-  const insecure = (scheme === 'https' || scheme === 'wss') ? {
-    scheme: scheme.slice(0, -1),
-    port: 80
-  } : { scheme, port }
+  const insecure =
+    scheme === 'https' || scheme === 'wss'
+      ? {
+          scheme: scheme.slice(0, -1),
+          port: 80
+        }
+      : { scheme, port }
 
   const addresses = []
   if (host === '127.0.0.1' || host === 'localhost') {

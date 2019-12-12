@@ -1,19 +1,10 @@
 import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
-import {
-  DirectAddress,
-  HttpAddressInitializer,
-  StdioAddressInitializer,
-  TcpAddressInitializer,
-  Transport,
-  UdsAddress,
-  VsockAddress,
-  WebSocketAddressInitializer
-} from './Transports'
-import { InternalError } from './InternalError'
-import { Id, generate } from './uid'
 import { CapabilityError } from './CapabilityError'
+import { InternalError } from './InternalError'
+import { Addresses, Transport } from './Transports'
+import { generate } from './uid'
 
 const log = getLogger('executa:executor')
 
@@ -47,19 +38,6 @@ export type Params = { [key: string]: any }
  */
 export interface Capabilities {
   [key: string]: JSONSchema7Definition | JSONSchema7Definition[]
-}
-
-/**
- * The addresses of an `Executor`.
- */
-export interface Addresses {
-  direct?: DirectAddress
-  stdio?: StdioAddressInitializer
-  uds?: UdsAddress
-  vsock?: VsockAddress
-  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
-  http?: HttpAddressInitializer | HttpAddressInitializer[]
-  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
 }
 
 /**
