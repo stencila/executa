@@ -231,7 +231,7 @@ export class HttpServer extends TcpServer {
     await app.ready()
 
     // Start listening
-    const { host, port } = this.address
+    const [host, port] = this.listeningAddress()
     await app.listen(port, host)
   }
 

@@ -98,6 +98,30 @@ export class TcpServer extends Server {
     })
   }
 
+  /**
+   * Generate the IP address and port number that this server should
+   * use for listening.
+   *
+   * Translates `this.address`, which is an "advertised" address
+   * into a "listening" address. Assumes that this process is not
+   * running as a privileged user so overrides any use, implied or
+   * otherwise, of a privileged port.
+   */
+  public listeningAddress(): [string, number] {
+    let { scheme, host, port } = this.address
+    if (port < 1024) {
+      if (scheme.startsWith('http')) port = 8000
+      else if (scheme.startsWith('ws')) port = 9000
+      log.info(`Overriding to an unpriviledged port for ${scheme}: ${port}`)
+    }
+    const match = /^\d+\.\d+\.\d+\.\d+$/.test(host)
+    if (!match && host !== '127.0.0.1' && host !== 'localhost') {
+      host = '0.0.0.0'
+      log.info(`Listening on any address available: ${host}`)
+    }
+    return [host, port]
+  }
+
   protected onConnected(connection: Connection): void {
     log.info(`Client connected: ${connection.id}`)
     this.connections[connection.id] = connection

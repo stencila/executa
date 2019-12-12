@@ -69,7 +69,7 @@ export async function expandAddress(
     scheme === 'https' || scheme === 'wss'
       ? {
           scheme: scheme.slice(0, -1),
-          port: 80
+          port: scheme === 'https' ? 8000 : 9000
         }
       : { scheme, port }
 

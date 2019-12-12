@@ -41,8 +41,8 @@ describe('expandAddress', () => {
     expect(await expandAddress('wss://executa.stenci.la/path')).toEqual([
       `wss://executa.stenci.la/path`,
       `wss://${globalIp}/path`,
-      `ws://${localIp}/path`,
-      'ws://127.0.0.1/path'
+      `ws://${localIp}:9000/path`,
+      'ws://127.0.0.1:9000/path'
     ])
   })
 })
