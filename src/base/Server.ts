@@ -1,14 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
-import { Manager } from './Manager'
 import { Executor, Claims } from './Executor'
 import { InternalError } from './InternalError'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { Address } from './Transports'
 import { CapabilityError } from './CapabilityError'
-import { Worker } from './Worker'
+import { Addresses } from './Transports'
 
 const log = getLogger('executa:server')
 
@@ -23,9 +21,12 @@ export abstract class Server {
   protected executor?: Executor
 
   /**
-   * Get the address of the server
+   * Get the addresses of this server.
+   *
+   * A server will usually on have one address type (e.g. `http`, `ws`)
+   * but may have more than one address for each type.
    */
-  public abstract get address(): Address
+  public abstract addresses(): Promise<Addresses>
 
   /**
    * Send a notification to one or more clients.

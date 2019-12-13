@@ -1,8 +1,8 @@
 import { getLogger } from '@stencila/logga'
-import { Executor, Addresses } from './Executor'
-import { Server } from './Server'
-import { generate, Id } from './uid'
 import * as schema from '@stencila/schema'
+import { Executor } from './Executor'
+import { Server } from './Server'
+import { Addresses } from './Transports'
 
 const log = getLogger('executa:listener')
 
@@ -26,14 +26,20 @@ export abstract class Listener extends Executor {
   }
 
   /**
-   * Get a map of server addresses for this executor.
+   * @implements Implements {@link Executor.addresses}.
+   *
+   * @description Combines the server addresses for this executor into
+   * a single `Addresses` object.
    */
   public addresses(): Promise<Addresses> {
     return Promise.resolve(
-      this.servers.reduce((prev, server) => {
-        const { address } = server
-        return { ...prev, ...{ [address.type]: address.url() } }
-      }, {})
+      this.servers.reduce(
+        async (prev, server) => ({
+          ...(await prev),
+          ...(await server.addresses())
+        }),
+        {}
+      )
     )
   }
 
@@ -67,11 +73,7 @@ export abstract class Listener extends Executor {
       return
     }
 
-    log.info(
-      `Starting servers: ${this.servers
-        .map(server => server.address.type)
-        .join(', ')}`
-    )
+    log.info(`Starting servers`)
     await Promise.all(this.servers.map(server => server.start(this)))
   }
 

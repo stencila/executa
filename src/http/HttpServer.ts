@@ -9,12 +9,17 @@ import fastify, {
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
 import { Executor } from '../base/Executor'
-import { Manager } from '../base/Manager'
 import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
-import { HttpAddress, HttpAddressInitializer } from '../base/Transports'
+import {
+  HttpAddress,
+  HttpAddressInitializer,
+  Transport,
+  Addresses
+} from '../base/Transports'
 import { TcpServer } from '../tcp/TcpServer'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
+import { expandAddress } from '../tcp/util'
 
 const log = getLogger('executa:http:server')
 
@@ -52,9 +57,19 @@ export class HttpServer extends TcpServer {
 
     if (jwtSecret === undefined) {
       jwtSecret = crypto.randomBytes(16).toString('hex')
-      log.info(`JWT secret generated for ${this.address.url()}: ${jwtSecret}`)
+      log.info(`JWT secret generated for HTTP server: ${jwtSecret}`)
     }
     this.jwtSecret = jwtSecret
+  }
+
+  /**
+   * @override Overrides {@link TcpServer.addresses}
+   * to provide a HTTP entry.
+   */
+  public async addresses(): Promise<Addresses> {
+    return {
+      [Transport.http]: await expandAddress(this.address.url())
+    }
   }
 
   /**
@@ -96,7 +111,7 @@ export class HttpServer extends TcpServer {
     // RESTful-like JSON-RPC wrapped in HTTP
     // Wrap the HTTP request into a JSON-RPC request and
     // unwrap the JSON-RPC response as HTTP response with
-    // bare, unenveloped results and errors
+    // bare, un-enveloped results and errors
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
         // @ts-ignore that user does not exist on request
@@ -206,26 +221,18 @@ export class HttpServer extends TcpServer {
       )
   }
 
-  public get address(): HttpAddress {
-    return new HttpAddress({
-      host: this.host,
-      port: this.port
-    })
-  }
-
   public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
-    const url = this.address.url()
-    log.info(`Starting server: ${url}`)
-
+    log.info(`Starting server`)
     const app = (this.app = this.buildApp())
 
     // Wait for plugins to be ready
     await app.ready()
 
     // Start listening
-    await app.listen(this.port, this.host)
+    const [host, port] = this.listeningAddress()
+    await app.listen(port, host)
   }
 
   /**

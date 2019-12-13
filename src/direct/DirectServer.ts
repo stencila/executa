@@ -1,5 +1,5 @@
 import { Server } from '../base/Server'
-import { DirectAddress, Transport } from '../base/Transports'
+import { Addresses, DirectAddress, Transport } from '../base/Transports'
 import { Client } from '../base/Client'
 import { InternalError } from '../base/InternalError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
@@ -7,8 +7,13 @@ import { JsonRpcRequest } from '../base/JsonRpcRequest'
 export class DirectServer extends Server {
   client?: Client
 
-  public get address(): DirectAddress {
-    return new DirectAddress(this)
+  /**
+   * @implements Implements {@link Server.addresses}.
+   */
+  public addresses(): Promise<Addresses> {
+    return Promise.resolve({
+      [Transport.direct]: new DirectAddress({ server: this })
+    })
   }
 
   public notify(subject: string, message: string): void {

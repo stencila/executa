@@ -8,7 +8,7 @@ test('DirectClient and DirectServer', async () => {
   const executor = new Worker()
   await server.start(executor)
 
-  const client = new DirectClient(server.address)
+  const client = new DirectClient({ server })
 
   // Run the usual client tests...
   await testClient(client)

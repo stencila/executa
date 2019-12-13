@@ -3,18 +3,23 @@ import fs from 'fs'
 import mkdirp from 'mkdirp'
 import path from 'path'
 import { Manifest } from '../base/Executor'
-import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
+import {
+  StdioAddress,
+  StdioAddressInitializer,
+  Addresses,
+  Transport
+} from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { home } from './util'
 
 const log = getLogger('executa:stdio:server')
 
 export class StdioServer extends StreamServer {
-  private address_: StdioAddress
+  private address: StdioAddress
 
   constructor(address?: StdioAddressInitializer) {
     super()
-    this.address_ = new StdioAddress(
+    this.address = new StdioAddress(
       address !== undefined
         ? address
         : {
@@ -24,8 +29,13 @@ export class StdioServer extends StreamServer {
     )
   }
 
-  public get address(): StdioAddress {
-    return this.address_
+  /**
+   * @implements Implements {@link Server.addresses}.
+   */
+  public addresses(): Promise<Addresses> {
+    return Promise.resolve({
+      [Transport.stdio]: this.address
+    })
   }
 
   /**

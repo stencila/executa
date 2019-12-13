@@ -28,6 +28,16 @@ export type AddressInitializer =
   | HttpAddressInitializer
   | WebSocketAddressInitializer
 
+export interface Addresses {
+  direct?: DirectAddressInitializer
+  stdio?: StdioAddressInitializer
+  uds?: UdsAddress
+  vsock?: VsockAddress
+  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
+  http?: HttpAddressInitializer | HttpAddressInitializer[]
+  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
+}
+
 export type DirectAddressInitializer = Pick<DirectAddress, 'server'>
 export class DirectAddress {
   public readonly type: Transport.direct = Transport.direct
@@ -124,7 +134,7 @@ export class VsockAddress {
 
   public url(): string {
     const { port, path } = this
-    let url = `vock://${port}`
+    let url = `vsock://${port}`
     if (path !== undefined) url += ' ' + path
     return url
   }
@@ -166,7 +176,7 @@ export class TcpAddress {
   }
 
   public url(): string {
-    return `${this.scheme}://${this.host}:${this.port}`
+    return deparseTcpAddress(this)
   }
 }
 
@@ -231,21 +241,6 @@ export class HttpAddress extends TcpAddress {
       this.jwt = jwt
     }
   }
-
-  public url(): string {
-    const { scheme, host, port, path } = this
-    let url = `${scheme}://${host}`
-    if (
-      ((scheme === 'http' || scheme === 'ws') && port !== 80) ||
-      ((scheme === 'https' || scheme === 'wss') && port !== 443)
-    )
-      url += `:${port}`
-    if (path !== undefined) {
-      if (!path.startsWith('/')) url += '/'
-      url += path
-    }
-    return url
-  }
 }
 
 export type WebSocketAddressInitializer = HttpAddressInitializer
@@ -299,6 +294,31 @@ export function parseTcpAddress(
     else port = defaults.port
   }
   return { scheme, host, port, path }
+}
+
+/**
+ * Create a URL from a TCP-based address. Inverse of `parseTcpAddress`.
+ *
+ * @param address The address to deparse.
+ */
+export function deparseTcpAddress(
+  address: Pick<HttpAddressProperties, 'scheme' | 'host' | 'port' | 'path'>
+): string {
+  const { scheme, host, port, path } = address
+  let url = `${scheme}://${host}`
+  // Only add port number if necessary
+  if (
+    scheme === 'tcp' ||
+    ((scheme === 'http' || scheme === 'ws') && port !== 80) ||
+    ((scheme === 'https' || scheme === 'wss') && port !== 443)
+  )
+    url += `:${port}`
+  // Add path for HTTP and WebSocket addresses
+  if (scheme !== 'tcp' && path !== undefined) {
+    if (!path.startsWith('/')) url += '/'
+    url += path
+  }
+  return url
 }
 
 export function parseAddress(address: string): Address | undefined {

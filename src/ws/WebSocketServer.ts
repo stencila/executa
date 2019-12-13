@@ -8,12 +8,14 @@ import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
   WebSocketAddressInitializer,
-  Transport
+  Transport,
+  Addresses
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen, parseProtocol } from './util'
 import { Claims } from '../base/Executor'
 import { FastifyRequest, FastifyInstance } from 'fastify'
+import { expandAddress } from '../tcp/util'
 
 const log = getLogger('executa:ws:server')
 
@@ -100,6 +102,16 @@ export class WebSocketServer extends HttpServer {
   }
 
   /**
+   * @override Overrides {@link HttpServer.addresses}
+   * to provide a WebSocket entry.
+   */
+  public async addresses(): Promise<Addresses> {
+    return {
+      [Transport.ws]: await expandAddress(this.address.url())
+    }
+  }
+
+  /**
    * @override Overrides {@link HttpServer.buildApp} to add WebSocket
    * handling.
    */
@@ -151,12 +163,5 @@ export class WebSocketServer extends HttpServer {
       }
     })
     return app
-  }
-
-  public get address(): WebSocketAddress {
-    return new WebSocketAddress({
-      host: this.host,
-      port: this.port
-    })
   }
 }

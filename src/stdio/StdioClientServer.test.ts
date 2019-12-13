@@ -18,8 +18,10 @@ describe('StdioClient and StdioServer', () => {
   const testServer = (arg = ''): string =>
     `npx ts-node --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
 
-  const nextClientMessage = async () =>
-    (await nextLogData(['executa:client', 'executa:stdio:client']))[0].message
+  const nextClientMessages = async (count = 1) =>
+    (await nextLogData(['executa:client', 'executa:stdio:client'], count)).map(
+      data => data.message
+    )
 
   const nextServerMessages = async (count = 1) =>
     (await nextLogData(['executa:stdio:server'], count)).map(
@@ -34,11 +36,11 @@ describe('StdioClient and StdioServer', () => {
     // Do not await the next two calls to `decode` - they do not
     // resolve due to the bad message
 
-    const message = nextClientMessage()
+    const messages = nextClientMessages()
     client.decode('send bad message').catch(error => {
       throw error
     })
-    expect(await message).toMatch(/^Error parsing message as JSON: ah hah/)
+    expect((await messages)[0]).toMatch(/^Error parsing message as JSON: ah hah/)
 
     await client.stop()
   })
@@ -47,11 +49,11 @@ describe('StdioClient and StdioServer', () => {
     const client = new StdioClient(testServer())
 
     await client.start()
-    const message = nextClientMessage()
+    const messages = nextClientMessages()
     client.decode('crash now!').catch(error => {
       throw error
     })
-    expect(await message).toMatch(
+    expect((await messages)[0]).toMatch(
       /^Server exited prematurely with exit code 1 and signal null/
     )
 
@@ -64,17 +66,35 @@ describe('StdioClient and StdioServer', () => {
   if (process.env.CI !== undefined) {
     test('crash-on-start', async () => {
       const client = new StdioClient(testServer('crash-on-start'))
-      expect(await nextClientMessage()).toMatch(
+
+      const nextMessages = nextClientMessages(2)
+      await client.start()
+
+      const messages = await nextMessages
+      expect(messages[0]).toMatch(
+        /^Starting StdioServer/
+      )
+      expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
       )
+
       await client.stop()
     })
 
     test('exit-prematurely', async () => {
       const client = new StdioClient(testServer('exit-prematurely'))
-      expect(await nextClientMessage()).toMatch(
+
+      const nextMessages = nextClientMessages(2)
+      await client.start()
+
+      const messages = await nextMessages
+      expect(messages[0]).toMatch(
+        /^Starting StdioServer/
+      )
+      expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
       )
+
       await client.stop()
     })
   }
