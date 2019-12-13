@@ -55,15 +55,17 @@ export class StdioClient extends StreamClient {
       )
       // This event can happen at start up before `super()` is called
       // and `this` is defined. There is not a better way to test for
-      // success of startup.
-      if (this !== undefined) this.child = undefined
+      // success of startup other than `this !== undefined`
+      if (this !== undefined) {
+        this.stop().catch(error => log.error(error))
+      }
     })
 
     child.on('exit', (code: number | null, signal: string | null) => {
       log.error(
         `Server exited prematurely with exit code ${code} and signal ${signal}`
       )
-      this.child = undefined
+      this.stop().catch(error => log.error(error))
     })
 
     const { stdin, stdout, stderr } = child
@@ -79,17 +81,20 @@ export class StdioClient extends StreamClient {
   }
 
   /**
-   * @override Overrider of {@link Executor.stop} to
+   * @override Override of {@link Executor.stop} to
    * stop the child server process.
    */
   public stop(): Promise<void> {
     log.debug(`Stopping StdioServer`)
+
     if (this.child !== undefined) {
       // Avoid unnecessary log errors by removing listener
       this.child.removeAllListeners('exit')
       this.child.kill()
+      this.child = undefined
     }
-    return Promise.resolve()
+
+    return super.stop()
   }
 
   /**

@@ -33,28 +33,35 @@ describe('StdioClient and StdioServer', () => {
 
     await testClient(client)
 
-    // Do not await the next two calls to `decode` - they do not
-    // resolve due to the bad message
-
-    const messages = nextClientMessages()
-    client.decode('send bad message').catch(error => {
-      throw error
-    })
-    expect((await messages)[0]).toMatch(/^Error parsing message as JSON: ah hah/)
-
-    await client.stop()
-  })
-
-  test('crash', async () => {
-    const client = new StdioClient(testServer())
-
-    await client.start()
+    // Test the server crashing
     const messages = nextClientMessages()
     client.decode('crash now!').catch(error => {
       throw error
     })
     expect((await messages)[0]).toMatch(
       /^Server exited prematurely with exit code 1 and signal null/
+    )
+
+    // The server should get restarted JIT on next
+    // method request
+    expect(await client.decode('1', 'json')).toEqual(1)
+
+    await client.stop()
+  })
+
+  test('crash', async () => {
+    const client = new StdioClient(testServer())
+    await client.start()
+
+    // Test the server sending a bad message
+    const messages = nextClientMessages()
+    // Do not await`decode` - it does not
+    // resolve due to the bad message
+    client.decode('send bad message').catch(error => {
+      throw error
+    })
+    expect((await messages)[0]).toMatch(
+      /^Error parsing message as JSON: ah hah/
     )
 
     await client.stop()
@@ -71,9 +78,7 @@ describe('StdioClient and StdioServer', () => {
       await client.start()
 
       const messages = await nextMessages
-      expect(messages[0]).toMatch(
-        /^Starting StdioServer/
-      )
+      expect(messages[0]).toMatch(/^Starting StdioServer/)
       expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
       )
@@ -88,9 +93,7 @@ describe('StdioClient and StdioServer', () => {
       await client.start()
 
       const messages = await nextMessages
-      expect(messages[0]).toMatch(
-        /^Starting StdioServer/
-      )
+      expect(messages[0]).toMatch(/^Starting StdioServer/)
       expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
       )

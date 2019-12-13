@@ -22,7 +22,7 @@ export class StreamClient extends Client {
   }
 
   /**
-   * Create an instance of `StreamClient`.
+   * Start the client.
    *
    * @param {Writable} outgoing Outgoing stream to send JSON-RPC requests on.
    * @param {Readable} incoming Incoming stream to receive JSON-RPC responses on.
@@ -49,6 +49,18 @@ export class StreamClient extends Client {
       this.receive(json)
     })
     incoming.pipe(decoder)
+
+    return Promise.resolve()
+  }
+
+  /**
+   * Stop the client.
+   *
+   * Sets `this.encoder` to `undefined` so that it gets
+   * reconstructed with a new stream if `start()` is called later.
+   */
+  public stop(): Promise<void> {
+    this.encoder = undefined
 
     return Promise.resolve()
   }
