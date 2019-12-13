@@ -1,3 +1,10 @@
+## [1.3.1](https://github.com/stencila/executa/compare/v1.3.0...v1.3.1) (2019-12-13)
+
+
+### Bug Fixes
+
+* **StdioClient:** Restart after premature exist of child server process ([eddeb0e](https://github.com/stencila/executa/commit/eddeb0e086d2f3fca9f37ac7596bac0cd43a4332)), closes [#42](https://github.com/stencila/executa/issues/42)
+
 # [1.3.0](https://github.com/stencila/executa/compare/v1.2.0...v1.3.0) (2019-12-13)
 
 
