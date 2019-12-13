@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/stencila/executa/compare/v1.2.0...v1.3.0) (2019-12-13)
+
+
+### Bug Fixes
+
+* **TcpServer:** Create a custom listening address ([753207c](https://github.com/stencila/executa/commit/753207cb31298578497d978265c718e20b583a05))
+
+
+### Features
+
+* **TCP util:** Add expandAddress function ([0e7d635](https://github.com/stencila/executa/commit/0e7d635f4772c7ac443e1fa241fd7a614f3d857b))
+
 # [1.2.0](https://github.com/stencila/executa/compare/v1.1.0...v1.2.0) (2019-12-11)
 
 
