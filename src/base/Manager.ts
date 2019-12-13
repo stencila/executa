@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { CapabilityError } from './CapabilityError'
+import { CapabilityError } from './errors'
 import { Delegator } from './Delegator'
 import { Method, Claims, Manifest } from './Executor'
 import { Listener } from './Listener'

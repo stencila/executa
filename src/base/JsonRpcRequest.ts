@@ -32,7 +32,7 @@ export class JsonRpcRequest {
    * A structured value that holds the parameter values to be used during the
    * invocation of the method.This member MAY be omitted.
    */
-  public readonly params?: { [key: string]: any } | any[]
+  public readonly params?: { [key: string]: any }
 
   /**
    * A counter for generating unique, sequential request ids.
@@ -117,33 +117,5 @@ export class JsonRpcRequest {
       )
     }
     return JsonRpcRequest.hydrate(obj)
-  }
-
-  /**
-   * Extract a parameter value from `params`.
-   *
-   * Because `params` can be an `array` or an `object`, this
-   * method requires specifying both the parameter name and index
-   * so that it can handle both cases.
-   *
-   * @param index The index of the parameter. A non negative number.
-   * @param name The name of the parameter
-   * @param required Is the parameter required?
-   */
-  public param(index: number, name: string, required = true): any {
-    if (this.params === undefined)
-      throw new JsonRpcError(
-        JsonRpcErrorCode.InvalidRequest,
-        'Invalid request: missing "params" property'
-      )
-    const value = Array.isArray(this.params)
-      ? this.params[index]
-      : this.params[name]
-    if (required && value === undefined)
-      throw new JsonRpcError(
-        JsonRpcErrorCode.InvalidParams,
-        `Invalid params: "${name}" is missing`
-      )
-    return value
   }
 }

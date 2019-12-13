@@ -2,7 +2,7 @@ import { getLogger } from '@stencila/logga'
 import net from 'net'
 import { VsockAddress } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
-import { InternalError } from '../base/InternalError'
+import { InternalError } from '../base/errors'
 
 const log = getLogger('executa:vsock:client')
 

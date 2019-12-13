@@ -2,7 +2,7 @@ import lolex from 'lolex'
 import { Queuer } from './Queuer'
 import { Config } from '../config'
 import { Worker } from './Worker'
-import { CapabilityError } from './CapabilityError'
+import { CapabilityError } from './errors'
 
 const clock = lolex.install()
 
@@ -23,14 +23,14 @@ test('call', async () => {
   const queuer = new Queuer({ ...new Config(), queueLength: 5 })
   const { queue } = queuer
 
-  const p0 = queuer.decode('')
-  const p1 = queuer.encode({})
+  const p0 = queuer.decode('', 'json')
+  const p1 = queuer.encode({}, 'json')
   const p2 = queuer.execute({})
   const p3 = queuer.begin({})
   const p4 = queuer.end({})
   expect(queue.length).toBe(5)
 
-  const p5 = queuer.decode('')
+  const p5 = queuer.decode('', 'json')
   await expect(p5).rejects.toThrow(
     new CapabilityError('Queue is at maximum length')
   )
@@ -93,7 +93,7 @@ test('clean', async () => {
   const queuer = new Queuer({ ...new Config(), queueStale: 1 })
   const { queue } = queuer
 
-  const p0 = queuer.decode('')
+  const p0 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
 
   clock.tick(1001)
@@ -102,7 +102,7 @@ test('clean', async () => {
   await expect(p0).rejects.toThrow(/Job has become stale/)
   expect(queue.length).toBe(0)
 
-  const p1 = queuer.decode('')
+  const p1 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
 
   queuer.clean()
@@ -119,14 +119,14 @@ test('start + stop', async () => {
 
   await queuer.start()
 
-  const p0 = queuer.decode('')
+  const p0 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
 
   clock.tick(1001)
 
   await expect(p0).rejects.toThrow(/Job has become stale/)
 
-  const p1 = queuer.decode('')
+  const p1 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
 
   await queuer.stop()

@@ -2,7 +2,7 @@ import { Client } from '../base/Client'
 import { JsonRpcError, JsonRpcErrorCode } from '../base/JsonRpcError'
 import { Method } from '../base/Executor'
 import { HttpClient } from '../http/HttpClient'
-import { CapabilityError } from '../base/CapabilityError'
+import { CapabilityError } from '../base/errors'
 
 /**
  * Test that the methods of a client (that is connected to a server)

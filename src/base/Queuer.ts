@@ -1,6 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import { Config } from '../config'
-import { CapabilityError } from './CapabilityError'
+import { CapabilityError } from './errors'
 import { Executor, Method, Params, Manifest } from './Executor'
 import { generate, Id } from './uid'
 
@@ -152,7 +152,7 @@ export class Queuer extends Executor {
     for (const { method, params, resolve, reject } of [...this.queue]) {
       let result
       try {
-        result = await executor.call(method, params)
+        result = await executor.dispatch(method, params)
       } catch (error) {
         if (!(error instanceof CapabilityError)) {
           log.error(error)

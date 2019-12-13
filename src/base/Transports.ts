@@ -1,4 +1,4 @@
-import { InternalError } from './InternalError'
+import { InternalError } from './errors'
 
 export enum Transport {
   direct = 'direct',

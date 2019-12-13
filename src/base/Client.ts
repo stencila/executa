@@ -1,6 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import { Executor, Method, Manifest } from './Executor'
-import { InternalError } from './InternalError'
+import { InternalError } from './errors'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
 import { JsonRpcError } from './JsonRpcError'
