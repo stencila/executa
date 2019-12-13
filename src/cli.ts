@@ -358,7 +358,7 @@ const convert = async (executor: Executor): Promise<void> => {
   const input = 'TODO:' // args[1]
   const output = 'TODO:' // args[2] !== undefined ? args[2] : '-'
 
-  const decoded = await executor.decode(input)
+  const decoded = await executor.decode(input, 'json')
   await executor.encode(decoded, output)
 }
 
@@ -369,7 +369,7 @@ const execute = async (executor: Executor): Promise<void> => {
   const input = 'TODO:' // args[1]
   const output = 'TODO:' // args[2] !== undefined ? args[2] : input
 
-  const decoded = await executor.decode(input)
+  const decoded = await executor.decode(input, 'json')
   const executed = await executor.execute(decoded)
   await executor.encode(executed, output)
 }

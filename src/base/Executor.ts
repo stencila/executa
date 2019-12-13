@@ -1,8 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
 import { JSONSchema7Definition } from 'json-schema'
-import { CapabilityError } from './CapabilityError'
-import { InternalError } from './InternalError'
+import {
+  InternalError,
+  MethodUnknownError,
+  ParamRequiredError,
+  CapabilityError
+} from './errors'
 import { Addresses, Transport } from './Transports'
 import { generate } from './uid'
 
@@ -15,11 +19,13 @@ export enum Method {
   manifest = 'manifest',
   decode = 'decode',
   encode = 'encode',
+  select = 'select',
   compile = 'compile',
   build = 'build',
   execute = 'execute',
   begin = 'begin',
-  end = 'end'
+  end = 'end',
+  pipe = 'pipe'
 }
 
 /**
@@ -169,7 +175,7 @@ export abstract class Executor {
    * @param format The format of the content
    * @returns The decoded node
    */
-  public async decode(content: string, format?: string): Promise<schema.Node> {
+  public async decode(content: string, format: string): Promise<schema.Node> {
     return this.call<schema.Node>(Method.decode, { content, format })
   }
 
@@ -180,8 +186,23 @@ export abstract class Executor {
    * @param format The format to encode
    * @returns The node encoded in the format
    */
-  public async encode(node: schema.Node, format?: string): Promise<string> {
+  public async encode(node: schema.Node, format: string): Promise<string> {
     return this.call<string>(Method.encode, { node, format })
+  }
+
+  /**
+   * Select a child from a `Node` using a JSON Pointer.
+   *
+   * Replaces `~1` with `/` and `~0` with `~` as per
+   * [RFC 6901](https://tools.ietf.org/html/rfc6901#section-4).
+   *
+   * @see {@link https://tools.ietf.org/html/rfc6901|JSON Pointer RFC}
+   */
+  public select(
+    node: schema.Node,
+    pointer: string | number | (string | number)[]
+  ): Promise<schema.Node> {
+    return this.call<schema.Node>(Method.select, { node, pointer })
   }
 
   /**
@@ -259,11 +280,94 @@ export abstract class Executor {
   }
 
   /**
-   * Call one of the above methods.
+   * Call a pipeline of methods passing the result of each call as the
+   * first argument of the next call.
    *
-   * Since this base executor, has no capabilities, this method
+   * This method is a "meta" method that is used to chain together calls to other methods.
+   * When using a remote executor, it is more efficient than chaining those calls together
+   * "by hand" because it only involves one round trip request to the executor.
+   *
+   * @param node The node to pipe through methods
+   * @param calls A list of method, parameters tuples to pipe the node through
+   * @returns The node after it has been piped through the methods
+   */
+  public async pipe(
+    node: schema.Node,
+    calls: (Method | [Method, Params])[]
+  ): Promise<schema.Node> {
+    return this.call<schema.Node>(Method.pipe, { node, calls })
+  }
+
+  /**
+   * Dispatch a call to one of the above methods.
+   *
+   * This method does run time dispatching. It is used
+   * by classes such as `Server` (to fulfil and JSON-RPC request),
+   * `Queuer` (to remove calls from a queue) and elsewhere for
+   * running the `pipe` method.
+   *
+   * It does runtime checking for the method name and
+   * required parameters.
+   */
+  public dispatch(method: Method, params: Params = {}): Promise<any> {
+    switch (method) {
+      case Method.manifest:
+        return this.manifest()
+      case Method.decode:
+        return this.decode(param(0, 'content'), param(1, 'format'))
+      case Method.select:
+        return this.select(param(0, 'node'), param(1, 'pointer'))
+      case Method.encode:
+        return this.encode(param(0, 'node'), param(1, 'format'))
+      case Method.compile:
+        return this.compile(param(0, 'node'))
+      case Method.build:
+        return this.build(param(0, 'node'))
+      case Method.execute:
+        return this.execute(
+          param(0, 'node'),
+          param(1, 'session', false),
+          param(2, 'claims', false)
+        )
+      case Method.begin:
+        return this.begin(param(0, 'node'), param(1, 'claims', false))
+      case Method.end:
+        return this.end(param(0, 'node'), param(1, 'claims', false))
+      case Method.pipe:
+        return this.pipe(param(0, 'node'), param(1, 'calls'))
+    }
+    throw new MethodUnknownError(method)
+
+    /**
+     * Get a parameter value.
+     *
+     * The number `index` is necessary to to be able to extract
+     * the first, forward piped, argument created when
+     * piping (e.g `{ 0: node, format: 'json'}` instead of
+     * `{ node: node, format: 'json'}`).
+     *
+     * @param index The index of the parameter
+     * @param name The name of the parameter
+     * @param required Is the parameter required?
+     */
+    function param(index: number, name: string, required = true): any {
+      let value = params[name]
+      if (value === undefined) value = params[index]
+      if (required && value === undefined) throw new ParamRequiredError(name)
+      return value
+    }
+  }
+
+  /**
+   * A fallback implementation of one of the above methods.
+   *
+   * Since this base executor has no capabilities, this method
    * simply throws a `CapabilityError`. Derived classes, may
    * override this method, and /or one of the methods above.
+   *
+   * Provided so that derived classes such as `Client`, `Delegator`
+   * and `Queuer` can override a single method to provide their
+   * functionality instead of having to implement each of the above methods.
    *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)

@@ -25,7 +25,7 @@ export class MethodUnknownError extends Error {
   method: string
 
   constructor(method: string) {
-    super(`message`)
+    super(`Method "${method}" is unknown`)
     this.name = 'MethodUnknownError'
     this.method = method
   }
@@ -38,7 +38,7 @@ export class ParamRequiredError extends Error {
   param: string
 
   constructor(param: string) {
-    super(`message`)
+    super(`Parameter "${param}" is required`)
     this.name = 'ParamRequiredError'
     this.param = param
   }
