@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/stencila/executa/compare/v1.3.1...v1.4.0) (2019-12-14)
+
+
+### Bug Fixes
+
+* **HttpServer:** Add RESTful endoints for new methods ([f4a34e4](https://github.com/stencila/executa/commit/f4a34e46622296e61fa785ce341dcc979c91ccdd))
+
+
+### Features
+
+* **Worker:** Add select, execute and pipe methods ([3cdfac7](https://github.com/stencila/executa/commit/3cdfac7461f86dc53c90391fc00669b201d6213c))
+
 ## [1.3.1](https://github.com/stencila/executa/compare/v1.3.0...v1.3.1) (2019-12-13)
 
 
