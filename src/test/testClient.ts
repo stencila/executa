@@ -5,26 +5,43 @@ import { HttpClient } from '../http/HttpClient'
 import { CapabilityError } from '../base/errors'
 
 /**
- * Test that the methods of a client (that is connected to a server)
- * work as expected. This function is designed to be used to test
- * all classes that extend `Client`.
+ * Test that a client works as expected.
+ *
+ * This function is designed to be used to test
+ * all classes that extend `Client` and that are
+ * connected to a `Server` serving a `Worker`.
+ * It tests that various methods work
+ * over the transport protocol that the client is using.
  *
  * @param client An instance of a `Client`
  */
 export const testClient = async (client: Client): Promise<void> => {
+  const expr = {
+    type: 'CodeExpression',
+    programmingLanguage: 'js',
+    text: '6 * 7'
+  }
+
   /**
-   * Check that calls to methods that the executor is
-   * capable of return the correct result
+   * Check that calls to methods (that the executor is
+   * capable of) return the correct result
    */
   expect(await client.decode('3.14', 'json')).toEqual(3.14)
-  expect(await client.decode('{"type":"Entity"}', 'json')).toEqual({
-    type: 'Entity'
-  })
-
   expect(await client.encode(3.14, 'json')).toEqual('3.14')
-  expect(await client.encode({ type: 'Entity' }, 'json')).toEqual(
-    '{"type":"Entity"}'
-  )
+  expect(await client.select({ a: 1 }, 'a')).toEqual(1)
+  expect(await client.execute(expr)).toEqual({ ...expr, output: 42 })
+
+  /**
+   * Check that piping works
+   */
+  expect(
+    await client.pipe(JSON.stringify(expr), [
+      [Method.decode, { format: 'json' }],
+      Method.execute,
+      [Method.select, { pointer: 'output' }],
+      [Method.encode, { format: 'json' }]
+    ])
+  ).toBe('42')
 
   /**
    * Check that calls to methods that the executor is not
@@ -36,7 +53,8 @@ export const testClient = async (client: Client): Promise<void> => {
    * Check that erroneous requests return a `JsonRpcError`.
    */
 
-  const methodNotFound =
+  // @ts-ignore unknown method
+  await expect(client.call('foo')).rejects.toEqual(
     client instanceof HttpClient && client.address.protocol === 'restful'
       ? new JsonRpcError(
           JsonRpcErrorCode.InvalidRequest,
@@ -46,8 +64,7 @@ export const testClient = async (client: Client): Promise<void> => {
           JsonRpcErrorCode.MethodNotFound,
           'Method not found: "foo"'
         )
-  // @ts-ignore unknown method
-  await expect(client.call('foo')).rejects.toEqual(methodNotFound)
+  )
 
   await expect(client.call(Method.execute)).rejects.toEqual(
     new JsonRpcError(
