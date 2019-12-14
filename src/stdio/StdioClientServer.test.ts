@@ -35,7 +35,7 @@ describe('StdioClient and StdioServer', () => {
 
     // Test the server crashing
     const messages = nextClientMessages()
-    client.decode('crash now!').catch(error => {
+    client.decode('crash now!', 'json').catch(error => {
       throw error
     })
     expect((await messages)[0]).toMatch(
@@ -57,7 +57,7 @@ describe('StdioClient and StdioServer', () => {
     const messages = nextClientMessages()
     // Do not await`decode` - it does not
     // resolve due to the bad message
-    client.decode('send bad message').catch(error => {
+    client.decode('send bad message', 'json').catch(error => {
       throw error
     })
     expect((await messages)[0]).toMatch(

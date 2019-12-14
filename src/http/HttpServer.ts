@@ -140,11 +140,13 @@ export class HttpServer extends TcpServer {
     app.post('/manifest', wrap('manifest'))
     app.post('/decode', wrap('decode'))
     app.post('/encode', wrap('encode'))
+    app.post('/select', wrap('select'))
     app.post('/compile', wrap('compile'))
     app.post('/build', wrap('build'))
     app.post('/execute', wrap('execute'))
     app.post('/begin', wrap('begin'))
     app.post('/end', wrap('end'))
+    app.post('/pipe', wrap('pipe'))
 
     return app
   }

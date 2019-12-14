@@ -6,7 +6,7 @@ import { Delegator, Peer } from './Delegator'
 import { Manifest, Method, Capabilities } from './Executor'
 import { DirectAddress } from './Transports'
 import { Worker } from './Worker'
-import { CapabilityError } from './CapabilityError'
+import { CapabilityError } from './errors'
 
 describe('Peer', () => {
   test('capable: no capabilities', async () => {

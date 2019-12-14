@@ -1,4 +1,8 @@
-import { CapabilityError } from './CapabilityError'
+import {
+  CapabilityError,
+  MethodUnknownError,
+  ParamRequiredError
+} from './errors'
 
 /**
  * A JSON-RPC 2.0 response error
@@ -78,6 +82,39 @@ export class JsonRpcError {
     this.code = code
     this.message = message
     this.data = data
+  }
+
+  /**
+   * Translate an `Error` into a `JsonRpcError`.
+   */
+  static fromError(error: Error): JsonRpcError {
+    if (error instanceof JsonRpcError) {
+      return error
+    }
+
+    if (error instanceof MethodUnknownError) {
+      return new JsonRpcError(
+        JsonRpcErrorCode.MethodNotFound,
+        `Method not found: "${error.method}"`
+      )
+    }
+
+    if (error instanceof ParamRequiredError) {
+      return new JsonRpcError(
+        JsonRpcErrorCode.InvalidParams,
+        `Invalid params: "${error.param}" is missing`
+      )
+    }
+
+    if (error instanceof CapabilityError) {
+      return new JsonRpcError(JsonRpcErrorCode.CapabilityError, error.message)
+    }
+
+    return new JsonRpcError(
+      JsonRpcErrorCode.ServerError,
+      `Internal error: ${error.message}`,
+      { trace: error.stack }
+    )
   }
 
   /**

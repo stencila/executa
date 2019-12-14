@@ -1,11 +1,12 @@
 import { getLogger } from '@stencila/logga'
 import Ajv from 'ajv'
-import { ClientType, clientTypeToTransport } from './Client'
+import { ClientType, clientTypeToTransport, Client } from './Client'
 import { Executor, Manifest, Method, Params } from './Executor'
-import { InternalError } from './InternalError'
-import { Transport } from './Transports'
-import { CapabilityError } from './CapabilityError'
+import { InternalError, CapabilityError } from './errors'
+
 import { generate } from './uid'
+import { DirectClient } from '../direct/DirectClient'
+import { DirectServer } from '../direct/DirectServer'
 
 const ajv = new Ajv()
 
@@ -168,7 +169,13 @@ export class Peer {
     if (executor !== undefined) {
       if (manifest === undefined)
         manifest = this.manifest = await executor.manifest()
-      this.interface = executor
+      if (this.interface instanceof Client) {
+        this.interface = executor
+      } else {
+        const server = new DirectServer()
+        await server.start(executor)
+        this.interface = new DirectClient({ server })
+      }
     } else {
       if (manifest === undefined) manifest = this.manifest = { version: 1 }
     }

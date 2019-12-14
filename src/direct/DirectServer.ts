@@ -1,7 +1,7 @@
 import { Server } from '../base/Server'
 import { Addresses, DirectAddress, Transport } from '../base/Transports'
 import { Client } from '../base/Client'
-import { InternalError } from '../base/InternalError'
+import { InternalError } from '../base/errors'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 
 export class DirectServer extends Server {

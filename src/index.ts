@@ -10,7 +10,7 @@ export { Manager } from './base/Manager'
 export { Queuer } from './base/Queuer'
 export { Worker } from './base/Worker'
 
-export { CapabilityError } from './base/CapabilityError'
+export { CapabilityError } from './base/errors'
 
 export { Server } from './base/Server'
 export { Client } from './base/Client'

@@ -1,11 +1,15 @@
 import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
-import { Executor, Claims } from './Executor'
-import { InternalError } from './InternalError'
+import { Executor, Claims, Method } from './Executor'
+import {
+  InternalError,
+  MethodUnknownError,
+  ParamRequiredError,
+  CapabilityError
+} from './errors'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
-import { CapabilityError } from './CapabilityError'
 import { Addresses } from './Transports'
 
 const log = getLogger('executa:server')
@@ -72,85 +76,36 @@ export abstract class Server {
     let error: JsonRpcError | undefined
 
     try {
+      // Create a JSON-RPC request
       request = JsonRpcRequest.create(request)
       id = request.id
-      const { method } = request
+      let { method, params } = request
 
-      // Notification: pass on to executor and do not return anything
+      // Any `claims` parameter is ignored and instead
+      // the claims from the server (e.g. based on a JWT) is applied
+      params = { ...params, claims }
+
+      // This is a notification: pass on to executor and do not return anything
       if (id === undefined) {
-        this.executor.notified(
-          method,
-          request.param(0, 'message'),
-          request.param(1, 'node', false)
-        )
+        this.executor.notified(method, params.message, params.node)
         return
       }
 
-      // Method call request: return result or any error
-      switch (method) {
-        case 'manifest':
-          result = await this.executor.manifest()
-          break
-        case 'decode':
-          result = await this.executor.decode(
-            request.param(0, 'content'),
-            request.param(1, 'format', false)
-          )
-          break
-        case 'encode':
-          result = await this.executor.encode(
-            request.param(0, 'node'),
-            request.param(1, 'format', false)
-          )
-          break
-        case 'execute':
-          result = await this.executor.execute(
-            request.param(0, 'node'),
-            request.param(1, 'session', false),
-            // Any `claims` parameter is ignored and instead
-            // the claims from the server (e.g. based on a JWT) is applied
-            claims
-          )
-          break
-        case 'begin':
-        case 'end':
-          result = await this.executor[method](
-            request.param(0, 'node'),
-            // Any `claims` parameter is ignored and instead
-            // the claims from the server (e.g. based on a JWT) is applied
-            claims
-          )
-          break
-        case 'compile':
-        case 'build':
-          result = await this.executor[method](request.param(0, 'node'))
-          break
-        default:
-          throw new JsonRpcError(
-            JsonRpcErrorCode.MethodNotFound,
-            `Method not found: "${request.method}"`
-          )
-      }
+      // This is a method call: return result or any error
+      result = await this.executor.dispatch(method as Method, params)
     } catch (exc) {
-      if (exc instanceof JsonRpcError) {
-        // A JSON-RPC client error (e.g. missing parameters), do
-        // not log it (to avoid noisy logs), just send to the client.
-        error = exc
-      } else if (exc instanceof CapabilityError) {
-        // Executor not capable of performing call so return special code
-        error = new JsonRpcError(JsonRpcErrorCode.CapabilityError, exc.message)
-      } else {
-        // Some sort of internal error, so log it and wrap
-        // it into a JSON RPC error to send to the client.
-        log.error(exc)
-        error = new JsonRpcError(
-          JsonRpcErrorCode.ServerError,
-          `Internal error: ${exc.message}`,
-          {
-            trace: exc.stack
-          }
+      if (
+        !(
+          exc instanceof JsonRpcError ||
+          exc instanceof MethodUnknownError ||
+          exc instanceof ParamRequiredError ||
+          exc instanceof CapabilityError
         )
+      ) {
+        // Some sort of internal error, so log it.
+        log.error(exc)
       }
+      error = JsonRpcError.fromError(exc)
     }
 
     const response = new JsonRpcResponse(id, result, error)
