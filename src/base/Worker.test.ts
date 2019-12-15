@@ -2,31 +2,173 @@ import { Method } from './Executor'
 import { Worker } from './Worker'
 import { schema } from '..'
 import { CapabilityError } from './errors'
+import { JSONSchema7 } from 'json-schema'
 
 const worker = new Worker()
 
-describe('select', () => {
-  test('select from primitives', async () => {
-    expect(await worker.select(false, '0')).toBeUndefined()
-    expect(await worker.select(1, 0)).toBeUndefined()
-    expect(await worker.select('a', [])).toBe('a')
-    expect(await worker.select('a', '/a/b/')).toBeUndefined()
+describe('query', () => {
+  test('json-pointer: primitives', async () => {
+    expect(await worker.query(false, '0', 'json-pointer')).toBeUndefined()
+    expect(await worker.query(1, '0', 'json-pointer')).toBeUndefined()
+    expect(await worker.query('a', '/a/b/', 'json-pointer')).toBeUndefined()
   })
 
-  test('select from array', async () => {
+  test('json-pointer: array', async () => {
     const array1 = ['a', 'b', 'c']
-    expect(await worker.select(array1, '0')).toBe('a')
-    expect(await worker.select(array1, '1')).toBe('b')
-    expect(await worker.select(array1, [2])).toBe('c')
-    expect(await worker.select(array1, [3])).toBeUndefined()
+    expect(await worker.query(array1, '0', 'json-pointer')).toBe('a')
+    expect(await worker.query(array1, '1', 'json-pointer')).toBe('b')
+    expect(await worker.query(array1, '3', 'json-pointer')).toBeUndefined()
   })
 
-  test('select from object', async () => {
+  test('json-pointer: object', async () => {
     const object1 = { a: 1, b: { a: 0 }, c: [1, 2, 3] }
-    expect(await worker.select(object1, 'a')).toBe(1)
-    expect(await worker.select(object1, 'b/a')).toBe(0)
-    expect(await worker.select(object1, 'c/1')).toBe(2)
-    expect(await worker.select(object1, 'c/1/2')).toBe(undefined)
+    expect(await worker.query(object1, 'a', 'json-pointer')).toBe(1)
+    expect(await worker.query(object1, 'b/a', 'json-pointer')).toBe(0)
+    expect(await worker.query(object1, 'c/1', 'json-pointer')).toBe(2)
+    expect(await worker.query(object1, 'c/1/2', 'json-pointer')).toBe(undefined)
+  })
+
+  test('jmes-path: array', async () => {
+    const array1 = ['a', 'b', 'c']
+    expect(await worker.query(array1, '[0]')).toBe('a')
+    expect(await worker.query(array1, '[1]')).toBe('b')
+  })
+
+  test('jmes-path: object', async () => {
+    const object1 = { a: 1, b: { a: 0 }, c: [1, 2, 3] }
+    expect(await worker.query(object1, 'a')).toBe(1)
+    expect(await worker.query(object1, 'b.a')).toBe(0)
+    expect(await worker.query(object1, 'c[1]')).toBe(2)
+    expect(await worker.query(object1, 'c[1][2]')).toBe(null)
+  })
+
+  test('jmes-path: query capabilities', async () => {
+    // Simulates getting a list of programming languages
+    // that can be `executed` and formats that can be
+    // encoded to.
+    // See https://github.com/stencila/executa/issues/45
+
+    const pyla: JSONSchema7 = {
+      required: ['node'],
+      properties: {
+        node: {
+          required: ['type', 'programmingLanguage'],
+          properties: {
+            type: {
+              const: 'CodeChunk'
+            },
+            programmingLanguage: {
+              // Langs specified as an enum of alternatives
+              enum: ['py', 'python']
+            }
+          }
+        }
+      }
+    }
+
+    // For brevity, the following omit props not
+    // needed for this test
+
+    const rasta: JSONSchema7 = {
+      properties: {
+        node: {
+          properties: {
+            programmingLanguage: {
+              // Single lang specified as a const
+              const: 'r'
+            }
+          }
+        }
+      }
+    }
+
+    const jesta: JSONSchema7 = {
+      properties: {
+        node: {
+          // Lazy programmer didn't specify langs
+        }
+      }
+    }
+
+    const encoda: JSONSchema7 = {
+      properties: {
+        format: {
+          enum: ['rmd', 'docx', 'pdf']
+        }
+      }
+    }
+
+    const workerEncode: JSONSchema7 = {
+      properties: {
+        format: {
+          enum: ['json']
+        }
+      }
+    }
+
+    const manifest = {
+      capabilities: {
+        execute: [pyla, rasta, jesta],
+        encode: [workerEncode, encoda]
+      }
+    }
+
+    expect(
+      await worker.query(
+        manifest,
+        'capabilities.execute[*].properties.node.properties.programmingLanguage.[const, enum][]'
+      )
+    ).toEqual([['py', 'python'], 'r'])
+
+    // Can slice off the first item from enums...
+    expect(
+      await worker.query(
+        manifest,
+        'capabilities.execute[*].properties.node.properties.programmingLanguage.[const, enum[0]][]'
+      )
+    ).toEqual(['py', 'r'])
+
+    // Get a sorted list of all the supported formats for encoding
+    expect(
+      await worker.query(
+        manifest,
+        'capabilities.encode[*].properties.format.[const, enum][][] | sort(@)'
+      )
+    ).toEqual(['docx', 'json', 'pdf', 'rmd'])
+  })
+
+  test('jmes-path: query a document metadata', async () => {
+    /**
+     * Simulates querying of a document. This could be made
+     * available via the command line e.g.
+     *
+     * `executa query authors[*].affiliations[*].name article.docx`
+     */
+    const article = schema.article(
+      [
+        schema.person({
+          givenNames: ['Jane'],
+          affiliations: [
+            schema.organization({
+              name: 'Acme Corp'
+            })
+          ]
+        }),
+        schema.person({
+          givenNames: ['John'],
+          affiliations: [
+            schema.organization({
+              name: 'Example University'
+            })
+          ]
+        })
+      ],
+      'On treating documents as a database'
+    )
+
+    expect(
+      await worker.query(article, 'authors[*].affiliations[*].name[]')
+    ).toEqual(['Acme Corp', 'Example University'])
   })
 })
 
@@ -122,7 +264,7 @@ describe('pipe', () => {
         node,
         [
           Method.execute,
-          [Method.select, {pointer: 'output'}],
+          [Method.query, {query: 'output'}],
           [Method.encode, {format: 'json'}]
         ]
       )

@@ -1,5 +1,9 @@
-import { Executor, Method, Capabilities, Params, Claims } from './Executor'
+import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
+import jmespath from 'jmespath'
+import { Capabilities, Claims, Executor, Method, Params } from './Executor'
+
+const log = getLogger('executa:worker')
 
 /**
  * An `Executor` class that has some basic capabilities able to be
@@ -36,23 +40,17 @@ export class Worker extends Executor {
           format: { const: 'json' }
         }
       },
-      // Can select from any node with a pointer
-      // of string, number or array of those
-      select: {
-        required: ['node', 'pointer'],
+      // Can query any node using JMESPath or JSONPointer
+      query: {
+        required: ['node', 'query'],
         properties: {
           node: true,
-          pointer: {
-            anyOf: [
-              { type: 'string' },
-              { type: 'number' },
-              {
-                type: 'array',
-                items: {
-                  anyOf: [{ type: 'string' }, { type: 'number' }]
-                }
-              }
-            ]
+          query: {
+            type: 'string'
+          },
+          type: {
+            enum: ['jmes-path', 'json-pointer'],
+            default: 'jmes-path'
           }
         }
       },
@@ -102,28 +100,31 @@ export class Worker extends Executor {
   }
 
   /**
-   * @override Override of {@link Executor.select} to provide
-   * implementation of JSON Pointer selection.
+   * @override Override of {@link Executor.query} to provide
+   * implementations for JSON Pointer and JMESPath.
    */
-  public select(
+  public query(
     node: schema.Node,
-    pointer: string | number | (string | number)[]
+    query: string,
+    lang: 'jmes-path' | 'json-pointer' = 'jmes-path'
   ): Promise<schema.Node> {
-    if (typeof pointer === 'string') {
-      pointer = pointer
+    if (lang === 'json-pointer') {
+      const path = query
         .split('/')
+        // Handle escaped character sequences
+        // As per https://tools.ietf.org/html/rfc6901#section-4
         .map(item => item.replace('~1', '/').replace('~0', '~'))
-    } else if (typeof pointer === 'number') {
-      pointer = [pointer]
+      let child = node
+      for (const item of path) {
+        // @ts-ignore
+        child = child[item]
+        if (child === undefined) break
+      }
+      return Promise.resolve(child)
+    } else if (lang === 'jmes-path') {
+      return Promise.resolve(jmespath.search(node, query))
     }
-
-    let child = node
-    for (const item of pointer) {
-      // @ts-ignore
-      child = child[item]
-      if (child === undefined) break
-    }
-    return Promise.resolve(child)
+    return super.query(node, query, lang)
   }
 
   /**

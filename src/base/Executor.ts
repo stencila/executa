@@ -19,7 +19,7 @@ export enum Method {
   manifest = 'manifest',
   decode = 'decode',
   encode = 'encode',
-  select = 'select',
+  query = 'query',
   compile = 'compile',
   build = 'build',
   execute = 'execute',
@@ -191,18 +191,19 @@ export abstract class Executor {
   }
 
   /**
-   * Select a child from a `Node` using a JSON Pointer.
+   * Query a `Node`.
    *
-   * Replaces `~1` with `/` and `~0` with `~` as per
-   * [RFC 6901](https://tools.ietf.org/html/rfc6901#section-4).
+   * Currently allows for two query languages:
    *
-   * @see {@link https://tools.ietf.org/html/rfc6901|JSON Pointer RFC}
+   * - [JMESPath](http://jmespath.org/) (default)
+   * - [JSONPointer](https://tools.ietf.org/html/rfc6901)
    */
-  public select(
+  public query(
     node: schema.Node,
-    pointer: string | number | (string | number)[]
+    query: string,
+    lang: 'jmes-path' | 'json-pointer' = 'jmes-path'
   ): Promise<schema.Node> {
-    return this.call<schema.Node>(Method.select, { node, pointer })
+    return this.call<schema.Node>(Method.query, { node, query, lang })
   }
 
   /**
@@ -315,10 +316,10 @@ export abstract class Executor {
         return this.manifest()
       case Method.decode:
         return this.decode(param(0, 'content'), param(1, 'format'))
-      case Method.select:
-        return this.select(param(0, 'node'), param(1, 'pointer'))
       case Method.encode:
         return this.encode(param(0, 'node'), param(1, 'format'))
+      case Method.query:
+        return this.query(param(0, 'node'), param(1, 'query'), param(1, 'lang', false))
       case Method.compile:
         return this.compile(param(0, 'node'))
       case Method.build:

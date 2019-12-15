@@ -53,6 +53,7 @@
   "typescript.updateImportsOnFileMove.enabled": "prompt",
   "workbench.editor.highlightModifiedTabs": true,
   "cSpell.words": [
+    "JMES",
     "configa",
     "deparse",
     "executa",
