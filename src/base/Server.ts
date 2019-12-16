@@ -24,6 +24,10 @@ export abstract class Server {
    */
   protected executor?: Executor
 
+  public constructor(executor?: Executor) {
+    this.executor = executor
+  }
+
   /**
    * Get the addresses of this server.
    *

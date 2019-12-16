@@ -17,9 +17,9 @@ export class DirectClient extends Client {
    *
    * @param address The address of the server to connect to
    */
-  public constructor(address: DirectAddressInitializer) {
+  public constructor(address: DirectAddressInitializer | DirectServer) {
     super('di')
-    this.server = address.server
+    this.server = address instanceof DirectServer ? address : address.server
     this.server.client = this
   }
 
