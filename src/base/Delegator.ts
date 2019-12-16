@@ -74,13 +74,8 @@ export class Delegator extends Executor {
         }
       }
     }
-    return Promise.reject(
-      new CapabilityError(
-        `Unable to delegate method "${method}" with params "${JSON.stringify(
-          params
-        )}"`
-      )
-    )
+
+    throw new CapabilityError(method, params)
   }
 
   /* eslint-disable @typescript-eslint/no-use-before-define */
@@ -108,6 +103,14 @@ export class Delegator extends Executor {
 
   public remove(id: string): void {
     delete this.peers[id]
+  }
+
+  /**
+   * @override Override of {@link Executor.stop} which
+   * stops any child processes it may have started.
+   */
+  async stop(): Promise<void> {
+    await Promise.all(Object.values(this.peers).map(peer => peer.stop()))
   }
 }
 
@@ -169,17 +172,25 @@ export class Peer {
     if (executor !== undefined) {
       if (manifest === undefined)
         manifest = this.manifest = await executor.manifest()
-      if (this.interface instanceof Client) {
-        this.interface = executor
-      } else {
-        const server = new DirectServer()
-        await server.start(executor)
-        this.interface = new DirectClient({ server })
-      }
+      this.interface =
+        executor instanceof Client
+          ? executor
+          : new DirectClient(new DirectServer(executor))
     } else {
       if (manifest === undefined) manifest = this.manifest = { version: 1 }
     }
     return manifest
+  }
+
+  /**
+   * Stop the peer client.
+   *
+   * This is important for stopping child
+   * processes that may have spawned by `StdioClient`
+   * during delegation.
+   */
+  async stop(): Promise<void> {
+    if (this.interface !== undefined) await this.interface.stop()
   }
 
   /**
