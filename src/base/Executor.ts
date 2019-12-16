@@ -319,7 +319,11 @@ export abstract class Executor {
       case Method.encode:
         return this.encode(param(0, 'node'), param(1, 'format'))
       case Method.query:
-        return this.query(param(0, 'node'), param(1, 'query'), param(1, 'lang', false))
+        return this.query(
+          param(0, 'node'),
+          param(1, 'query'),
+          param(1, 'lang', false)
+        )
       case Method.compile:
         return this.compile(param(0, 'node'))
       case Method.build:
