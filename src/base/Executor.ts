@@ -171,23 +171,28 @@ export abstract class Executor {
   /**
    * Decode content to a `Node`.
    *
-   * @param content The content to decode
+   * @param source The source of the content to decode
    * @param format The format of the content
    * @returns The decoded node
    */
-  public async decode(content: string, format: string): Promise<schema.Node> {
-    return this.call<schema.Node>(Method.decode, { content, format })
+  public async decode(source: string, format?: string): Promise<schema.Node> {
+    return this.call<schema.Node>(Method.decode, { source, format })
   }
 
   /**
    * Encode a `Node` in a format.
    *
    * @param node The node to encode
+   * @param dest The destination for the encoded content
    * @param format The format to encode
-   * @returns The node encoded in the format
+   * @returns The encoded content, or the destination of the content.
    */
-  public async encode(node: schema.Node, format: string): Promise<string> {
-    return this.call<string>(Method.encode, { node, format })
+  public async encode(
+    node: schema.Node,
+    dest?: string,
+    format?: string
+  ): Promise<string> {
+    return this.call<string>(Method.encode, { node, dest, format })
   }
 
   /**
@@ -315,9 +320,13 @@ export abstract class Executor {
       case Method.manifest:
         return this.manifest()
       case Method.decode:
-        return this.decode(param(0, 'content'), param(1, 'format'))
+        return this.decode(param(0, 'source'), param(1, 'format', false))
       case Method.encode:
-        return this.encode(param(0, 'node'), param(1, 'format'))
+        return this.encode(
+          param(0, 'node'),
+          param(1, 'dest', false),
+          param(2, 'format', false)
+        )
       case Method.query:
         return this.query(
           param(0, 'node'),

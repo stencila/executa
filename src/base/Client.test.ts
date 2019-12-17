@@ -30,10 +30,10 @@ test('calling methods', async () => {
     params: {}
   })
 
-  expect(await client.decode('the content', 'the format')).toEqual({
+  expect(await client.decode('the source', 'the format')).toEqual({
     method: 'decode',
     params: {
-      content: 'the content',
+      source: 'the source',
       format: 'the format'
     }
   })

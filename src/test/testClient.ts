@@ -27,7 +27,7 @@ export const testClient = async (client: Client): Promise<void> => {
    * capable of) return the correct result
    */
   expect(await client.decode('3.14', 'json')).toEqual(3.14)
-  expect(await client.encode(3.14, 'json')).toEqual('3.14')
+  expect(await client.encode(3.14, undefined, 'json')).toEqual('3.14')
   expect(await client.query({ a: 1 }, 'a')).toEqual(1)
   expect(await client.execute(expr)).toEqual({ ...expr, output: 42 })
 

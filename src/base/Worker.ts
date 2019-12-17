@@ -24,17 +24,17 @@ export class Worker extends Executor {
     return Promise.resolve({
       // Can provide this manifest
       manifest: true,
-      // Can decode string content of JSON format
+      // Can decode source of JSON format
       decode: {
-        required: ['content'],
+        required: ['source', 'format'],
         properties: {
-          content: { type: 'string' },
+          source: { type: 'string' },
           format: { const: 'json' }
         }
       },
       // Can encode any node to JSON format
       encode: {
-        required: ['node'],
+        required: ['node', 'format'],
         properties: {
           node: true,
           format: { const: 'json' }
@@ -85,17 +85,22 @@ export class Worker extends Executor {
    * @override Override of {@link Executor.decode} that
    * provides decoding of JSON.
    */
-  public decode(content: string, format: string): Promise<schema.Node> {
-    if (format === 'json') return Promise.resolve(JSON.parse(content))
-    return super.decode(content, format)
+  public decode(source: string, format?: string): Promise<schema.Node> {
+    if (format === 'json') return Promise.resolve(JSON.parse(source))
+    return super.decode(source, format)
   }
 
   /**
    * @override Override of {@link Executor.encode} that
    * provides encoding to JSON.
    */
-  public encode(node: schema.Node, format = 'json'): Promise<string> {
-    if (format === 'json') return Promise.resolve(JSON.stringify(node))
+  public encode(
+    node: schema.Node,
+    dest?: string,
+    format?: string
+  ): Promise<string> {
+    if (format === 'json' && dest === undefined)
+      return Promise.resolve(JSON.stringify(node))
     return super.encode(node, format)
   }
 
@@ -122,7 +127,13 @@ export class Worker extends Executor {
       }
       return Promise.resolve(child)
     } else if (lang === 'jmes-path') {
-      return Promise.resolve(jmespath.search(node, query))
+      let result
+      try {
+        result = jmespath.search(node, query)
+      } catch (error) {
+        log.error(`Error with JMESPath: ${error.message}`)
+      }
+      return Promise.resolve(result)
     }
     return super.query(node, query, lang)
   }
