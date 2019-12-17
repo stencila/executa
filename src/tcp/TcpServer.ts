@@ -123,18 +123,18 @@ export class TcpServer extends Server {
   }
 
   protected onConnected(connection: Connection): void {
-    log.info(`Client connected: ${connection.id}`)
+    log.debug(`Client connected: ${connection.id}`)
     this.connections[connection.id] = connection
   }
 
   protected onDisconnected(connection: Connection): void {
-    log.info(`Client disconnected: ${connection.id}`)
+    log.debug(`Client disconnected: ${connection.id}`)
     delete this.connections[connection.id]
   }
 
   public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
-      log.info(`Starting server`)
+      log.debug(`Starting server`)
 
       const server = (this.server = net.createServer())
 
@@ -180,7 +180,7 @@ export class TcpServer extends Server {
     this.connections = {}
 
     if (this.server !== undefined) {
-      log.info(`Stopping server`)
+      log.debug(`Stopping server`)
 
       return new Promise(resolve => {
         if (this.server !== undefined)
@@ -189,7 +189,7 @@ export class TcpServer extends Server {
               this.server.unref()
               this.server = undefined
             }
-            log.info(`Stopped server`)
+            log.debug(`Stopped server`)
             resolve()
           })
       })

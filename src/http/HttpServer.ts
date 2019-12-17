@@ -226,7 +226,7 @@ export class HttpServer extends TcpServer {
   public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
-    log.info(`Starting server`)
+    log.debug(`Starting server`)
     const app = (this.app = this.buildApp())
 
     // Wait for plugins to be ready

@@ -73,7 +73,7 @@ export abstract class Listener extends Executor {
       return
     }
 
-    log.info(`Starting servers`)
+    log.debug(`Starting servers`)
     await Promise.all(this.servers.map(server => server.start(this)))
   }
 
@@ -81,7 +81,7 @@ export abstract class Listener extends Executor {
    * Stop listening by stopping all servers.
    */
   public async stop(): Promise<void> {
-    log.info('Stopping servers')
+    log.debug('Stopping servers')
     await Promise.all(this.servers.map(server => server.stop()))
   }
 
