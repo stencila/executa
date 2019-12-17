@@ -74,30 +74,38 @@ export class StdioClient extends StreamClient {
     // Attempt to parse the stderr stream as newline-delimited JSON,
     // having the same keys as emitted by Logga (the child may
     // actually be using Logga)
-    stderr.pipe(split(data => {
-      try {
-        return JSON.parse(data)
-      } catch {
-        return data
-      }
-    })).on('data', (object: unknown) => {
-      if (typeof object === 'object') {
-        const { level = LogLevel.debug, tag = 'executa:stdio:client:child', message } = object as any
-        if (message !== undefined) {
-          const logger = getLogger(tag)
-          if (level === LogLevel.debug) logger.debug(message)
-          else if (level === LogLevel.info) logger.info(message)
-          else if (level === LogLevel.warn) logger.warn(message)
-          else if (level === LogLevel.error) logger.error(message)
-          return
+    stderr
+      .pipe(
+        split(data => {
+          try {
+            return JSON.parse(data)
+          } catch {
+            return data
+          }
+        })
+      )
+      .on('data', (object: unknown) => {
+        if (typeof object === 'object') {
+          const {
+            level = LogLevel.debug,
+            tag = 'executa:stdio:client:child',
+            message
+          } = object as any
+          if (message !== undefined) {
+            const logger = getLogger(tag)
+            if (level === LogLevel.debug) logger.debug(message)
+            else if (level === LogLevel.info) logger.info(message)
+            else if (level === LogLevel.warn) logger.warn(message)
+            else if (level === LogLevel.error) logger.error(message)
+            return
+          }
         }
-      }
-      // Unable to parse as JSON log data, so emit
-      // as a debug event on own `Logger`
-      if (object !== undefined && object !== null) {
-        log.debug(`${object}`)
-      }
-    })
+        // Unable to parse as JSON log data, so emit
+        // as a debug event on own `Logger`
+        if (object !== undefined && object !== null) {
+          log.debug(`${object}`)
+        }
+      })
 
     return super.start(stdin, stdout)
   }
