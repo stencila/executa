@@ -1,10 +1,10 @@
-import { getLogger } from '@stencila/logga'
+import { getLogger, LogLevel } from '@stencila/logga'
 import { ChildProcess, spawn } from 'child_process'
 import fs from 'fs'
 import glob_ from 'glob'
+import split from 'split2'
 import path from 'path'
 import util from 'util'
-import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
 import { Manifest } from '../base/Executor'
@@ -13,6 +13,7 @@ import { home } from './util'
 const glob = util.promisify(glob_)
 
 const log = getLogger('executa:stdio:client')
+
 export class StdioClient extends StreamClient {
   /**
    * The address of the server to connect to.
@@ -70,11 +71,32 @@ export class StdioClient extends StreamClient {
 
     const { stdin, stdout, stderr } = child
 
-    // Pass and output on stderr to own logs
-    // In the future we could try parsing the stderr data as
-    // newline-delimited JSON (as emitted by `logga`) using `ndjson`.
-    stderr.on('data', (data: Buffer) => {
-      log.info(data.toString('utf8'))
+    // Attempt to parse the stderr stream as newline-delimited JSON,
+    // having the same keys as emitted by Logga (the child may
+    // actually be using Logga)
+    stderr.pipe(split(data => {
+      try {
+        return JSON.parse(data)
+      } catch {
+        return data
+      }
+    })).on('data', (object: unknown) => {
+      if (typeof object === 'object') {
+        const { level = LogLevel.debug, tag = 'executa:stdio:client:child', message } = object as any
+        if (message !== undefined) {
+          const logger = getLogger(tag)
+          if (level === LogLevel.debug) logger.debug(message)
+          else if (level === LogLevel.info) logger.info(message)
+          else if (level === LogLevel.warn) logger.warn(message)
+          else if (level === LogLevel.error) logger.error(message)
+          return
+        }
+      }
+      // Unable to parse as JSON log data, so emit
+      // as a debug event on own `Logger`
+      if (object !== undefined && object !== null) {
+        log.debug(`${object}`)
+      }
     })
 
     return super.start(stdin, stdout)
