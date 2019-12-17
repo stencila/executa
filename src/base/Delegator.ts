@@ -24,6 +24,11 @@ export class Delegator extends Executor {
   /**
    * Classes of `Client` that can be used
    * to connect to peer executors.
+   *
+   * This allows for dependency injection:
+   * rather than importing clients for all transports into this module when they may
+   * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
+   * The order of this list, defines the preference for the transport.
    */
   protected readonly clientTypes: ClientType[]
 
@@ -33,6 +38,9 @@ export class Delegator extends Executor {
    */
   protected readonly peers: { [key: string]: Peer } = {}
 
+  /**
+   * Construct a `Delegator`.
+   */
   constructor(executors: Executor[] = [], clientTypes: ClientType[] = []) {
     super('de')
     this.clientTypes = clientTypes
@@ -95,7 +103,7 @@ export class Delegator extends Executor {
       peer.update(manifest)
     } else {
       log.warn(`Peer with id not found, adding new peer: ${id}`)
-      this.peers[id] = new Peer(undefined, this.clientTypes, manifest)
+      this.peers[id] = new Peer(manifest, this.clientTypes)
     }
   }
 
@@ -119,16 +127,14 @@ export class Delegator extends Executor {
  * to delegate method calls to.
  */
 export class Peer {
-  executor?: Executor
+  /**
+   * The client used to communicate with the peer executor
+   */
+  client?: Client
 
   /**
-   * A list of classes, that extend `Client`, and are available
-   * to connect to peer executors.
-   *
-   * This property is used for dependency injection, rather than importing
-   * clients for all transports into this module when they may
-   * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
-   * The order of this list, defines the preference for the transport.
+   * Classes of `Client` that can be used
+   * to (re)connect to the peer executor.
    */
   public readonly clientTypes: ClientType[]
 
@@ -138,15 +144,6 @@ export class Peer {
   public manifest?: Manifest
 
   /**
-   * The interface to the peer executor.
-   *
-   * May be an in-process `Executor` or a `Client` to an out-of-process
-   * `Executor`, in which case it's type e.g. `StdioClient` vs `WebSocketClient`
-   * will depend upon the available transports in `manifest.addresses`.
-   */
-  private interface?: Executor
-
-  /**
    * Ajv validation functions for each method.
    *
    * Validation functions are just-in-time compiled
@@ -154,43 +151,44 @@ export class Peer {
    */
   private validators: { [key: string]: Ajv.ValidateFunction[] } = {}
 
+  /**
+   * Construct a `Peer`.
+   *
+   * @param executor A `Client`, `Executor`, or a executor `Manifest`.
+   * @param clientTypes A list of classes, that extend `Client`, and are available
+   * to reconnect to peer executors.
+   */
   public constructor(
-    executor?: Executor,
-    clientTypes: ClientType[] = [],
-    manifest?: Manifest
+    executor: Executor | Manifest,
+    clientTypes: ClientType[] = []
   ) {
-    this.executor = executor
+    if (executor instanceof Client) {
+      this.client = executor
+    } else if (executor instanceof Executor) {
+      this.client = new DirectClient(new DirectServer(executor))
+    } else {
+      this.manifest = executor
+    }
+
     this.clientTypes = clientTypes
-    this.manifest = manifest
+
+    // Reconnect to the executor, potentially changing
+    // to a more preferred client / transport / address.
+    this.connect(true).catch(error => log.error(error))
   }
 
   /**
    * Initialize the peer.
    */
-  async initialize(): Promise<Manifest> {
-    let { executor, manifest } = this
-    if (executor !== undefined) {
-      if (manifest === undefined)
-        manifest = this.manifest = await executor.manifest()
-      this.interface =
-        executor instanceof Client
-          ? executor
-          : new DirectClient(new DirectServer(executor))
-    } else {
-      if (manifest === undefined) manifest = this.manifest = { version: 1 }
+  async start(): Promise<Manifest> {
+    let { client, manifest } = this
+
+    if (manifest === undefined) {
+      if (client !== undefined)
+        manifest = this.manifest = await client.manifest()
+      else throw new InternalError('')
     }
     return manifest
-  }
-
-  /**
-   * Stop the peer client.
-   *
-   * This is important for stopping child
-   * processes that may have spawned by `StdioClient`
-   * during delegation.
-   */
-  async stop(): Promise<void> {
-    if (this.interface !== undefined) await this.interface.stop()
   }
 
   /**
@@ -204,6 +202,17 @@ export class Peer {
   update(manifest: Manifest) {
     this.manifest = manifest
     this.validators = {}
+  }
+
+  /**
+   * Stop the peer client.
+   *
+   * This is important for stopping child
+   * processes that may have spawned by `StdioClient`
+   * during delegation.
+   */
+  async stop(): Promise<void> {
+    if (this.client !== undefined) await this.client.stop()
   }
 
   /**
@@ -221,8 +230,7 @@ export class Peer {
     method: Method,
     params: { [key: string]: unknown }
   ): Promise<boolean> {
-    let { manifest } = this
-    if (manifest === undefined) manifest = await this.initialize()
+    const manifest = await this.start()
 
     let validators = this.validators[method]
     if (validators === undefined) {
@@ -249,19 +257,17 @@ export class Peer {
   }
 
   /**
-   * Connect to the `Executor`.
+   * Reconnect to the `Executor`.
    *
    * Finds the first client type that the peer
    * executor supports.
-   *
-   * @returns A client instance or `undefined` if not able to connect
    */
-  public async connect(): Promise<boolean> {
-    let { manifest } = this
-    if (manifest === undefined) manifest = await this.initialize()
-
+  public async connect(reconnect = false): Promise<boolean> {
     // Check if already connected
-    if (this.interface !== undefined) return true
+    if (this.client !== undefined && !reconnect) return true
+
+    // Need a manifest to connect
+    const manifest = await this.start()
 
     // Connect to remote executor in order of preference of
     // transports
@@ -284,7 +290,7 @@ export class Peer {
         } else {
           address = addresses
         }
-        this.interface = new ClientType(address)
+        this.client = new ClientType(address)
         return true
       }
     }
@@ -306,10 +312,7 @@ export class Peer {
     params: { [key: string]: any } = {}
   ): Promise<Type> {
     //  istanbul ignore next
-    if (this.interface === undefined)
-      throw new InternalError(
-        "WTF, no client! You shouldn't be calling this yet!"
-      )
-    return this.interface.call<Type>(method, params)
+    if (this.client === undefined) throw new InternalError('Not connected yet')
+    return this.client.call<Type>(method, params)
   }
 }

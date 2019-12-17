@@ -10,14 +10,14 @@ import { CapabilityError } from './errors'
 
 describe('Peer', () => {
   test('capable: no capabilities', async () => {
-    const peer = new Peer(undefined, [], { version: 1 })
+    const peer = new Peer({ version: 1 })
 
     expect(await peer.capable(Method.compile, { foo: 'bar' })).toBe(false)
     expect(await peer.capable(Method.execute, {})).toBe(false)
   })
 
   test('capable: boolean capabilities', async () => {
-    const peer = new Peer(undefined, [], {
+    const peer = new Peer({
       version: 1,
       capabilities: {
         decode: false,
@@ -32,7 +32,7 @@ describe('Peer', () => {
   })
 
   test('capable: schema object capabilities', async () => {
-    const peer = new Peer(undefined, [], {
+    const peer = new Peer({
       version: 1,
       capabilities: {
         decode: {
@@ -101,7 +101,7 @@ describe('Peer', () => {
   })
 
   test('capable: multiple capabilities', async () => {
-    const peer = new Peer(undefined, [], {
+    const peer = new Peer({
       version: 1,
       capabilities: {
         decode: [
@@ -140,17 +140,20 @@ describe('Peer', () => {
   })
 
   test('connect: no addresses', async () => {
-    const peer = new Peer(undefined, [DirectClient], {
-      version: 1,
-      capabilities: {},
-      addresses: {}
-    })
+    const peer = new Peer(
+      {
+        version: 1,
+        capabilities: {},
+        addresses: {}
+      },
+      [DirectClient]
+    )
 
     expect(await peer.connect()).toBe(false)
   })
 
   test('connect: no client types', async () => {
-    const peer = new Peer(undefined, [], {
+    const peer = new Peer({
       version: 1,
       capabilities: {},
       addresses: {}
@@ -160,16 +163,19 @@ describe('Peer', () => {
   })
 
   test('connect: no addresses match client types', async () => {
-    const peer = new Peer(undefined, [DirectClient, StdioClient], {
-      version: 1,
-      capabilities: {},
-      addresses: {
-        http: {
-          host: '127.0.0.1',
-          port: 8000
+    const peer = new Peer(
+      {
+        version: 1,
+        capabilities: {},
+        addresses: {
+          http: {
+            host: '127.0.0.1',
+            port: 8000
+          }
         }
-      }
-    })
+      },
+      [DirectClient, StdioClient]
+    )
 
     expect(await peer.connect()).toBe(false)
   })
@@ -183,16 +189,16 @@ describe('Peer', () => {
         stdio: 'echo'
       }
     }
-    const peer1 = new Peer(undefined, [DirectClient, StdioClient], manifest)
-    const peer2 = new Peer(undefined, [StdioClient, DirectClient], manifest)
+    const peer1 = new Peer(manifest, [DirectClient, StdioClient])
+    const peer2 = new Peer(manifest, [StdioClient, DirectClient])
 
     expect(await peer1.connect()).toBe(true)
-    // @ts-ignore that interface is private
-    expect(peer1.interface instanceof DirectClient).toBe(true)
+    // @ts-ignore that client is private
+    expect(peer1.client instanceof DirectClient).toBe(true)
 
     expect(await peer2.connect()).toBe(true)
-    // @ts-ignore that interface is private
-    expect(peer2.interface instanceof StdioClient).toBe(true)
+    // @ts-ignore that client is private
+    expect(peer2.client instanceof StdioClient).toBe(true)
   })
 })
 
