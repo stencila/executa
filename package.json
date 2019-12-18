@@ -10,10 +10,10 @@
     "dist"
   ],
   "scripts": {
-    "cli": "ts-node --files src/cli.ts",
-    "cli:dev": "ts-node-dev --files src/cli.ts --debug=1",
-    "cli:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli.ts --debug=1",
-    "repl:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli.ts repl --debug=1",
+    "cli": "ts-node --files src/cli",
+    "cli:dev": "ts-node-dev --files src/cli --debug=1",
+    "cli:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli --debug=1",
+    "repl:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli repl --debug=1",
     "console": "ts-node --files src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
@@ -44,6 +44,7 @@
     "@types/minimist": "1.2.0",
     "@types/mkdirp": "^0.5.2",
     "@types/nanoid": "2.1.0",
+    "@types/split2": "^2.1.6",
     "jest": "24.9.0",
     "lolex": "^5.1.1",
     "markdown-toc": "1.2.0",
@@ -61,12 +62,13 @@
     "typescript": "3.6.4"
   },
   "dependencies": {
-    "@stencila/configa": "^0.3.0",
+    "@stencila/configa": "^0.4.0",
     "@stencila/logga": "^2.1.0",
     "@stencila/schema": "^0.31.1",
     "@types/ws": "^6.0.3",
     "ajv": "^6.10.2",
     "chalk": "^3.0.0",
+    "cli-highlight": "^2.1.4",
     "cross-fetch": "^3.0.4",
     "external-ip": "^2.1.1",
     "fastify": "^2.10.0",
@@ -74,13 +76,15 @@
     "fastify-jwt": "^1.1.0",
     "fastify-websocket": "^0.6.0",
     "glob": "^7.1.4",
+    "historic-readline": "^1.0.8",
     "isomorphic-ws": "^4.0.1",
     "jmespath": "^0.15.0",
     "length-prefixed-stream": "^2.0.0",
     "mkdirp": "^0.5.1",
     "nanoid": "^2.1.6",
     "ora": "^4.0.3",
-    "p-retry": "^4.2.0"
+    "p-retry": "^4.2.0",
+    "split2": "^3.1.1"
   },
   "prettier": "@stencila/dev-config/prettier-config.json",
   "commitlint": {

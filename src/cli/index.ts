@@ -1,44 +1,45 @@
 #!/usr/bin/env node
 
-import { collectOptions, helpUsage } from '@stencila/configa/dist/run'
+import { collectConfig, helpUsage } from '@stencila/configa/dist/run'
 import {
   defaultHandler,
+  Logger,
   LogLevel,
-  replaceHandlers,
-  Logger
+  replaceHandlers
 } from '@stencila/logga'
 import * as schema from '@stencila/schema'
-import * as readline from 'readline'
-import { ClientType, addressesToClients, Client } from './base/Client'
-import { Delegator } from './base/Delegator'
-import { Executor } from './base/Executor'
-import { Manager } from './base/Manager'
-import { Queuer } from './base/Queuer'
-import { Server } from './base/Server'
-import { VsockAddress } from './base/Transports'
-import { Config } from './config'
-import configSchema from './config.schema.json'
-import { HttpServer } from './http/HttpServer'
-import { StdioServer } from './stdio/StdioServer'
-import { TcpServer } from './tcp/TcpServer'
-import { VsockServer } from './vsock/VsockServer'
-import { WebSocketServer } from './ws/WebSocketServer'
-import { HttpClient } from './http/HttpClient'
-import { StdioClient } from './stdio/StdioClient'
-import { WebSocketClient } from './ws/WebSocketClient'
-import { TcpClient } from './tcp/TcpClient'
 import chalk from 'chalk'
 import ora, { Ora } from 'ora'
-import { DirectClient } from './direct/DirectClient'
-import { DirectServer } from './direct/DirectServer'
-import { Listener } from './base/Listener'
+import * as readline from 'readline'
+import { addressesToClients, Client, ClientType } from '../base/Client'
+import { Delegator } from '../base/Delegator'
+import { Executor } from '../base/Executor'
+import { Listener } from '../base/Listener'
+import { Manager } from '../base/Manager'
+import { Queuer } from '../base/Queuer'
+import { Server } from '../base/Server'
+import { VsockAddress } from '../base/Transports'
+import { Worker } from '../base/Worker'
+import { Config } from '../config'
+import configSchema from '../config.schema.json'
+import { DirectClient } from '../direct/DirectClient'
+import { DirectServer } from '../direct/DirectServer'
+import { HttpClient } from '../http/HttpClient'
+import { HttpServer } from '../http/HttpServer'
+import { StdioClient } from '../stdio/StdioClient'
+import { StdioServer } from '../stdio/StdioServer'
+import { TcpClient } from '../tcp/TcpClient'
+import { TcpServer } from '../tcp/TcpServer'
+import { VsockServer } from '../vsock/VsockServer'
+import { WebSocketClient } from '../ws/WebSocketClient'
+import { WebSocketServer } from '../ws/WebSocketServer'
+import { query } from './query'
 
-const main = async (): Promise<void> => {
+const main = async (): Promise<void | schema.Node> => {
   // Collect configuration options
-  const { args = ['help'], config, valid, log } = collectOptions<Config>(
-    'executa',
-    configSchema
-  )
+  const { args = ['help'], options, config, valid, log } = collectConfig<
+    Config
+  >('executa', configSchema)
 
   // Run the command
   const command = args[0]
@@ -57,13 +58,53 @@ const main = async (): Promise<void> => {
         case 'serve':
           return start(executor)
         case 'convert':
-          return convert(executor)
+          await convert(
+            executor,
+            log,
+            args[1],
+            options.from,
+            args[2],
+            options.to
+          )
+          break
+        case 'compile':
+          await compile(
+            executor,
+            log,
+            args[1],
+            options.from,
+            args[2],
+            options.to
+          )
+          break
+        case 'query':
+          await query(
+            executor,
+            log,
+            args[1],
+            options.from,
+            args[2],
+            options.to,
+            args[3],
+            options.lang
+          )
+          break
         case 'execute':
-          return execute(executor)
+          await execute(
+            executor,
+            log,
+            args[1],
+            options.from,
+            args[2],
+            options.to
+          )
+          break
+        default:
+          log.error(`Unknown command: ${command}`)
       }
+      return executor.stop()
     }
   }
-  log.error(`Unknown command: ${command}`)
 }
 
 /**
@@ -115,13 +156,113 @@ const init = async (config: Config): Promise<Listener> => {
 
   // Configure the delegator with clients for each peer
   const { peers } = config
-  const clients: Client[] = await addressesToClients(peers, clientTypes)
+  const clients: Client[] = [
+    new DirectClient(new DirectServer(new Worker())),
+    ...(await addressesToClients(peers, clientTypes))
+  ]
   const delegator = new Delegator(clients, clientTypes)
 
   // Configure the queue
   const queuer = new Queuer(config)
 
   return new Manager(servers, delegator, queuer)
+}
+
+/**
+ * Start the executor
+ */
+const start = (executor: Executor): Promise<void> => executor.start()
+
+/**
+ * Stop the executor
+ */
+const stop = (executor: Executor): Promise<void> => executor.stop()
+
+/**
+ * Decode a document
+ */
+const decode = async (
+  executor: Executor,
+  log: Logger,
+  source: string,
+  format?: string
+): Promise<schema.Node> => {
+  return executor.decode(source, format)
+}
+
+/**
+ * Encode a document
+ */
+const encode = async (
+  executor: Executor,
+  log: Logger,
+  node: schema.Node,
+  dest?: string,
+  format?: string
+): Promise<string> => {
+  return executor.encode(node, dest, format)
+}
+
+/**
+ * Convert a document
+ */
+const convert = async (
+  executor: Executor,
+  log: Logger,
+  source: string,
+  from?: string,
+  dest?: string,
+  to = 'json5'
+): Promise<void> => {
+  const decoded = await decode(executor, log, source, from)
+  const encoded = await encode(executor, log, decoded, dest, to)
+  if (dest === undefined) {
+    console.log(encoded)
+  }
+}
+
+/**
+ * Compile a document
+ */
+const compile = async (
+  executor: Executor,
+  log: Logger,
+  source: string,
+  from?: string,
+  dest?: string,
+  to?: string
+): Promise<schema.Node> => {
+  const decoded = await decode(executor, log, source, from)
+  const compiled = await executor.compile(decoded)
+  if (dest !== undefined) await encode(executor, log, compiled, dest, to)
+  return compiled
+}
+
+/**
+ * Execute a document
+ */
+const execute = async (
+  executor: Executor,
+  log: Logger,
+  source: string,
+  from?: string,
+  dest?: string,
+  to?: string
+): Promise<void> => {
+  const decoded = await executor.decode(source, from)
+  const compiled = await executor.compile(decoded)
+  const executed = await executor.execute(compiled)
+  if (dest === undefined) {
+    dest = source
+    if (to === undefined) to = from
+  } else if (dest === '-') {
+    dest = undefined
+    if (to === undefined) to = 'md'
+  }
+  const encoded = await executor.encode(executed, dest, to)
+  if (dest === undefined) {
+    console.log(encoded)
+  }
 }
 
 /**
@@ -152,7 +293,7 @@ const repl = async (
   // Create a client and server instead of calling executor
   // directly so that we can receive notifications
   const server = new DirectServer()
-  const client = new DirectClient({ server })
+  const client = new DirectClient(server)
   await executor.start([server])
 
   // Function to create a prompt based on current language
@@ -344,34 +485,6 @@ const repl = async (
       console.warn(e)
     })
   })
-}
-
-/**
- * Start the executor
- */
-const start = (executor: Executor): Promise<void> => executor.start()
-
-/**
- * Convert a document
- */
-const convert = async (executor: Executor): Promise<void> => {
-  const input = 'TODO:' // args[1]
-  const output = 'TODO:' // args[2] !== undefined ? args[2] : '-'
-
-  const decoded = await executor.decode(input, 'json')
-  await executor.encode(decoded, output)
-}
-
-/**
- * Execute a document
- */
-const execute = async (executor: Executor): Promise<void> => {
-  const input = 'TODO:' // args[1]
-  const output = 'TODO:' // args[2] !== undefined ? args[2] : input
-
-  const decoded = await executor.decode(input, 'json')
-  const executed = await executor.execute(decoded)
-  await executor.encode(executed, output)
 }
 
 // Run the main function and log any exceptions

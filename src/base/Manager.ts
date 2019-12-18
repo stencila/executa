@@ -44,40 +44,49 @@ export class Manager extends Listener {
   }
 
   /**
-   * @override Override of {@link Executor.call} that
-   * places a call on the queue if it is unable to
-   * be delegated.
+   * @override Override of {@link Executor.compile} that compiles a
+   * node by walking it and delegating the compilation of child
+   * nodes to peers.
    */
-  public async call(
-    method: Method,
-    params: { [key: string]: any }
-  ): Promise<any> {
-    // TODO: Call endHere
-
-    try {
-      const result = await this.delegator.call(method, params)
-      return result
-    } catch (error) {
-      if (error instanceof CapabilityError) {
-        try {
-          switch (method) {
-            case Method.begin:
-              return this.beginHere(params.node)
-          }
-        } catch (error) {
-          if (error instanceof CapabilityError) {
-            return this.queuer.call(method, params, this)
-          }
-          throw error
-        }
+  public async compile<Type extends schema.Node>(node: Type): Promise<Type> {
+    return this.walk(node, async child => {
+      if (!['CodeChunk', 'CodeExpression'].includes(schema.nodeType(child)))
+        return child
+      try {
+        return await this.delegator.compile(child)
+      } catch (error) {
+        if (error instanceof CapabilityError) return Promise.resolve(child)
+        else throw error
       }
-      throw error
-    }
+    })
   }
 
   /**
-   * Implements {@link Executor.begin} to
-   * begin a `SoftwareSession` in the current
+   * @override Override of {@link Executor.execute} that executes a
+   * node by walking it and delegating the execution of child
+   * nodes to peers.
+   *
+   * Note that walk is async and that nodes do not wait for
+   * previous nodes before executing.
+   */
+  public async execute<Type extends schema.Node>(
+    node: Type,
+    session?: schema.SoftwareSession
+  ): Promise<Type> {
+    return this.walk(node, async child => {
+      if (!['CodeChunk', 'CodeExpression'].includes(schema.nodeType(child)))
+        return child
+      try {
+        return await this.delegator.execute(child)
+      } catch (error) {
+        if (error instanceof CapabilityError) return Promise.resolve(child)
+        else throw error
+      }
+    })
+  }
+
+  /**
+   * Implements {@link Executor.begin} to begin a `SoftwareSession` in the current
    * environment.
    *
    * This method should only be called if
@@ -109,12 +118,65 @@ export class Manager extends Listener {
     return Promise.resolve(session)
   }
 
+  protected async walk<NodeType extends schema.Node>(
+    root: NodeType,
+    transformer: (node: schema.Node) => Promise<schema.Node>
+  ): Promise<NodeType> {
+    return walk(root) as Promise<NodeType>
+    async function walk(node: schema.Node): Promise<schema.Node> {
+      const transformed = await transformer(node)
+
+      if (transformed !== node) return transformed
+
+      if (transformed === undefined || schema.isPrimitive(transformed))
+        return transformed
+
+      if (Array.isArray(transformed)) return Promise.all(transformed.map(walk))
+
+      return Object.entries(transformed).reduce(
+        async (prev, [key, child]) => ({
+          ...(await prev),
+          [key]: await walk(child)
+        }),
+        Promise.resolve({})
+      )
+    }
+  }
+
+  /**
+   * @override Override of {@link Executor.call} that
+   * delegates the call.
+   *
+   * @description This is a fallback for methods that
+   * are not implemented above.
+   */
+  public async call(
+    method: Method,
+    params: { [key: string]: any }
+  ): Promise<any> {
+    return this.delegator.call(method, params)
+  }
+
   /**
    * @override Override of {@link Listener.start} which
-   * also starts periodic checking of the queue
+   * also starts delegator and queuer and
+   * periodic checking of the queue.
    */
   async start(servers: Server[] = []): Promise<void> {
     await super.start(servers)
+    await this.delegator.start()
+    await this.queuer.start()
     await this.queuer.check(this.delegator)
+  }
+
+  /**
+   * @override Override of {@link Listener.stop} which
+   * stops delegator (including any child processes it may have started)
+   * and queuer.
+   */
+  async stop(): Promise<void> {
+    await super.stop()
+    await this.delegator.stop()
+    await this.queuer.stop()
   }
 }
