@@ -5,6 +5,7 @@ import { highlight } from 'cli-highlight'
 import * as readline from 'historic-readline'
 import { Executor } from '../base/Executor'
 import * as schema from '@stencila/schema'
+import { home } from '../util'
 
 /**
  * Query a document
@@ -35,9 +36,42 @@ export async function query(
 }
 
 const replHelp = chalk`
+{bold Queries}:
+
+{bold {red jmp >} JMES Path}
+
+  See http://jmespath.org/ for syntax and tutorial.
+
+  Examples:
+
+  {cyan content}
+  {grey Get the content of the document}
+
+  {cyan content[? type=='CodeChunk'].text}
+  {grey Get the text of all the CodeChunk nodes in the document}
+
+  {cyan \{type:'Article', content:content[?type=='CodeBlock']\}}
+  {grey Create a new article containing the CodeBlock nodes
+  in the current document}
+
+{bold {red jpo >} JSON Pointer}
+
+  See https://tools.ietf.org/html/rfc6901 for syntax.
+
+  Examples:
+
+  {cyan title}
+  {grey Get the title of the document}
+
+  {cyan content/0/type}
+  {grey Get the type of the first node in the document content}
+
+
 {bold Commands}:
 
 {red %help}            Get this help message
+
+{red %hist}            Get the history of queries and commands
 
 {red %lang} {blue [lang]}     Get or set the query language
                  e.g. {cyan %lang jmp}, {cyan %lang sql}.
@@ -49,6 +83,7 @@ const replHelp = chalk`
 {red %dest} {blue [file]}     Get or set the destination for query results
                  Use "-" to set the destination back to the console.
                  e.g. {cyan %dest my.docx}, {cyan %dest folder/report.md}.
+
 
 `
 
@@ -73,7 +108,9 @@ function repl(
   readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    path: 'query-repl-history.txt',
+    historySize: 500,
+    maxLength: 500,
+    path: home('history', 'executa-query-repl.txt'),
     next: (rl: any) => (repl = rl)
   })
   setPrompt()
@@ -125,6 +162,9 @@ function repl(
     switch (command) {
       case 'help':
         console.log(replHelp)
+        break
+      case 'hist':
+        console.log(chalk.magenta(repl.history.reverse().join('\n')))
         break
       case 'lang':
         if (value.length > 0) {

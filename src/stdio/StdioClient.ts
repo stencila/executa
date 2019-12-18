@@ -8,7 +8,7 @@ import util from 'util'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
 import { Manifest } from '../base/Executor'
-import { home } from './util'
+import { home } from '../util'
 
 const glob = util.promisify(glob_)
 
@@ -134,7 +134,7 @@ export class StdioClient extends StreamClient {
    * for manifest files and instantiates a client from there.
    */
   static async discover(): Promise<StdioClient[]> {
-    const dir = home()
+    const dir = home('executors')
 
     // Check the folder exists (it may not e.g. if no executors
     // have been registered)

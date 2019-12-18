@@ -1,12 +1,10 @@
 import fs from 'fs'
 import path from 'path'
-import { Worker } from '../base/Worker'
 import { nextLogData } from '../test/nextLogData'
 import { testClient } from '../test/testClient'
+import { home } from '../util'
 import { StdioClient } from './StdioClient'
 import { StdioServer } from './StdioServer'
-import { home } from './util'
-import { Listener } from '../base/Listener'
 
 // Some of these tests take time to run
 // due to spawning a ts-node process, so
@@ -103,19 +101,20 @@ describe('StdioClient and StdioServer', () => {
   }
 
   test('register', async () => {
-    const manifestFile = path.join(home(), 'stdio-test.json')
+    const manifestFile = path.join(home('executors'), 'stdio-test.json')
     const removeManifestFile = () => {
       if (fs.existsSync(manifestFile)) fs.unlinkSync(manifestFile)
     }
 
     removeManifestFile()
 
-    StdioServer.register('stdio-test', {
+    const filePath = StdioServer.register('stdio-test', {
       version: 1,
       addresses: {
         stdio: 'dummy address'
       }
     })
+    expect(filePath).toBe(manifestFile)
     expect(fs.existsSync(manifestFile)).toBe(true)
 
     removeManifestFile()

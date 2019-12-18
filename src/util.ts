@@ -2,16 +2,17 @@ import * as os from 'os'
 import * as path from 'path'
 
 /**
- * Get the home directory of executors.
+ * Get the Stencila home directory.
  *
- * Used for bother registration and discovery of
- * executors on the current machine.
+ * Used for registration and discovery of
+ * executors on the current machine, caches
+ * and history files etc
  */
-export function home(): string {
-  let stencilaHome: string
+export function home(...subpath: string[]): string {
+  let home: string
   switch (os.platform()) {
     case 'darwin':
-      stencilaHome = path.join(
+      home = path.join(
         process.env.HOME !== undefined ? process.env.HOME : '',
         'Library',
         'Application Support',
@@ -19,22 +20,22 @@ export function home(): string {
       )
       break
     case 'linux':
-      stencilaHome = path.join(
+      home = path.join(
         process.env.HOME !== undefined ? process.env.HOME : '',
         '.stencila'
       )
       break
     case 'win32':
-      stencilaHome = path.join(
+      home = path.join(
         process.env.APPDATA !== undefined ? process.env.APPDATA : '',
         'Stencila'
       )
       break
     default:
-      stencilaHome = path.join(
+      home = path.join(
         process.env.HOME !== undefined ? process.env.HOME : '',
         'stencila'
       )
   }
-  return path.join(stencilaHome, 'executors')
+  return path.join(home, ...subpath)
 }

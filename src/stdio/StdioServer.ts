@@ -10,7 +10,7 @@ import {
   Transport
 } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
-import { home } from './util'
+import { home } from '../util'
 
 const log = getLogger('executa:stdio:server')
 
@@ -46,9 +46,10 @@ export class StdioServer extends StreamServer {
    *
    * @param name The name of executor.
    * @param manifest The executor's manifest.
+   * @returns The path to the file created
    */
-  public static register(name: string, manifest: Manifest) {
-    const dir = home()
+  public static register(name: string, manifest: Manifest): string {
+    const dir = home('executors')
 
     log.info(`Registering executor "${name}" in folder "${dir}"`)
     mkdirp.sync(dir)
@@ -58,10 +59,9 @@ export class StdioServer extends StreamServer {
       log.warn('Manifest does not include a STDIO address')
     }
 
-    fs.writeFileSync(
-      path.join(dir, name + '.json'),
-      JSON.stringify(manifest, null, '  '),
-      'utf8'
-    )
+    const filePath = path.join(dir, name + '.json')
+    fs.writeFileSync(filePath, JSON.stringify(manifest, null, '  '), 'utf8')
+
+    return filePath
   }
 }
