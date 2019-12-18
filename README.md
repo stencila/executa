@@ -63,7 +63,6 @@ All configuration options can be set, in descending order of priority, by:
 
 ## Develop
 
-
 There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, for example from within VSCode (which will auto attach to the Node process), e.g.
 
 ```bash
