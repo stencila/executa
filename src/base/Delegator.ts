@@ -83,7 +83,7 @@ export class Delegator extends Executor {
       }
     }
 
-    throw new CapabilityError(method, params)
+    throw new CapabilityError('Unable to delegate', method, params)
   }
 
   /* eslint-disable @typescript-eslint/no-use-before-define */

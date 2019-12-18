@@ -28,7 +28,7 @@ export const testClient = async (client: Client): Promise<void> => {
    */
   expect(await client.decode('3.14', 'json')).toEqual(3.14)
   expect(await client.encode(3.14, undefined, 'json')).toEqual('3.14')
-  expect(await client.query({ a: 1 }, 'a')).toEqual(1)
+  expect(await client.query({ a: 1 }, 'a', 'jmes-path')).toEqual(1)
   expect(await client.execute(expr)).toEqual({ ...expr, output: 42 })
 
   /**

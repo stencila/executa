@@ -286,6 +286,6 @@ describe('pipe', () => {
           [Method.encode, {format: 'pdf'}],
         ]
       )
-    ).rejects.toThrow(new CapabilityError(Method.encode))
+    ).rejects.toThrow(CapabilityError)
   })
 })

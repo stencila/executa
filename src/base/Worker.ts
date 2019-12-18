@@ -111,9 +111,9 @@ export class Worker extends Executor {
   public query(
     node: schema.Node,
     query: string,
-    lang: 'jmes-path' | 'json-pointer' = 'jmes-path'
+    lang = 'jmes-path'
   ): Promise<schema.Node> {
-    if (lang === 'json-pointer') {
+    if (lang === 'jpo' || lang === 'json-pointer') {
       const path = query
         .split('/')
         // Handle escaped character sequences
@@ -126,7 +126,7 @@ export class Worker extends Executor {
         if (child === undefined) break
       }
       return Promise.resolve(child)
-    } else if (lang === 'jmes-path') {
+    } else if (lang === 'jmp' || lang === 'jmes-path') {
       let result
       try {
         result = jmespath.search(node, query)

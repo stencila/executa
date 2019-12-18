@@ -200,13 +200,13 @@ export abstract class Executor {
    *
    * Currently allows for two query languages:
    *
-   * - [JMESPath](http://jmespath.org/) (default)
-   * - [JSONPointer](https://tools.ietf.org/html/rfc6901)
+   * - `jmp`: [JMESPath](http://jmespath.org/) (default)
+   * - `jpo`: [JSONPointer](https://tools.ietf.org/html/rfc6901)
    */
   public query(
     node: schema.Node,
     query: string,
-    lang: 'jmes-path' | 'json-pointer' = 'jmes-path'
+    lang: string
   ): Promise<schema.Node> {
     return this.call<schema.Node>(Method.query, { node, query, lang })
   }
@@ -387,7 +387,7 @@ export abstract class Executor {
    * @param params Values of parameters (i.e. arguments)
    */
   public call<Type>(method: Method, params: Params): Promise<Type> {
-    throw new CapabilityError(method, params)
+    throw new CapabilityError('No capability implemented', method, params)
   }
 
   /**

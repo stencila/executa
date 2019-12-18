@@ -10,6 +10,7 @@
  * not for end users.
  */
 import { Method, Params } from './Executor'
+import * as schema from '@stencila/schema'
 
 export class InternalError extends Error {
   constructor(message: string) {
@@ -55,14 +56,32 @@ export class ParamRequiredError extends Error {
  * not for end users.
  */
 export class CapabilityError extends Error {
-  constructor(message: string | Method, params: Params = {}) {
+  constructor(message = 'Incapable', method?: Method, params: Params = {}) {
     super(
-      typeof message === 'string'
-        ? message
-        : `Incapable of method "${message}" with params "${JSON.stringify(
-            params
-          ).slice(0, 256)}"`
+      method !== undefined
+        ? CapabilityError.message(message, method, params)
+        : message
     )
     this.name = 'CapabilityError'
+  }
+
+  static message(message: string, method: Method, params: Params): string {
+    return (
+      `${message}: method "${method}" with params:\n` +
+      Object.entries(params)
+        .map(([name, value]) => {
+          let repr
+          if (schema.isEntity(value)) {
+            repr = `<${schema.nodeType(value)}>`
+          } else {
+            repr = JSON.stringify(value)
+            if (repr !== undefined && repr.length > 20) {
+              repr = repr.slice(0, 20) + '...'
+            }
+          }
+          return `  ${name}: ${repr}`
+        })
+        .join('\n')
+    )
   }
 }
