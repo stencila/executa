@@ -1,5 +1,6 @@
 import * as logga from '@stencila/logga'
 import * as schema from '@stencila/schema'
+import * as cli from './cli'
 import * as uid from './base/uid'
 
 export * from './base/Executor'
@@ -38,6 +39,7 @@ export { WebSocketAddress } from './base/Transports'
 export { WebSocketClient } from './ws/WebSocketClient'
 export { WebSocketServer, WebSocketConnection } from './ws/WebSocketServer'
 
+export { cli }
 export { uid }
 
 // The following re-exports are provided for dependant packages
