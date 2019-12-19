@@ -33,9 +33,7 @@ describe('StdioClient and StdioServer', () => {
 
     // Test the server crashing
     const messages = nextClientMessages()
-    client.decode('crash now!', 'json').catch(error => {
-      throw error
-    })
+    await client.decode('crash now!', 'json')
     expect((await messages)[0]).toMatch(
       /^Server exited prematurely with exit code 1 and signal null/
     )
@@ -55,14 +53,15 @@ describe('StdioClient and StdioServer', () => {
     const messages = nextClientMessages()
     // Do not await`decode` - it does not
     // resolve due to the bad message
-    client.decode('send bad message', 'json').catch(error => {
-      throw error
-    })
+    const promise = client.decode('send bad message', 'json')
     expect((await messages)[0]).toMatch(
       /^Error parsing message as JSON: ah hah/
     )
 
     await client.stop()
+
+    // Now the promise gets rejected
+    await expect(promise).rejects.toThrow(/Client is stopping/)
   })
 
   // These tests add ~5s to test run time (involve starting more ts-node processes)
