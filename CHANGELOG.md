@@ -1,3 +1,28 @@
+# [1.5.0](https://github.com/stencila/executa/compare/v1.4.0...v1.5.0) (2019-12-19)
+
+
+### Bug Fixes
+
+* Improve capability error messages; don't use query lang enum ([59e1b97](https://github.com/stencila/executa/commit/59e1b977aa4b0f700cf09ca18e3c8551f30fb2db))
+* Log more server events at debug level to reduce noise ([08b6c1d](https://github.com/stencila/executa/commit/08b6c1db366f2a76de16a5ae8fa55a6ae01f67cd))
+* **Client:** Reject ounstanding requests on stop ([b9a06ce](https://github.com/stencila/executa/commit/b9a06ce178d4597dedaea83c719c43223e2153e7))
+* **Delegator:** Add stop method to stop peer clients ([47112f2](https://github.com/stencila/executa/commit/47112f29862e2a5fa615774002add9d7c27a00c4))
+* **deps:** update dependency @stencila/schema to ^0.32.0 ([4d3af89](https://github.com/stencila/executa/commit/4d3af8915ec727842098a48cf1f895ecd78771ac))
+* **deps:** update dependency fastify-websocket to v1 ([fb2b109](https://github.com/stencila/executa/commit/fb2b10917eb7eb8e958efe93068dd7dfa82ebd19))
+* **Package:** Move hashbang to index ([007842b](https://github.com/stencila/executa/commit/007842b639ca65018ff812c068231b5e88a4cb56))
+* **REPL:** Do not pause; handle unknown highlight lang ([1f5ba4e](https://github.com/stencila/executa/commit/1f5ba4edba73edfaa9139a25b5c2434a033ff2cd))
+* **WebSocketServer:** Fixes for upgrade to fastify-websocket 1.0.0 ([2e8b7bd](https://github.com/stencila/executa/commit/2e8b7bdbb94939e532f8560c5fa5654dee5f0785))
+* **Worker:** Fix capabilities spec ([b8eee17](https://github.com/stencila/executa/commit/b8eee174f230d7c54db5d9c295f7fae270f0d216))
+
+
+### Features
+
+* **CLI:** Add query command ([c9abf53](https://github.com/stencila/executa/commit/c9abf5314d031b516c26528f670317d9a8ae789f))
+* **CLI:** Store history centrally; add more query help ([a4e95f0](https://github.com/stencila/executa/commit/a4e95f00f3cd4d2635a8103b11334ff49a5e22dc))
+* **Executor:** Add query method ([ed25e8f](https://github.com/stencila/executa/commit/ed25e8f453f21089f407493406238b5285da1559))
+* **Listener:** Add register method ([b479cc9](https://github.com/stencila/executa/commit/b479cc9e5acaf9f01caa1174484aaa3994d856e7))
+* **StdioClient:** Parse logs from child process ([b4720dc](https://github.com/stencila/executa/commit/b4720dcd4623b9da54a9bb984ad34aacba5a9f91))
+
 # [1.4.0](https://github.com/stencila/executa/compare/v1.3.1...v1.4.0) (2019-12-14)
 
 
