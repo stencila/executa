@@ -86,36 +86,29 @@ export class Manager extends Listener {
   }
 
   /**
-   * Implements {@link Executor.begin} to begin a `SoftwareSession` in the current
-   * environment.
+   * @override Overrides {@link Executor.begin} to begin a `SoftwareSession`
+   * in the current environment.
    *
-   * This method should only be called if
-   * unable to delegate to a peer.
+   * TODO: This method should only be called if
+   * unable to delegate to a peer for a specific type of session
    */
-  public beginHere(node: schema.Node): Promise<schema.SoftwareSession> {
+  public async begin<Type>(node: Type, claims?: Claims): Promise<Type> {
     if (schema.isA('SoftwareSession', node)) {
       // TODO: Assign id and dateStart etc to session
       return Promise.resolve(node)
     }
-    throw new CapabilityError(
-      `Unable to compile node of type "${schema.nodeType(node)}"`
-    )
+    throw new CapabilityError(undefined, Method.begin, { node, claims })
   }
 
   /**
-   * End a `SoftwareSession` that was begun by
-   * this manager.
+   * @override Overrides {@link Executor.end} to end a `SoftwareSession`
+   * that was started here.
    *
-   * This method should not be used for
-   * sessions that were begun elsewhere.
-   *
-   * @see {@link Executor.end}
+   * TODO: Check that the session was begun here, otherwise delegate.
    */
-  public endHere(
-    session: schema.SoftwareSession
-  ): Promise<schema.SoftwareSession> {
+  public async end<Type>(node: Type, claims?: Claims): Promise<Type> {
     // TODO
-    return Promise.resolve(session)
+    return Promise.resolve(node)
   }
 
   protected async walk<NodeType extends schema.Node>(
