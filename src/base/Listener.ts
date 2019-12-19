@@ -3,6 +3,7 @@ import * as schema from '@stencila/schema'
 import { Executor } from './Executor'
 import { Server } from './Server'
 import { Addresses } from './Transports'
+import { StdioServer } from '../stdio/StdioServer'
 
 const log = getLogger('executa:listener')
 
@@ -104,5 +105,16 @@ export abstract class Listener extends Executor {
     process.on('SIGTERM', stop)
 
     return this.start()
+  }
+
+  /**
+   * Register this listener so that it can
+   * be discovered by other executors.
+   *
+   * @returns The path to the registration file.
+   */
+  public async register(): Promise<string> {
+    const name = this.constructor.name.toLowerCase()
+    return StdioServer.register(name, await this.manifest())
   }
 }
