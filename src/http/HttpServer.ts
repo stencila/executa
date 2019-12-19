@@ -257,10 +257,12 @@ export class HttpServer extends TcpServer {
   }
 }
 
+/**
+ * Generate a JSON-RPC response with only an error.
+ *
+ * This is only used to send an error when the server has not yet,
+ * or does not want to, resolve the is of the request.
+ */
 function jsonRpcErrorResponse(code: JsonRpcErrorCode, message: string) {
-  return new JsonRpcResponse(
-    undefined,
-    undefined,
-    new JsonRpcError(code, message)
-  )
+  return new JsonRpcResponse('', undefined, new JsonRpcError(code, message))
 }

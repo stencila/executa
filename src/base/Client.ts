@@ -9,7 +9,7 @@ import { Transport, parseAddress, Address } from './Transports'
 const log = getLogger('executa:client')
 
 interface Request<Type> {
-  id: number
+  id: string
   date: Date
   resolve: (result: Type) => void
   reject: (error: Error) => void
@@ -31,8 +31,10 @@ interface Notification {
 export abstract class Client extends Executor {
   /**
    * A map of requests to which responses can be paired against
+   *
+   * The key is the unique id for each request.
    */
-  private requests: { [key: number]: Request<any> } = {}
+  private requests: { [key: string]: Request<any> } = {}
 
   /**
    * A cached manifest from the remote executor.
@@ -179,7 +181,7 @@ export abstract class Client extends Executor {
 
     // Must be a response....
 
-    if (id < 0) {
+    if (id.length === 0) {
       // A response with accidentally missing id
       log.error(`Response is missing id: ${JSON.stringify(message)}`)
       return
