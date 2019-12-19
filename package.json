@@ -5,7 +5,7 @@
   "main": "./dist/lib/index.js",
   "types": "./dist/lib/index.d.ts",
   "browser": "./dist/browser/index.js",
-  "bin": "./dist/lib/cli.js",
+  "bin": "./dist/lib/cli/index.js",
   "files": [
     "dist"
   ],
