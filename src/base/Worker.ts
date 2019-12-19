@@ -40,17 +40,14 @@ export class Worker extends Executor {
           format: { const: 'json' }
         }
       },
-      // Can query any node using JMESPath or JSONPointer
+      // Can query any node using JMES Path or JSON Pointer
       query: {
-        required: ['node', 'query'],
+        required: ['node', 'query', 'lang'],
         properties: {
           node: true,
-          query: {
-            type: 'string'
-          },
-          type: {
-            enum: ['jmes-path', 'json-pointer'],
-            default: 'jmes-path'
+          query: { type: 'string' },
+          lang: {
+            enum: ['jmp', 'jmes-path', 'jpo', 'json-pointer']
           }
         }
       },
