@@ -109,7 +109,9 @@ export async function repl(
   await server.start(executor)
   class ReplClient extends DirectClient {
     notified(subject: string, message: string) {
-      const display = `🔔 ${chalk.magenta('NOTIF')} ${chalk.cyan(subject)} ${message}`
+      const display = `🔔 ${chalk.magenta('NOTIF')} ${chalk.cyan(
+        subject
+      )} ${message}`
       onMessage(display)
     }
   }

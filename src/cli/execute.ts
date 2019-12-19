@@ -55,7 +55,7 @@ export async function execute(
         return errors
           .map(error => {
             const { kind, message } = error
-            return chalk`🚫 {red ERROR} ${kind} ${message}`
+            return chalk`🚫 {red ERROR} {cyan ${kind}} ${message}`
           })
           .join('\n')
       }
