@@ -1,7 +1,7 @@
 import { Logger, LogLevel, replaceHandlers } from '@stencila/logga'
 import * as schema from '@stencila/schema'
 import chalk from 'chalk'
-import { highlight } from 'cli-highlight'
+import { highlight, listLanguages } from 'cli-highlight'
 // @ts-ignore
 import * as readline from 'historic-readline'
 import ora, { Ora } from 'ora'
@@ -10,6 +10,8 @@ import { Executor } from '../base/Executor'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { home } from '../util'
+
+const highlightLanguages = listLanguages()
 
 /**
  * A read-evaluate-print-loop interface
@@ -96,8 +98,8 @@ export async function repl(
     const colour = [chalk.red, chalk.yellow, chalk.blue, chalk.grey][level]
     const label = LogLevel[level].toUpperCase()
     const display =
-      `${emoji} ${colour(label.padEnd(5))} ${tag} ${message}` +
-      (debug && stack !== undefined ? stack : '')
+      `${emoji} ${colour(label.padEnd(5))} ${chalk.cyan(tag)} ${message}` +
+      (debug && stack !== undefined ? '\n' + stack : '')
     onMessage(display)
   })
 
@@ -107,7 +109,7 @@ export async function repl(
   await server.start(executor)
   class ReplClient extends DirectClient {
     notified(subject: string, message: string) {
-      const display = chalk`🔔 {magenta NOTIF} ${subject} ${message}`
+      const display = `🔔 ${chalk.magenta('NOTIF')} ${chalk.cyan(subject)} ${message}`
       onMessage(display)
     }
   }
@@ -149,9 +151,10 @@ export async function repl(
   async function onLine(line: string): Promise<void> {
     // Pause the input stream
     // Any input will be cached in the buffer until resumed
-    // with new prompt below. Unfortunately, this also ignores
-    // SIGINT, so wwe will probably need a way to handle that.
-    rl.pause()
+    // with new prompt below.
+    // Unfortunately, this also ignores SIGINT, so we don't
+    // do this until we find a better way to handle that.
+    // rl.pause()
 
     // Show any messages and turn off muting
     clearMessages()
@@ -297,12 +300,17 @@ export async function repl(
 function displayOutput(encoded: string, format: string): string {
   // Get the Highlight.js language for the format,
   // falling back to the format name itself.
+  // If you get a message like:
+  //   Could not find the language 'txt', did you forget to load/include a language module?
+  // add an entry here!
   const languages: { [key: string]: string } = {
     jsonld: 'json',
-    json5: 'js'
+    json5: 'javascript',
+    txt: 'plain'
   }
   let language = languages[format]
   if (language === undefined) language = format
+  if (!highlightLanguages.includes(language)) language = 'plaintext'
   // Handle exception if Highlight.js can not highlight
   // the code of does not recognize the format.
   try {
