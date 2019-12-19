@@ -14,7 +14,7 @@ import {
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen, parseProtocol } from './util'
 import { Claims } from '../base/Executor'
-import { FastifyRequest, FastifyInstance } from 'fastify'
+import { FastifyInstance } from 'fastify'
 import { expandAddress } from '../tcp/util'
 
 const log = getLogger('executa:ws:server')
@@ -118,7 +118,7 @@ export class WebSocketServer extends HttpServer {
   protected buildApp(): FastifyInstance {
     const app = super.buildApp()
     app.register(fastifyWebsocket, {
-      handle: (connection: any, request: FastifyRequest) => {
+      handle: (connection: fastifyWebsocket.SocketStream) => {
         const { socket } = connection
 
         // Extract id and jwt from the protocol ('sec-websocket-protocol' header)
@@ -150,17 +150,19 @@ export class WebSocketServer extends HttpServer {
         socket.on('close', () => this.onDisconnected(wsconnection))
 
         // Handle messages from connection
-        socket.on('message', async (message: string) => {
+        const onMessage = async (message: string): Promise<void> => {
           const response = await this.receive(message, wsconnection.claims)
           if (response !== undefined)
-            wsconnection
-              .send(response as string)
-              .catch((error: Error) => log.error(error))
+            await wsconnection.send(response as string)
+        }
+        socket.on('message', (message: string) => {
+          onMessage(message).catch((error: Error) => log.error(error))
         })
 
         // Handle any errors
         socket.on('error', (error: Error) => log.error(error))
-      }
+      },
+      options: {}
     })
     return app
   }
