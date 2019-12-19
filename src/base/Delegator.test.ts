@@ -230,7 +230,7 @@ class DeepThought extends Worker {
     })
   }
 
-  public async execute<Type extends schema.Node>(node: Type): Promise<Type> {
+  public async execute<Type>(node: Type): Promise<Type> {
     if (schema.isA('CodeChunk', node) && node.text === DeepThought.question) {
       return Promise.resolve({ ...node, outputs: [42] })
     }
@@ -263,7 +263,7 @@ class Calculator extends Worker {
     })
   }
 
-  public async execute<Type extends schema.Node>(node: Type): Promise<Type> {
+  public async execute<Type>(node: Type): Promise<Type> {
     if (schema.isA('CodeExpression', node)) {
       // eslint-disable-next-line no-eval
       return Promise.resolve({ ...node, output: eval(node.text) })
