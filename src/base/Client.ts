@@ -206,6 +206,22 @@ export abstract class Client extends Executor {
 
     delete this.requests[id]
   }
+
+  /**
+   * @override Override of {@link Executor.stop} that rejects
+   * all outstanding requests.
+   *
+   * @description If outstanding requests are not rejected
+   * like this then they cant `await` for ever, after the
+   * client has stopped. This could be implemented to
+   * have a grace period.
+   */
+  public stop(): Promise<void> {
+    for (const { reject } of Object.values(this.requests)) {
+      reject(new Error('Client is stopping'))
+    }
+    return super.stop()
+  }
 }
 
 /**

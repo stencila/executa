@@ -54,15 +54,13 @@ export class StreamClient extends Client {
   }
 
   /**
-   * Stop the client.
-   *
-   * Sets `this.encoder` to `undefined` so that it gets
+   * @override Override of {@link Client.stop} that sets
+   * `this.encoder` to `undefined` so that it gets
    * reconstructed with a new stream if `start()` is called later.
    */
   public stop(): Promise<void> {
     this.encoder = undefined
-
-    return Promise.resolve()
+    return super.stop()
   }
 
   /**
