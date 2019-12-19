@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { main } from './main'
 
 export { main }
@@ -7,5 +9,5 @@ export { compile } from './compile'
 export { query } from './query'
 export { execute } from './execute'
 
-// If this is the main mdule then run the main function
+// If this is the main module then run the main function
 if (require.main === module) main().catch(err => console.error(err))

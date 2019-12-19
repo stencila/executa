@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { collectConfig, helpUsage } from '@stencila/configa/dist/run'
 import * as schema from '@stencila/schema'
 import { Executor } from '../base/Executor'
