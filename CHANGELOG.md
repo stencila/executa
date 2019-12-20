@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/stencila/executa/compare/v1.5.0...v1.6.0) (2019-12-20)
+
+
+### Features
+
+* **Http:** Add serving of static files ([c0f86df](https://github.com/stencila/executa/commit/c0f86dfb7acec6f40dacda43435b92180157fbde))
+
 # [1.5.0](https://github.com/stencila/executa/compare/v1.4.0...v1.5.0) (2019-12-19)
 
 
