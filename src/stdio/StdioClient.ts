@@ -115,7 +115,7 @@ export class StdioClient extends StreamClient {
    * stop the child server process.
    */
   public stop(): Promise<void> {
-    log.debug(`Stopping StdioServer`)
+    log.debug(`Stopping StdioServer: ${this.address.url()}`)
 
     if (this.child !== undefined) {
       // Avoid unnecessary log errors by removing listener

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="dist/browser/index.js"></script>
+    <script src="/browser/index.js"></script>
     <script>
       window.Stencila.executa.init({
         host: window.location.hostname,
@@ -27,6 +27,7 @@
     <style>
       body {
         max-width: 50em;
+        padding: 1em;
         margin: 0 auto;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
           Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -34,40 +35,10 @@
     </style>
   </head>
   <body>
-    <p>
-      A test of an Executor running in the browser and connecting to an Executor
-      in Node.js. To make this work...
-    </p>
-
-    <p>
-      Build the browser Javascript:
-    </p>
-    <pre><code>npm run build:browser</code></pre>
-
-    <p>
-      In one terminal run an Executor listening on ws://localhost:9000.
-    </p>
-
-    <p>
-      For example, in this repo, Executa, you could run:
-    </p>
-    <pre><code>npm run cli:dev -- --ws</code></pre>
-
-    <p>
-      Or, you could run Sparkla using this command in that repo:
-    </p>
-    <pre><code>npm run serve:dev -- --docker</code></pre>
-
-    <p>
-      In another terminal, serve this file
-    </p>
-    <pre><code>npx serve</code></pre>
-
-    <p>
-      Then open http://localhost:5000 and check the console and network tabs
-      while you run the code below.
-    </p>
-
+    <h1>
+      <img style="vertical-align:top" src="https://stenci.la/img/logo-name.png" height="40px">
+      <span style="color: #777">Executa</span>
+    </h1>
     <stencila-code-chunk
       itemtype="stencila:CodeChunk"
       data-collapsed="false"

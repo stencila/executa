@@ -63,6 +63,32 @@ All configuration options can be set, in descending order of priority, by:
 
 ## Develop
 
+### Testing with the REPL
+
+There is an interactive REPL that can be used with the both `query` and `execute` CLI commands e.g.
+
+```bash
+npm run cli -- execute --repl --debug
+```
+
+### Testing in the browser
+
+1. Build the browser Javascript
+
+```bash
+npm run build:browser
+```
+
+2. Serve Executa on ws://localhost:9000 (with reloading when source changes):
+
+```bash
+npm run cli:dev -- serve --ws --debug</code></pre>
+```
+
+3. Visit http://localhost:9000 in your browser.
+
+### Debug inspecting
+
 There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, for example from within VSCode (which will auto attach to the Node process), e.g.
 
 ```bash

@@ -134,7 +134,7 @@ export class TcpServer extends Server {
 
   public async start(executor: Executor): Promise<void> {
     if (this.server === undefined) {
-      log.debug(`Starting server`)
+      log.debug(`Starting server: ${this.address.url()}`)
 
       const server = (this.server = net.createServer())
 
@@ -180,7 +180,7 @@ export class TcpServer extends Server {
     this.connections = {}
 
     if (this.server !== undefined) {
-      log.debug(`Stopping server`)
+      log.debug(`Stopping server: ${this.address.url()}`)
 
       return new Promise(resolve => {
         if (this.server !== undefined)
@@ -189,7 +189,7 @@ export class TcpServer extends Server {
               this.server.unref()
               this.server = undefined
             }
-            log.debug(`Stopped server`)
+            log.debug(`Stopped server: ${this.address.url()}`)
             resolve()
           })
       })

@@ -8,6 +8,7 @@ import fastify, {
 } from 'fastify'
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
+import fastifyStatic from 'fastify-static'
 import { Executor } from '../base/Executor'
 import { JsonRpcErrorCode, JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
@@ -17,6 +18,7 @@ import {
   Transport,
   Addresses
 } from '../base/Transports'
+import path from 'path'
 import { TcpServer } from '../tcp/TcpServer'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { expandAddress } from '../tcp/util'
@@ -87,6 +89,11 @@ export class HttpServer extends TcpServer {
 
     // Register JWT plugin
     app.register(fastifyJwt, { secret: this.jwtSecret })
+
+    // Register static file serving plugin
+    app.register(fastifyStatic, {
+      root: path.join(__dirname, 'static')
+    })
 
     // Set custom, override-able, hooks and handlers
     app.addHook('onRequest', (request, reply) => this.onRequest(request, reply))
@@ -226,7 +233,7 @@ export class HttpServer extends TcpServer {
   public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
-    log.debug(`Starting server`)
+    log.debug(`Starting server: ${this.address.url()}`)
     const app = (this.app = this.buildApp())
 
     // Wait for plugins to be ready
