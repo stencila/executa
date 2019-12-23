@@ -44,6 +44,12 @@ export const testClient = async (client: Client): Promise<void> => {
   ).toBe('42')
 
   /**
+   * Check that attempt to cancel a request
+   * returns false (for the `Worker` class)
+   */
+  expect(await client.cancel('not-a-unique-job-id')).toBe(false)
+
+  /**
    * Check that calls to methods that the executor is not
    * capable of throw a `CapabilityError`
    */

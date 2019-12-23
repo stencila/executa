@@ -154,6 +154,7 @@ export class HttpServer extends TcpServer {
     app.post('/begin', wrap('begin'))
     app.post('/end', wrap('end'))
     app.post('/pipe', wrap('pipe'))
+    app.post('/cancel', wrap('cancel'))
 
     return app
   }

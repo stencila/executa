@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Executor, Method, Manifest } from './Executor'
+import { Executor, Method, Manifest, Params } from './Executor'
 import { InternalError } from './errors'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
@@ -78,7 +78,7 @@ export abstract class Client extends Executor {
    * @override Override of {@link Executor.manifest} to
    * return the manifest of the remote executor.
    */
-  public async manifest() {
+  public async manifest(): Promise<Manifest> {
     if (this.manifestCached === undefined) {
       this.manifestCached = await this.call<Manifest>(Method.manifest)
     }
@@ -86,13 +86,18 @@ export abstract class Client extends Executor {
   }
 
   /**
+   * @override Override of {@link Executor.cancel} to
+   * request the remote executor to cancel a job.
+   */
+  public cancel(job: string): Promise<boolean> {
+    return this.call<boolean>(Method.cancel, { job })
+  }
+
+  /**
    * @implements Implements {@link Executor.call} by sending a
    * a request to the remote `Executor` that this client is connected to.
    */
-  public async call<Type>(
-    method: Method,
-    params: { [key: string]: any } = {}
-  ): Promise<Type> {
+  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
     const request = new JsonRpcRequest(method, params)
     const id = request.id
     if (id === undefined)

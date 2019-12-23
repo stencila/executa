@@ -1,12 +1,11 @@
 import { getLogger } from '@stencila/logga'
 import Ajv from 'ajv'
-import { ClientType, clientTypeToTransport, Client } from './Client'
-import { Executor, Manifest, Method, Params } from './Executor'
-import { InternalError, CapabilityError } from './errors'
-
-import { generate } from './uid'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
+import { Client, ClientType, clientTypeToTransport } from './Client'
+import { CapabilityError, InternalError } from './errors'
+import { Executor, Manifest, Method, Params } from './Executor'
+import * as uid from './uid'
 
 const ajv = new Ajv()
 
@@ -34,9 +33,17 @@ export class Delegator extends Executor {
 
   /**
    * Peer executors that are delegated to depending
-   * upon their capabilities and the request at hand.
+   * upon their capabilities and the particular request.
    */
   protected readonly peers: { [key: string]: Peer } = {}
+
+  /**
+   * A map of jobs to the peers that they have been delegated to.
+   *
+   * Used to route the cancellation of a job to the peer that
+   * it was originally delegated to.
+   */
+  protected readonly jobs: { [key: string]: Peer } = {}
 
   /**
    * Construct a `Delegator`.
@@ -69,20 +76,36 @@ export class Delegator extends Executor {
   }
 
   /**
-   * @implements Implements {@link Executor.call} by delegating
-   * all requests to peers.
+   * @override Override of {@link Executor.cancel} that passes on the
+   * cancellation request to the peer that was delegated the job.
    */
-  public async call(method: Method, params: Params = {}): Promise<any> {
-    if (method === Method.manifest) return this.manifest()
+  public cancel(job: string): Promise<boolean> {
+    const peer = this.jobs[job]
+    if (peer !== undefined) {
+      log.debug(`Cancelling job: ${job}`)
+      return peer.call<boolean>(Method.cancel, { job })
+    }
+    return Promise.resolve(false)
+  }
 
+  /**
+   * @override Override of {@link Executor.call} that delegates
+   * calls to peers where possible.
+   */
+  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
     for (const peer of Object.values(this.peers)) {
       if (await peer.capable(method, params)) {
         if (await peer.connect()) {
-          return peer.call(method, params)
+          const { job = uid.generate('jo').toString() } = params
+          this.jobs[job] = peer
+
+          const result = await peer.call<Type>(method, params)
+
+          delete this.jobs[job]
+          return result
         }
       }
     }
-
     throw new CapabilityError('Unable to delegate', method, params)
   }
 
@@ -90,7 +113,7 @@ export class Delegator extends Executor {
 
   public add(executor: Executor): string {
     const id =
-      executor.id !== undefined ? executor.id : generate('pe').toString()
+      executor.id !== undefined ? executor.id : uid.generate('pe').toString()
     log.debug(`Adding peer ${id}`)
     const peer = new Peer(executor, this.clientTypes)
     this.peers[id] = peer
