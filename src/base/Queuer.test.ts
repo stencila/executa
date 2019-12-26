@@ -3,6 +3,7 @@ import { Queuer } from './Queuer'
 import { Config } from '../config'
 import { Worker } from './Worker'
 import { CapabilityError } from './errors'
+import { Method } from './Executor'
 
 const clock = lolex.install()
 
@@ -53,6 +54,14 @@ test('call', async () => {
   expect(j2.id).not.toBe(j1.id)
 })
 
+test('cancel', async () => {
+  const queuer = new Queuer()
+
+  const job = 'a-job'
+  const p1 = queuer.call(Method.decode, { source: '', format: 'json', job })
+  expect(await queuer.cancel(job)).toBe(true)
+})
+
 test('check', async () => {
   const queuer = new Queuer({ ...new Config(), queueInterval: 1 })
   const worker = new Worker()
@@ -99,7 +108,7 @@ test('clean', async () => {
   clock.tick(1001)
 
   queuer.clean()
-  await expect(p0).rejects.toThrow(/Job has become stale/)
+  await expect(p0).rejects.toThrow(/Request has become stale/)
   expect(queue.length).toBe(0)
 
   const p1 = queuer.decode('', 'json')
@@ -124,7 +133,7 @@ test('start + stop', async () => {
 
   clock.tick(1001)
 
-  await expect(p0).rejects.toThrow(/Job has become stale/)
+  await expect(p0).rejects.toThrow(/Request has become stale/)
 
   const p1 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
