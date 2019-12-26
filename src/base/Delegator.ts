@@ -79,11 +79,13 @@ export class Delegator extends Executor {
    * @override Override of {@link Executor.cancel} that passes on the
    * cancellation request to the peer that was delegated the job.
    */
-  public cancel(job: string): Promise<boolean> {
+  public async cancel(job: string): Promise<boolean> {
     const peer = this.jobs[job]
     if (peer !== undefined) {
-      log.debug(`Cancelling job: ${job}`)
-      return peer.call<boolean>(Method.cancel, { job })
+      if (await peer.capable(Method.cancel, { job })) {
+        log.debug(`Cancelling job: ${job}`)
+        return peer.call<boolean>(Method.cancel, { job })
+      }
     }
     return Promise.resolve(false)
   }
