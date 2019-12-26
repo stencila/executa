@@ -47,7 +47,7 @@ export class StdioClient extends StreamClient {
 
     const { command, args = [] } = this.address
 
-    log.debug(`Starting StdioServer: ${command} ${args.join(' ')}`)
+    log.debug(`Starting client: ${this.address.url()}`)
     const child = (this.child = spawn(command, args))
 
     child.on('error', (error: Error) => {
@@ -115,7 +115,7 @@ export class StdioClient extends StreamClient {
    * stop the child server process.
    */
   public stop(): Promise<void> {
-    log.debug(`Stopping StdioServer: ${this.address.url()}`)
+    log.debug(`Stopping client: ${this.address.url()}`)
 
     if (this.child !== undefined) {
       // Avoid unnecessary log errors by removing listener
