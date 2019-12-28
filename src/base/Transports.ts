@@ -67,7 +67,13 @@ export class StdioAddress {
       if (match !== null) address = match[1]
       const parts = address.split(/\s/)
       this.command = parts[0]
-      this.args = parts.slice(1)
+      // Remove surrounding quotes from arguments to support
+      // shell style command lines
+      this.args = parts.slice(1).map(arg =>
+        (arg.startsWith('"') && arg.endsWith('"')) ||
+        (arg.startsWith('\'') && arg.endsWith('\''))
+        ? arg.slice(1, -1) : arg
+      )
     } else {
       this.command = address.command
       this.args = address.args
