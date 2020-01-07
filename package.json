@@ -76,7 +76,7 @@
     "fastify-jwt": "^1.1.0",
     "fastify-static": "^2.5.1",
     "fastify-websocket": "^1.0.0",
-    "glob": "^7.1.4",
+    "globby": "^11.0.0",
     "historic-readline": "^1.0.8",
     "isomorphic-ws": "^4.0.1",
     "jmespath": "^0.15.0",
