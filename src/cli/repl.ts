@@ -259,7 +259,8 @@ export async function repl(
         job = uid.generate('jo').toString()
         result = await evaluate(client, job, document, text, lang)
       } catch (error) {
-        log.error(error)
+        if (schema.isA(error, 'CodeError')) return displayError(error)
+        else log.error(error)
       } finally {
         job = undefined
       }
@@ -354,6 +355,15 @@ function displayOutput(encoded: string, format: string): string {
   } catch {
     return encoded
   }
+}
+
+/**
+ * Display an error
+ */
+function displayError(error: schema.CodeError): string {
+  return chalk.red(
+    error.message !== undefined ? error.message : 'Unknown error'
+  )
 }
 
 /**
