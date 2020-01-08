@@ -1,3 +1,20 @@
+# [1.7.0](https://github.com/stencila/executa/compare/v1.6.0...v1.7.0) (2020-01-08)
+
+
+### Bug Fixes
+
+* **Delegator:** Check if peer is capable of cancel ([5cde3dc](https://github.com/stencila/executa/commit/5cde3dcdf63270ae212d86bbb322483a038acb14))
+* **Delegator:** More gracefully switch transports ([01440d2](https://github.com/stencila/executa/commit/01440d2a8fc2dfb79b3fbed6d5cb39e89ec804b0))
+* **REPL:** Display errors ([ed995ac](https://github.com/stencila/executa/commit/ed995ac907c6a703f144f923d83f73ec59f02060))
+* **StdioAddress:** Remove surrounding quotes from arguments ([80bbc26](https://github.com/stencila/executa/commit/80bbc268d4cc9cd96486185ccfe3066646d8881b))
+* **StdioClient:** Only log if child has been started ([3594973](https://github.com/stencila/executa/commit/35949735fd28f817201ad4e6c29def8a7a05cb70))
+
+
+### Features
+
+* **Cancel:** Add cancel method ([8c85c3d](https://github.com/stencila/executa/commit/8c85c3daaf8d63df5ac4fce944413cba541112ab))
+* **PipeClient:** Add PipeClient class ([d902ac4](https://github.com/stencila/executa/commit/d902ac44f9119146f2568a33a4a7102988e66225))
+
 # [1.6.0](https://github.com/stencila/executa/compare/v1.5.0...v1.6.0) (2019-12-20)
 
 
