@@ -134,5 +134,10 @@
   },
   "release": {
     "extends": "@stencila/semantic-release-config"
+  },
+  "renovate": {
+    "extends": [
+      "@stencila"
+    ]
   }
 }
