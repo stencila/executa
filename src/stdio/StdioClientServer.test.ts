@@ -75,7 +75,7 @@ describe('StdioClient and StdioServer', () => {
       await client.start()
 
       const messages = await nextMessages
-      expect(messages[0]).toMatch(/^Starting StdioServer/)
+      expect(messages[0]).toMatch(/^Starting client: stdio/)
       expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 1 and signal null/
       )
@@ -90,7 +90,7 @@ describe('StdioClient and StdioServer', () => {
       await client.start()
 
       const messages = await nextMessages
-      expect(messages[0]).toMatch(/^Starting StdioServer/)
+      expect(messages[0]).toMatch(/^Starting client: stdio/)
       expect(messages[1]).toMatch(
         /^Server exited prematurely with exit code 0 and signal null/
       )
