@@ -1,16 +1,13 @@
 import { getLogger, LogLevel } from '@stencila/logga'
 import { ChildProcess, spawn } from 'child_process'
 import fs from 'fs'
-import glob_ from 'glob'
+import glob from 'globby'
 import split from 'split2'
 import path from 'path'
-import util from 'util'
 import { StdioAddress, StdioAddressInitializer } from '../base/Transports'
 import { StreamClient } from '../stream/StreamClient'
 import { Manifest } from '../base/Executor'
 import { home } from '../util'
-
-const glob = util.promisify(glob_)
 
 const log = getLogger('executa:stdio:client')
 
@@ -47,7 +44,7 @@ export class StdioClient extends StreamClient {
 
     const { command, args = [] } = this.address
 
-    log.debug(`Starting StdioServer: ${command} ${args.join(' ')}`)
+    log.debug(`Starting client: ${this.address.url()}`)
     const child = (this.child = spawn(command, args))
 
     child.on('error', (error: Error) => {
@@ -115,9 +112,9 @@ export class StdioClient extends StreamClient {
    * stop the child server process.
    */
   public stop(): Promise<void> {
-    log.debug(`Stopping StdioServer: ${this.address.url()}`)
-
     if (this.child !== undefined) {
+      log.debug(`Stopping client: ${this.address.url()}`)
+
       // Avoid unnecessary log errors by removing listener
       this.child.removeAllListeners('exit')
       this.child.kill()

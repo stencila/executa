@@ -16,7 +16,7 @@ export class JsonRpcResponse {
    * It MUST be the same as the value of the id member in the Request Object.
    * If there was an error in detecting the id in the Request object (e.g. Parse error/Invalid Request), it MUST be Null.
    */
-  public readonly id: number
+  public readonly id: string
 
   /**
    * This member is REQUIRED on success.
@@ -32,7 +32,7 @@ export class JsonRpcResponse {
    */
   public readonly error?: JsonRpcError
 
-  public constructor(id = -1, result?: any, error?: JsonRpcError) {
+  public constructor(id: string, result?: any, error?: JsonRpcError) {
     this.id = id
     this.result = result
     this.error = error

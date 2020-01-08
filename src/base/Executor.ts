@@ -25,7 +25,8 @@ export enum Method {
   execute = 'execute',
   begin = 'begin',
   end = 'end',
-  pipe = 'pipe'
+  pipe = 'pipe',
+  cancel = 'cancel'
 }
 
 /**
@@ -175,7 +176,7 @@ export abstract class Executor {
    * @param format The format of the content
    * @returns The decoded node
    */
-  public async decode(source: string, format?: string): Promise<schema.Node> {
+  public decode(source: string, format?: string): Promise<schema.Node> {
     return this.call<schema.Node>(Method.decode, { source, format })
   }
 
@@ -187,7 +188,7 @@ export abstract class Executor {
    * @param format The format to encode
    * @returns The encoded content, or the destination of the content.
    */
-  public async encode(
+  public encode(
     node: schema.Node,
     dest?: string,
     format?: string
@@ -217,7 +218,7 @@ export abstract class Executor {
    * @param node The node to compile
    * @returns The compiled node
    */
-  public async compile<Type extends schema.Node>(node: Type): Promise<Type> {
+  public compile<Type extends schema.Node>(node: Type): Promise<Type> {
     return this.call<Type>(Method.compile, { node })
   }
 
@@ -227,7 +228,7 @@ export abstract class Executor {
    * @param node The node to build
    * @returns The build node
    */
-  public async build<Type extends schema.Node>(node: Type): Promise<Type> {
+  public build<Type extends schema.Node>(node: Type): Promise<Type> {
     return this.call<Type>(Method.build, { node })
   }
 
@@ -237,14 +238,16 @@ export abstract class Executor {
    * @param node The node to execute
    * @param session The session that the node will be executed in
    * @param claims The `Claims` made for the call
+   * @param job The unique id of the request
    * @returns The node, with updated properties, after it has been executed
    */
-  public async execute<Type extends schema.Node>(
+  public execute<Type extends schema.Node>(
     node: Type,
     session?: schema.SoftwareSession,
-    claims?: Claims
+    claims?: Claims,
+    job?: string
   ): Promise<Type> {
-    return this.call<Type>(Method.execute, { node, session, claims })
+    return this.call<Type>(Method.execute, { node, session, claims, job })
   }
 
   /**
@@ -264,7 +267,7 @@ export abstract class Executor {
    * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has begun running
    */
-  public async begin<Type extends schema.Node>(
+  public begin<Type extends schema.Node>(
     node: Type,
     claims?: Claims
   ): Promise<Type> {
@@ -278,7 +281,7 @@ export abstract class Executor {
    * @param claims The `Claims` made for the call
    * @returns The node, with updated properties, after it has ended running
    */
-  public async end<Type extends schema.Node>(
+  public end<Type extends schema.Node>(
     node: Type,
     claims?: Claims
   ): Promise<Type> {
@@ -297,11 +300,24 @@ export abstract class Executor {
    * @param calls A list of method, parameters tuples to pipe the node through
    * @returns The node after it has been piped through the methods
    */
-  public async pipe(
+  public pipe(
     node: schema.Node,
     calls: (Method | [Method, Params])[]
   ): Promise<schema.Node> {
     return this.call<schema.Node>(Method.pipe, { node, calls })
+  }
+
+  /**
+   * Cancel a previous request to call a method
+   *
+   * @param job The unique id of the request to be cancelled.
+   * @returns Whether or not the request was cancelled.
+   */
+  public cancel(job: string): Promise<boolean> {
+    // Unlike the other methods, the default is to return
+    // false (i.e. the call could not be cancelled) rather than
+    // fallback to calling `call()`.
+    return Promise.resolve(false)
   }
 
   /**
@@ -341,7 +357,8 @@ export abstract class Executor {
         return this.execute(
           param(0, 'node'),
           param(1, 'session', false),
-          param(2, 'claims', false)
+          param(2, 'claims', false),
+          param(3, 'job', false)
         )
       case Method.begin:
         return this.begin(param(0, 'node'), param(1, 'claims', false))
@@ -349,6 +366,8 @@ export abstract class Executor {
         return this.end(param(0, 'node'), param(1, 'claims', false))
       case Method.pipe:
         return this.pipe(param(0, 'node'), param(1, 'calls'))
+      case Method.cancel:
+        return this.cancel(param(0, 'job'))
     }
     throw new MethodUnknownError(method)
 
@@ -385,6 +404,7 @@ export abstract class Executor {
    *
    * @param method The name of the method
    * @param params Values of parameters (i.e. arguments)
+   * @param request The request id
    */
   public call<Type>(method: Method, params: Params): Promise<Type> {
     throw new CapabilityError('No capability implemented', method, params)

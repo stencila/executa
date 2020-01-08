@@ -1,17 +1,16 @@
 import { Logger, LogLevel, replaceHandlers } from '@stencila/logga'
 import * as schema from '@stencila/schema'
 import chalk from 'chalk'
-import { highlight, listLanguages } from 'cli-highlight'
+import { highlight, supportsLanguage } from 'cli-highlight'
 // @ts-ignore
 import * as readline from 'historic-readline'
 import ora, { Ora } from 'ora'
 import { Client } from '../base/Client'
 import { Executor } from '../base/Executor'
+import * as uid from '../base/uid'
 import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { home } from '../util'
-
-const highlightLanguages = listLanguages()
 
 /**
  * A read-evaluate-print-loop interface
@@ -38,6 +37,7 @@ export async function repl(
   log: Logger,
   evaluate: (
     client: Client,
+    job: string,
     doc: schema.Node,
     line: string,
     lang: string
@@ -58,6 +58,7 @@ export async function repl(
   let buffer = ''
   let continuing = false
 
+  let spinnerMessage = ''
   const spinner = ora({
     spinner: 'dots',
     // With this set to true, all input is ignored while
@@ -72,7 +73,7 @@ export async function repl(
   // that they do not interfere with input
   const messages: string[] = []
   let mute = false
-  function onMessage(message: string) {
+  function onMessage(message: string): void {
     if (mute) {
       messages.push(message)
     } else {
@@ -80,7 +81,7 @@ export async function repl(
       process.stdout.write(message + '\n')
     }
   }
-  function clearMessages() {
+  function clearMessages(): void {
     spinner.clear()
     for (const message of messages) {
       process.stdout.write(message + '\n')
@@ -108,7 +109,7 @@ export async function repl(
   const server = new DirectServer()
   await server.start(executor)
   class ReplClient extends DirectClient {
-    notified(subject: string, message: string) {
+    notified(subject: string, message: string): void {
       const display = `🔔 ${chalk.magenta('NOTIF')} ${chalk.cyan(
         subject
       )} ${message}`
@@ -135,9 +136,29 @@ export async function repl(
   rl.prompt()
   rl.on('line', (line: string) => onLine(line).catch(error => log.error(error)))
 
-  // On interrupt signal resolve this promise.
+  // On  interrupt signal (Ctrl+C) cancel current request
+  let job: string | undefined
+
+  // On close signal (Ctrl+D) resolve this promise
+  // so any clean up can be done after it.
   return new Promise<void>(resolve => {
     rl.on('SIGINT', () => {
+      if (job !== undefined) {
+        spinner.clear()
+        spinnerMessage = 'Cancelling'
+        executor
+          .cancel(job)
+          .then(cancelled => {
+            spinnerMessage = cancelled ? 'Cancelled' : 'Noncancellable'
+          })
+          .catch(error => log.error(error))
+      } else {
+        rl.close()
+        resolve()
+      }
+    })
+
+    rl.on('close', () => {
       rl.close()
       resolve()
     })
@@ -163,11 +184,11 @@ export async function repl(
     mute = false
 
     // Start the spinner and update it to show elapsed time
+    // and any messages
     spinner.color = 'gray'
-    spinner.text = chalk.gray(`+0s`)
-    spinner.start()
+    spinnerMessage = ''
     const started = Date.now()
-    const interval = setInterval(() => {
+    const spinnerUpdate = (): void => {
       const seconds = Math.round((Date.now() - started) / 1000)
       spinner.color = [
         'gray',
@@ -178,8 +199,11 @@ export async function repl(
         'magenta',
         'red'
       ][Math.max(0, Math.min(Math.round(Math.log(seconds)), 6))] as Ora['color']
-      spinner.text = chalk.grey(`+${seconds}s`)
-    }, 1000)
+      spinner.text = chalk.grey(`+${seconds}s ${spinnerMessage}`)
+    }
+    spinnerUpdate()
+    spinner.start()
+    const interval = setInterval(spinnerUpdate, 1000)
 
     // Handle the line and get any output
     const output = await handleLine(line)
@@ -232,10 +256,15 @@ export async function repl(
     if (text.trim().length > 0) {
       let result
       try {
-        result = await evaluate(client, document, text, lang)
+        job = uid.generate('jo').toString()
+        result = await evaluate(client, job, document, text, lang)
       } catch (error) {
-        log.error(error)
+        if (schema.isA(error, 'CodeError')) return displayError(error)
+        else log.error(error)
+      } finally {
+        job = undefined
       }
+
       if (result !== undefined) {
         // If there is no format defined, and no destination to infer it from,
         // defaults to JSON (because that is available even it Encoda is not).
@@ -307,12 +336,11 @@ function displayOutput(encoded: string, format: string): string {
   // add an entry here!
   const languages: { [key: string]: string } = {
     jsonld: 'json',
-    json5: 'javascript',
-    txt: 'plain'
+    json5: 'javascript'
   }
   let language = languages[format]
   if (language === undefined) language = format
-  if (!highlightLanguages.includes(language)) language = 'plaintext'
+  if (!supportsLanguage(language)) language = 'plaintext'
   // Handle exception if Highlight.js can not highlight
   // the code of does not recognize the format.
   try {
@@ -327,6 +355,15 @@ function displayOutput(encoded: string, format: string): string {
   } catch {
     return encoded
   }
+}
+
+/**
+ * Display an error
+ */
+function displayError(error: schema.CodeError): string {
+  return chalk.red(
+    error.message !== undefined ? error.message : 'Unknown error'
+  )
 }
 
 /**

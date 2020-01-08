@@ -40,9 +40,13 @@ export async function execute(
   }
 
   if (repl_ !== false) {
-    // Each text block is evaluated as a code chunk of the current language
+    // Begin a new session
+    const session = await executor.begin(schema.softwareSession())
+    // Each text block is evaluated within the session
+    // as a code chunk of the current language
     const evaluate = async (
       client: Client,
+      request: string,
       doc: schema.Node,
       text: string,
       lang: string
@@ -50,15 +54,9 @@ export async function execute(
       const chunk = schema.codeChunk(text, {
         programmingLanguage: lang
       })
-      const { outputs, errors } = await client.execute(chunk)
-      if (errors !== undefined && errors.length > 0) {
-        return errors
-          .map(error => {
-            const { kind, message } = error
-            return chalk`🚫 {red ERROR} {cyan ${kind}} ${message}`
-          })
-          .join('\n')
-      }
+      const executed = await client.execute(chunk, session, undefined, request)
+      const { outputs, errors } = executed
+      if (errors !== undefined && errors.length > 0) throw errors[0]
       return outputs
     }
     // Starting language for REPL defaults to Bash

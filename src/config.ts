@@ -5,7 +5,7 @@ import {
 } from '@stencila/configa/dist/define'
 
 /**
- * Executa ${version}
+ * Executa
  */
 export class Config {
   /**

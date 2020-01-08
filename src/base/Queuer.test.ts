@@ -3,6 +3,7 @@ import { Queuer } from './Queuer'
 import { Config } from '../config'
 import { Worker } from './Worker'
 import { CapabilityError } from './errors'
+import { Method } from './Executor'
 
 const clock = lolex.install()
 
@@ -51,6 +52,14 @@ test('call', async () => {
   // Both of those jobs should be removed
   const j2 = queue[0]
   expect(j2.id).not.toBe(j1.id)
+})
+
+test('cancel', async () => {
+  const queuer = new Queuer()
+
+  const job = 'a-job'
+  const p1 = queuer.call(Method.decode, { source: '', format: 'json', job })
+  expect(await queuer.cancel(job)).toBe(true)
 })
 
 test('check', async () => {

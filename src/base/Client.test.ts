@@ -10,7 +10,7 @@ import { JsonRpcResponse } from './JsonRpcResponse'
  */
 class EchoClient extends Client {
   public send(request: JsonRpcRequest): Promise<void> {
-    const { id, method, params } = request
+    const { id = '', method, params } = request
     const response = new JsonRpcResponse(id, { method, params })
     this.receive(response)
     return Promise.resolve()
@@ -80,7 +80,7 @@ test('receiving bad response', async () => {
 
   message = nextMessage()
   // @ts-ignore that receive is protected
-  client.receive({ id: -1 })
+  client.receive({ id: '' })
   expect(await message).toMatch(/^Response is missing id/)
 
   message = nextMessage()

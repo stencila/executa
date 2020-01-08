@@ -75,7 +75,7 @@ export abstract class Server {
     if (this.executor === undefined)
       throw new InternalError('Executor has not been initialized')
 
-    let id: number | undefined
+    let id: string | undefined
     let result
     let error: JsonRpcError | undefined
 
@@ -112,7 +112,11 @@ export abstract class Server {
       error = JsonRpcError.fromError(exc)
     }
 
-    const response = new JsonRpcResponse(id, result, error)
+    const response = new JsonRpcResponse(
+      id !== undefined ? id : '',
+      result,
+      error
+    )
     return stringify ? JSON.stringify(response) : response
   }
 

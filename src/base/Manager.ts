@@ -71,18 +71,28 @@ export class Manager extends Listener {
    */
   public async execute<Type extends schema.Node>(
     node: Type,
-    session?: schema.SoftwareSession
+    session?: schema.SoftwareSession,
+    claims?: Claims,
+    job?: string
   ): Promise<Type> {
     return this.walk(node, async child => {
       if (!['CodeChunk', 'CodeExpression'].includes(schema.nodeType(child)))
         return child
       try {
-        return await this.delegator.execute(child)
+        return await this.delegator.execute(child, session, claims, job)
       } catch (error) {
         if (error instanceof CapabilityError) return Promise.resolve(child)
         else throw error
       }
     })
+  }
+
+  /**
+   * @override Override of {@link Executor.cancel} that passes on
+   * the request to the delegator.
+   */
+  public cancel(job: string): Promise<boolean> {
+    return this.delegator.cancel(job)
   }
 
   /**

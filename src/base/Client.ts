@@ -1,5 +1,5 @@
 import { getLogger } from '@stencila/logga'
-import { Executor, Method, Manifest } from './Executor'
+import { Executor, Method, Manifest, Params } from './Executor'
 import { InternalError } from './errors'
 import { JsonRpcRequest } from './JsonRpcRequest'
 import { JsonRpcResponse } from './JsonRpcResponse'
@@ -9,7 +9,7 @@ import { Transport, parseAddress, Address } from './Transports'
 const log = getLogger('executa:client')
 
 interface Request<Type> {
-  id: number
+  id: string
   date: Date
   resolve: (result: Type) => void
   reject: (error: Error) => void
@@ -31,8 +31,10 @@ interface Notification {
 export abstract class Client extends Executor {
   /**
    * A map of requests to which responses can be paired against
+   *
+   * The key is the unique id for each request.
    */
-  private requests: { [key: number]: Request<any> } = {}
+  private requests: { [key: string]: Request<any> } = {}
 
   /**
    * A cached manifest from the remote executor.
@@ -76,7 +78,7 @@ export abstract class Client extends Executor {
    * @override Override of {@link Executor.manifest} to
    * return the manifest of the remote executor.
    */
-  public async manifest() {
+  public async manifest(): Promise<Manifest> {
     if (this.manifestCached === undefined) {
       this.manifestCached = await this.call<Manifest>(Method.manifest)
     }
@@ -84,13 +86,18 @@ export abstract class Client extends Executor {
   }
 
   /**
+   * @override Override of {@link Executor.cancel} to
+   * request the remote executor to cancel a job.
+   */
+  public cancel(job: string): Promise<boolean> {
+    return this.call<boolean>(Method.cancel, { job })
+  }
+
+  /**
    * @implements Implements {@link Executor.call} by sending a
    * a request to the remote `Executor` that this client is connected to.
    */
-  public async call<Type>(
-    method: Method,
-    params: { [key: string]: any } = {}
-  ): Promise<Type> {
+  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
     const request = new JsonRpcRequest(method, params)
     const id = request.id
     if (id === undefined)
@@ -179,7 +186,7 @@ export abstract class Client extends Executor {
 
     // Must be a response....
 
-    if (id < 0) {
+    if (id.length === 0) {
       // A response with accidentally missing id
       log.error(`Response is missing id: ${JSON.stringify(message)}`)
       return
@@ -243,9 +250,14 @@ export interface ClientType {
   discover: (address?: string) => Promise<Client[]>
 }
 
+/**
+ * A mapping between clients and the transports
+ * that they use.
+ */
 const clientTypeTransportMap: { [key: string]: Transport } = {
   DirectClient: Transport.direct,
   StdioClient: Transport.stdio,
+  PipeClient: Transport.pipe,
   VsockClient: Transport.vsock,
   TcpClient: Transport.tcp,
   HttpClient: Transport.http,
@@ -338,7 +350,7 @@ export function addressToClients(
     return Promise.resolve([])
   }
 
-  // If a discovery address then  do discovery, otherwise return a single client
+  // If a discovery address then do discovery, otherwise return a single client
   return address === undefined
     ? ClientType.discover()
     : Promise.resolve([new ClientType(address)])

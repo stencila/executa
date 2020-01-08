@@ -1,4 +1,5 @@
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
+import * as uid from './uid'
 
 /**
  * A JSON-RPC 2.0 request
@@ -18,7 +19,7 @@ export class JsonRpcRequest {
    * parts. The Server MUST reply with the same value in the Response object if included.
    * This member is used to correlate the context between the two objects.
    */
-  public readonly id?: number
+  public readonly id?: string
 
   /**
    * A string containing the name of the method to be invoked.
@@ -35,14 +36,6 @@ export class JsonRpcRequest {
   public readonly params?: { [key: string]: any }
 
   /**
-   * A counter for generating unique, sequential request ids.
-   *
-   * Request ids don't need to be sequential but this helps with debugging.
-   * Request ids don't need to be unique across clients.
-   */
-  private static counter = 0
-
-  /**
    * Create a JSON-RPC request
    *
    * @param method The name of the method to call
@@ -54,13 +47,12 @@ export class JsonRpcRequest {
   public constructor(
     method: string,
     params?: { [key: string]: any } | any[],
-    id?: number | false
+    id?: string | false
   ) {
     if (id !== undefined && id !== false) {
       this.id = id
     } else if (id === undefined) {
-      JsonRpcRequest.counter += 1
-      this.id = JsonRpcRequest.counter
+      this.id = uid.generate('re').toString()
     }
     this.method = method
     this.params = params

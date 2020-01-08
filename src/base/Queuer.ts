@@ -2,14 +2,12 @@ import { getLogger } from '@stencila/logga'
 import { Config } from '../config'
 import { CapabilityError } from './errors'
 import { Executor, Method, Params, Manifest } from './Executor'
-import { generate, Id } from './uid'
+import * as uid from './uid'
 
 const log = getLogger('executa:queuer')
 
-type JobId = Id<'jo'>
-
 interface Job<Type> {
-  id: JobId
+  id: string
   method: Method
   params: Params
   delegator?: Executor
@@ -67,16 +65,16 @@ export class Queuer extends Executor {
   }
 
   /**
-   * @implements Implements {@link Executor.call} by placing
+   * @override Overrides {@link Executor.call} by placing
    * all requests on the queue.
    *
-   * @param delegator The executor, if any that delegated this call.
-   * Used to notify that executor's clients on the status of the job.
+   * @param client The executor, if any that delegated this call.
+   * Used to notify that client on the status of the job.
    */
   public async call<Type>(
     method: Method,
     params: Params = {},
-    delegator?: Executor
+    client?: Executor
   ): Promise<Type> {
     const {
       queue,
@@ -86,20 +84,22 @@ export class Queuer extends Executor {
     if (queue.length >= queueLength)
       throw new CapabilityError('Queue is at maximum length')
 
+    // If necessary generate a unique id
+    const { job: id = uid.generate('jo').toString() } = params
+
     return new Promise<Type>((resolve, reject) => {
-      const id = generate('jo')
       const job = {
         id,
         method,
         params,
-        delegator,
+        client,
         date: new Date(),
-        resolve: (result: Type) => {
-          this.remove(id)
+        resolve: async (result: Type) => {
+          await this.cancel(id)
           resolve(result)
         },
-        reject: (error: Error) => {
-          this.remove(id)
+        reject: async (error: Error) => {
+          await this.cancel(id)
           reject(error)
         }
       }
@@ -110,6 +110,20 @@ export class Queuer extends Executor {
         `Job has been added to queue at position ${position}`
       )
     })
+  }
+
+  /**
+   * @override Overrides {@link Executor.cancel} by removing
+   * a job from the queue.
+   */
+  public cancel(job: string): Promise<boolean> {
+    const index = this.queue.findIndex(item => item.id === job)
+    if (index >= 0) {
+      this.queue.splice(index, 1)
+      return Promise.resolve(true)
+    } else {
+      return Promise.resolve(false)
+    }
   }
 
   notifyDelegator(job: Job<any>, subject: string, message: string) {
@@ -165,17 +179,6 @@ export class Queuer extends Executor {
       }
     }
     return resolved
-  }
-
-  /**
-   * Remove a job from the queue.
-   *
-   * This method is `protected` because jobs should only
-   * be removed by a call to `job.resolve` or `job.reject`.
-   */
-  protected remove(id: JobId): void {
-    const index = this.queue.findIndex(job => job.id === id)
-    this.queue.splice(index, 1)
   }
 
   /**

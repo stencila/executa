@@ -28,12 +28,15 @@ export async function query(
   const decoded = await executor.decode(source, from)
   const compiled = await executor.compile(decoded)
   if (repl_ !== false) {
-    const evaluate = (
+    const evaluate = async (
       client: Client,
+      request: string,
       doc: schema.Node,
       text: string,
       lang: string
-    ) => client.query(doc, text, lang)
+    ) => {
+      return client.query(doc, text, lang)
+    }
     return repl('query', compiled, executor, log, evaluate, replHelp, {
       dest,
       format: to,

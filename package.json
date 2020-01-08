@@ -32,7 +32,7 @@
     "docs:readme:toc": "markdown-toc -i --maxdepth=4 README.md",
     "docs:api": "typedoc --options typedoc.js ./src"
   },
-  "author": "",
+  "author": "Executa contributors (https://github.com/stencila/executa/graphs/contributors)",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-typescript": "7.7.7",
@@ -45,8 +45,8 @@
     "@types/mkdirp": "0.5.2",
     "@types/nanoid": "2.1.0",
     "@types/split2": "2.1.6",
-    "@types/ws": "^6.0.4",
-    "depcheck": "^0.9.1",
+    "@types/ws": "6.0.4",
+    "depcheck": "0.9.1",
     "jest": "24.9.0",
     "lolex": "5.1.2",
     "markdown-toc": "1.2.0",
@@ -76,7 +76,7 @@
     "fastify-jwt": "^1.1.0",
     "fastify-static": "^2.5.1",
     "fastify-websocket": "^1.0.0",
-    "glob": "^7.1.4",
+    "globby": "^11.0.0",
     "historic-readline": "^1.0.8",
     "isomorphic-ws": "^4.0.1",
     "jmespath": "^0.15.0",
