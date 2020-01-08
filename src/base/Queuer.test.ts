@@ -108,7 +108,7 @@ test('clean', async () => {
   clock.tick(1001)
 
   queuer.clean()
-  await expect(p0).rejects.toThrow(/Request has become stale/)
+  await expect(p0).rejects.toThrow(/Job has become stale/)
   expect(queue.length).toBe(0)
 
   const p1 = queuer.decode('', 'json')
@@ -133,7 +133,7 @@ test('start + stop', async () => {
 
   clock.tick(1001)
 
-  await expect(p0).rejects.toThrow(/Request has become stale/)
+  await expect(p0).rejects.toThrow(/Job has become stale/)
 
   const p1 = queuer.decode('', 'json')
   expect(queue.length).toBe(1)
