@@ -315,6 +315,13 @@ export class Peer {
         } else {
           address = addresses
         }
+
+        if (this.client !== undefined) {
+          // If already using this client type then just return
+          if (this.client.constructor === ClientType && reconnect) return true
+          // otherwise stop the existing client
+          else await this.client.stop()
+        }
         this.client = new ClientType(address)
         return true
       }
