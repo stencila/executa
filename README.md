@@ -82,7 +82,7 @@ npm run build:browser
 2. Serve Executa on ws://localhost:9000 (with reloading when source changes):
 
 ```bash
-npm run cli:dev -- serve --ws --debug</code></pre>
+npm run cli:dev -- serve --ws
 ```
 
 3. Visit http://localhost:9000 in your browser.
