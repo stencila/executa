@@ -12,6 +12,7 @@ import { DirectClient } from '../direct/DirectClient'
 import { DirectServer } from '../direct/DirectServer'
 import { HttpClient } from '../http/HttpClient'
 import { HttpServer } from '../http/HttpServer'
+import { PipeClient } from '../pipe/PipeClient'
 import { StdioClient } from '../stdio/StdioClient'
 import { StdioServer } from '../stdio/StdioServer'
 import { TcpClient } from '../tcp/TcpClient'
@@ -50,6 +51,7 @@ export async function init(config: Config): Promise<Listener> {
   // Client types that are available for connecting to peers
   const clientTypes: ClientType[] = [
     StdioClient,
+    PipeClient,
     TcpClient,
     HttpClient,
     WebSocketClient

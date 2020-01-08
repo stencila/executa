@@ -250,9 +250,14 @@ export interface ClientType {
   discover: (address?: string) => Promise<Client[]>
 }
 
+/**
+ * A mapping between clients and the transports
+ * that they use.
+ */
 const clientTypeTransportMap: { [key: string]: Transport } = {
   DirectClient: Transport.direct,
   StdioClient: Transport.stdio,
+  PipeClient: Transport.pipe,
   VsockClient: Transport.vsock,
   TcpClient: Transport.tcp,
   HttpClient: Transport.http,
@@ -345,7 +350,7 @@ export function addressToClients(
     return Promise.resolve([])
   }
 
-  // If a discovery address then  do discovery, otherwise return a single client
+  // If a discovery address then do discovery, otherwise return a single client
   return address === undefined
     ? ClientType.discover()
     : Promise.resolve([new ClientType(address)])

@@ -23,6 +23,9 @@ export { StdioAddress } from './base/Transports'
 export { StdioClient } from './stdio/StdioClient'
 export { StdioServer } from './stdio/StdioServer'
 
+export { PipeAddress } from './base/Transports'
+export { PipeClient } from './pipe/PipeClient'
+
 export { VsockAddress } from './base/Transports'
 export { VsockFirecrackerClient } from './vsock/VsockFirecrackerClient'
 export { VsockServer } from './vsock/VsockServer'

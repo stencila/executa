@@ -3,6 +3,7 @@ import { InternalError } from './errors'
 export enum Transport {
   direct = 'direct',
   stdio = 'stdio',
+  pipe = 'pipe',
   uds = 'uds',
   vsock = 'vsock',
   tcp = 'tcp',
@@ -13,24 +14,17 @@ export enum Transport {
 export type Address =
   | DirectAddress
   | StdioAddress
+  | PipeAddress
   | UdsAddress
   | VsockAddress
   | TcpAddress
   | HttpAddress
   | WebSocketAddress
 
-export type AddressInitializer =
-  | DirectAddressInitializer
-  | StdioAddressInitializer
-  | UdsAddress
-  | VsockAddress
-  | TcpAddressInitializer
-  | HttpAddressInitializer
-  | WebSocketAddressInitializer
-
 export interface Addresses {
   direct?: DirectAddressInitializer
   stdio?: StdioAddressInitializer
+  pipe?: PipeAddressInitializer
   uds?: UdsAddress
   vsock?: VsockAddress
   tcp?: TcpAddressInitializer | TcpAddressInitializer[]
@@ -69,11 +63,14 @@ export class StdioAddress {
       this.command = parts[0]
       // Remove surrounding quotes from arguments to support
       // shell style command lines
-      this.args = parts.slice(1).map(arg =>
-        (arg.startsWith('"') && arg.endsWith('"')) ||
-        (arg.startsWith('\'') && arg.endsWith('\''))
-        ? arg.slice(1, -1) : arg
-      )
+      this.args = parts
+        .slice(1)
+        .map(arg =>
+          (arg.startsWith('"') && arg.endsWith('"')) ||
+          (arg.startsWith("'") && arg.endsWith("'"))
+            ? arg.slice(1, -1)
+            : arg
+        )
     } else {
       this.command = address.command
       this.args = address.args
@@ -86,6 +83,30 @@ export class StdioAddress {
     let url = `stdio://${command}`
     if (args !== undefined) url += ' ' + args.join(' ')
     return url
+  }
+}
+
+/**
+ * An initializer for a `PipeAddress`.
+ */
+export type PipeAddressInitializer = string
+
+/**
+ * An address representing the base path to a pair
+ * of named pipes `<address>.in` and `<address>.out`.
+ * Other files may be associated with this address e.g. `<address>.lock`.
+ *
+ * @see {@link https://en.wikipedia.org/wiki/Named_pipe Wikipedia}
+ */
+export class PipeAddress extends String {
+  public readonly type: Transport.pipe = Transport.pipe
+
+  public constructor(address: PipeAddressInitializer) {
+    super(address.startsWith('pipe://') ? address.slice(7) : address)
+  }
+
+  public url(): string {
+    return `pipe://${this}`
   }
 }
 
@@ -338,6 +359,8 @@ export function parseAddress(address: string): Address | undefined {
       case 'http':
       case 'https':
         return new HttpAddress(address)
+      case 'pipe':
+        return new PipeAddress(address)
       case 'stdio':
         return new StdioAddress(address)
     }
