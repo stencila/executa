@@ -95,3 +95,10 @@ There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, fo
 ```bash
 npm run cli:debug -- compile test.md
 ```
+
+## FAQ
+
+#### Why is `@types/ws` a production dependency?
+
+This package has several dependents e.g `@stencila/basha`. If `@types/ws` is not installed as a production dependency, when you try to build dependent packages, you get the error "Cannot find type definition file for 'ws'.". By having it as a production dependency here, each dependent package does not have to install it
+as a development dependency.
