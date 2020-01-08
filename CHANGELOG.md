@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/stencila/executa/compare/v1.7.0...v1.7.1) (2020-01-08)
+
+
+### Bug Fixes
+
+* **Package:** Move @types/ws back to prod dependencies ([b5cce3f](https://github.com/stencila/executa/commit/b5cce3fb204145fe0c544b87297a5ca7a3851c26))
+
 # [1.7.0](https://github.com/stencila/executa/compare/v1.6.0...v1.7.0) (2020-01-08)
 
 
