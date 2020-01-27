@@ -1,3 +1,10 @@
+## [1.7.2](https://github.com/stencila/executa/compare/v1.7.1...v1.7.2) (2020-01-27)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/ws to v7 ([cc535f8](https://github.com/stencila/executa/commit/cc535f8ecc9cf0fa8f4444458271ccca1399e108))
+
 ## [1.7.1](https://github.com/stencila/executa/compare/v1.7.0...v1.7.1) (2020-01-08)
 
 
