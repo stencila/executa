@@ -65,7 +65,7 @@
     "@stencila/configa": "^0.4.0",
     "@stencila/logga": "^2.1.0",
     "@stencila/schema": "^0.32.0",
-    "@types/ws": "6.0.4",
+    "@types/ws": "7.2.0",
     "ajv": "^6.10.2",
     "chalk": "^3.0.0",
     "cli-highlight": "^2.1.4",
