@@ -81,7 +81,7 @@
     "isomorphic-ws": "^4.0.1",
     "jmespath": "^0.15.0",
     "length-prefixed-stream": "^2.0.0",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.0",
     "nanoid": "^2.1.6",
     "ora": "^4.0.3",
     "p-retry": "^4.2.0",
