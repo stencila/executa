@@ -101,7 +101,9 @@ export class Delegator extends Executor {
           const { job = uid.generate('jo').toString() } = params
           this.jobs[job] = peer
 
+          log.debug(`Delegating job "${job}" to peer "${peer.client?.id}"`)
           const result = await peer.call<Type>(method, params)
+          log.debug(`Received result for job "${job}"`)
 
           delete this.jobs[job]
           return result
