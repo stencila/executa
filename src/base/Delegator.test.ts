@@ -296,21 +296,23 @@ describe('Delegator', () => {
     // Delegates executable nodes to peers
 
     expect(
-      await delegator.execute(schema.codeChunk(DeepThought.question))
+      await delegator.execute(schema.codeChunk({ text: DeepThought.question }))
     ).toEqual({
       type: 'CodeChunk',
       text: DeepThought.question,
       outputs: [42]
     })
 
-    expect(await delegator.execute(schema.codeExpression('6 * 7'))).toEqual({
+    expect(
+      await delegator.execute(schema.codeExpression({ text: '6 * 7' }))
+    ).toEqual({
       type: 'CodeExpression',
       text: '6 * 7',
       output: 42
     })
 
     expect(
-      await delegator.execute(schema.codeExpression('2 * Math.PI'))
+      await delegator.execute(schema.codeExpression({ text: '2 * Math.PI' }))
     ).toEqual({
       type: 'CodeExpression',
       text: '2 * Math.PI',
@@ -323,13 +325,13 @@ describe('Delegator', () => {
     // Throws a capability error if we change a peers capabilities
     delegator.update(id1, { version: 1 })
     await expect(
-      delegator.execute(schema.codeChunk(DeepThought.question))
+      delegator.execute(schema.codeChunk({ text: DeepThought.question }))
     ).rejects.toThrow(CapabilityError)
 
     // Throws a capability error if we remove a peer
     delegator.remove(id2)
     await expect(
-      delegator.execute(schema.codeExpression('6 * 7'))
+      delegator.execute(schema.codeExpression({ text: '6 * 7' }))
     ).rejects.toThrow(CapabilityError)
   })
 })

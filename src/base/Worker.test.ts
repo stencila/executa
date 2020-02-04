@@ -144,8 +144,8 @@ describe('query', () => {
      *
      * `executa query authors[*].affiliations[*].name article.docx`
      */
-    const article = schema.article(
-      [
+    const article = schema.article({
+      authors: [
         schema.person({
           givenNames: ['Jane'],
           affiliations: [
@@ -163,8 +163,8 @@ describe('query', () => {
           ]
         })
       ],
-      'On treating documents as a database'
-    )
+      title: 'On treating documents as a database'
+    })
 
     expect(
       await worker.query(article, 'authors[*].affiliations[*].name[]')
@@ -175,7 +175,7 @@ describe('query', () => {
 describe('execute', () => {
   const ex = async (text: string) => {
     return worker.execute(
-      schema.codeExpression(text, { programmingLanguage: 'js' })
+      schema.codeExpression({ text, programmingLanguage: 'js' })
     )
   }
 
@@ -192,13 +192,15 @@ describe('execute', () => {
     expect(await error('')).toBeUndefined()
     expect(await error('6 * 7')).toBeUndefined()
     expect(await error('{')).toEqual([
-      schema.codeError('SyntaxError', {
-        message: 'Unexpected token )'
+      schema.codeError({
+        errorType: 'SyntaxError',
+        errorMessage: 'Unexpected token )'
       })
     ])
     expect(await error('foo')).toEqual([
-      schema.codeError('ReferenceError', {
-        message: 'foo is not defined'
+      schema.codeError({
+        errorType: 'ReferenceError',
+        errorMessage: 'foo is not defined'
       })
     ])
   })

@@ -361,9 +361,7 @@ function displayOutput(encoded: string, format: string): string {
  * Display an error
  */
 function displayError(error: schema.CodeError): string {
-  return chalk.red(
-    error.message !== undefined ? error.message : 'Unknown error'
-  )
+  return chalk.red(error.errorMessage ?? 'Unknown error')
 }
 
 /**

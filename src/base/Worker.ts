@@ -163,9 +163,10 @@ export class Worker extends Executor {
       } catch (error) {
         const { name, message, trace } = error
         node.errors = [
-          schema.codeError(name, {
-            message,
-            trace
+          schema.codeError({
+            errorType: name,
+            errorMessage: message,
+            stackTrace: trace
           })
         ]
       }

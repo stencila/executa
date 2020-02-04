@@ -63,9 +63,7 @@ export async function execute(
       text: string,
       lang: string
     ): Promise<schema.Node | undefined> => {
-      const chunk = schema.codeChunk(text, {
-        programmingLanguage: lang
-      })
+      const chunk = schema.codeChunk({ text, programmingLanguage: lang })
       const executed = await client.execute(chunk, session, undefined, job)
       const { outputs, errors } = executed
       if (errors !== undefined && errors.length > 0) throw errors[0]

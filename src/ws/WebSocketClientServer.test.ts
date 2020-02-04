@@ -44,13 +44,13 @@ test('WebSocketClient and WebSocketServer', async () => {
   {
     // JWT with session limits to be used for begin() method
     const sessionRequests = schema.softwareSession({
-      environment: schema.softwareEnvironment('some-environment'),
+      environment: schema.softwareEnvironment({ name: 'some-environment' }),
       cpuRequest: 4,
       memoryRequest: 5
     })
     const claims: Claims = {
       session: schema.softwareSession({
-        environment: schema.softwareEnvironment('some-environment'),
+        environment: schema.softwareEnvironment({ name: 'some-environment' }),
         cpuLimit: 2,
         memoryLimit: 2
       })
