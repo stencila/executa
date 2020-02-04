@@ -1,3 +1,14 @@
+## [1.7.3](https://github.com/stencila/executa/compare/v1.7.2...v1.7.3) (2020-02-04)
+
+
+### Bug Fixes
+
+* **deps:** update dependency @types/ws to v7.2.1 ([0727fcf](https://github.com/stencila/executa/commit/0727fcf5564ad11320c7c182279b29c0b26432e6))
+* **deps:** update dependency mkdirp to v1 ([473ad9c](https://github.com/stencila/executa/commit/473ad9cca440e74db30c72b29a22e5f3ff4c3024))
+* **Deps:** Upgrade to schema 0.37.0 ([b277fca](https://github.com/stencila/executa/commit/b277fcabbac5b2262b7cf79605697851017e1b25))
+* **execute:** Change into the docs directory ([28445f2](https://github.com/stencila/executa/commit/28445f27146e5f88fe290dd7fe1531bd11b2e71a))
+* **Manager:** Ensure deth first, awaited walking ([2ccea41](https://github.com/stencila/executa/commit/2ccea418311a720b71774d891122b4283e62a832))
+
 ## [1.7.2](https://github.com/stencila/executa/compare/v1.7.1...v1.7.2) (2020-01-27)
 
 
