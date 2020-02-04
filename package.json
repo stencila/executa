@@ -1,6 +1,6 @@
 {
   "name": "@stencila/executa",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "description": "Document executors: protocols, transports and reference implementations",
   "main": "./dist/lib/index.js",
   "types": "./dist/lib/index.d.ts",
@@ -35,10 +35,10 @@
   "author": "Executa contributors (https://github.com/stencila/executa/graphs/contributors)",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@babel/preset-typescript": "7.7.7",
+    "@babel/preset-typescript": "7.8.3",
     "@gerrit0/typedoc": "0.15.12",
-    "@stencila/dev-config": "1.4.5",
-    "@types/jest": "24.0.25",
+    "@stencila/dev-config": "1.4.10",
+    "@types/jest": "25.1.1",
     "@types/jmespath": "0.15.0",
     "@types/json-schema": "7.0.4",
     "@types/lolex": "5.1.0",
@@ -46,26 +46,26 @@
     "@types/nanoid": "2.1.0",
     "@types/split2": "2.1.6",
     "depcheck": "0.9.1",
-    "jest": "24.9.0",
+    "jest": "25.1.0",
     "lolex": "5.1.2",
     "markdown-toc": "1.2.0",
-    "rollup": "1.28.0",
+    "rollup": "1.30.1",
     "rollup-plugin-babel": "4.3.3",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-json": "4.0.0",
     "rollup-plugin-node-builtins": "2.1.2",
     "rollup-plugin-node-resolve": "5.2.0",
     "rollup-plugin-typescript2": "0.25.3",
-    "ts-jest": "24.2.0",
-    "ts-node": "8.5.4",
+    "ts-jest": "25.1.0",
+    "ts-node": "8.6.2",
     "ts-node-dev": "1.0.0-pre.44",
-    "typescript": "3.7.4"
+    "typescript": "3.7.5"
   },
   "dependencies": {
     "@stencila/configa": "^0.4.0",
     "@stencila/logga": "^2.1.0",
     "@stencila/schema": "^0.32.0",
-    "@types/ws": "6.0.4",
+    "@types/ws": "7.2.0",
     "ajv": "^6.10.2",
     "chalk": "^3.0.0",
     "cli-highlight": "^2.1.4",
@@ -81,7 +81,7 @@
     "isomorphic-ws": "^4.0.1",
     "jmespath": "^0.15.0",
     "length-prefixed-stream": "^2.0.0",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.0",
     "nanoid": "^2.1.6",
     "ora": "^4.0.3",
     "p-retry": "^4.2.0",
@@ -138,6 +138,9 @@
   "renovate": {
     "extends": [
       "@stencila"
+    ],
+    "schedule": [
+      "before 3am on Tuesday"
     ]
   }
 }
