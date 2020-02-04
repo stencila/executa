@@ -1,9 +1,10 @@
 import { Logger } from '@stencila/logga'
 import chalk from 'chalk'
-import { Executor } from '../base/Executor'
-import { repl } from './repl'
+import path from 'path'
 import { schema } from '..'
 import { Client } from '../base/Client'
+import { Executor } from '../base/Executor'
+import { repl } from './repl'
 
 /**
  * Execute a document
@@ -14,14 +15,25 @@ export async function execute(
   args: string[],
   options: { [key: string]: any }
 ): Promise<void> {
-  const source = args[1]
+  let source: string | undefined = args[1]
+  if (source !== undefined) source = path.resolve(source)
+
   let dest: string | undefined = args[2]
+  if (dest !== undefined) dest = path.resolve(dest)
+
   let { from, to, lang, repl: repl_ = false, debug } = options
 
   let executed: schema.Node
   if (source !== undefined) {
     // Execute the source document
+
     const decoded = await executor.decode(source, from)
+
+    // Change into the directory of the source document, so that
+    // relative paths, including those within `CodeChunks` that
+    // are executed withing child processes, work.
+    process.chdir(path.dirname(source))
+
     const compiled = await executor.compile(decoded)
     executed = await executor.execute(compiled)
   } else {
@@ -30,7 +42,7 @@ export async function execute(
     executed = null
   }
 
-  if (dest === undefined) {
+  if (dest === undefined && repl_ === false) {
     // No destination specified so default to the source
     dest = source
     if (to === undefined) to = from
@@ -46,7 +58,7 @@ export async function execute(
     // as a code chunk of the current language
     const evaluate = async (
       client: Client,
-      request: string,
+      job: string,
       doc: schema.Node,
       text: string,
       lang: string
@@ -54,7 +66,7 @@ export async function execute(
       const chunk = schema.codeChunk(text, {
         programmingLanguage: lang
       })
-      const executed = await client.execute(chunk, session, undefined, request)
+      const executed = await client.execute(chunk, session, undefined, job)
       const { outputs, errors } = executed
       if (errors !== undefined && errors.length > 0) throw errors[0]
       return outputs
@@ -70,8 +82,7 @@ export async function execute(
       debug
     })
   } else {
-    const format = to !== undefined ? to : 'json'
-    const encoded = await executor.encode(executed, dest, format)
+    const encoded = await executor.encode(executed, dest, to)
     if (dest === undefined) console.log(encoded)
   }
 }
