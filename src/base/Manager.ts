@@ -121,6 +121,20 @@ export class Manager extends Listener {
     return Promise.resolve(node)
   }
 
+  /**
+   * Do a depth first walk of a node applying a transformation function.
+   *
+   * This function has three characteristics to be aware of
+   *   - recursively traverses **all** nodes, including the nodes
+   *     resulting from transformation
+   *   - awaits for the result of transformation of each child, in order
+   *   - depth first
+   *
+   * These characteristics make it suitable for doing an "in order" traversal
+   * of a node e.g. executing the nodes in a document in the order that they appear.
+   * But in some cases it may be better to use a different function e.g. in
+   * cases where you wish to traverse all nodes but the order does not matter.
+   */
   protected async walk<NodeType extends schema.Node>(
     root: NodeType,
     transformer: (node: schema.Node) => Promise<schema.Node>
@@ -129,12 +143,14 @@ export class Manager extends Listener {
     async function walk(node: schema.Node): Promise<schema.Node> {
       const transformed = await transformer(node)
 
-      if (transformed !== node) return transformed
-
       if (transformed === undefined || schema.isPrimitive(transformed))
         return transformed
 
-      if (Array.isArray(transformed)) return Promise.all(transformed.map(walk))
+      if (Array.isArray(transformed))
+        return transformed.reduce(
+          async (prev, child) => [...(await prev), await walk(child)],
+          Promise.resolve([])
+        )
 
       return Object.entries(transformed).reduce(
         async (prev, [key, child]) => ({
