@@ -96,6 +96,34 @@ There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, fo
 npm run cli:debug -- compile test.md
 ```
 
+### Integration testing with Docker
+
+The [`Dockerfile`][Dockerfile] installs all know executor packages (e.g. `basha`, `pyla`) into a container so that they can be easily be tested for API compatibility (with one another, and clients). Get it from Docker Hub,
+
+```bash
+docker pull stencila/executa
+```
+
+You can build it locally if you prefer:
+
+```bash
+npm run docker:build
+```
+
+Or, to _force_ the latest version of all executor packages to be installed:
+
+```bash
+npm run docker:build:latest
+```
+
+Then run it using:
+
+```bash
+npm run docker:run
+```
+
+That will serve Executa from within the container and make it available at http://localhost:9000 and ws://localhost:9000.
+
 ## FAQ
 
 #### Why is `@types/ws` a production dependency?
