@@ -5,7 +5,6 @@
 # For docs on building and pushing Docker images
 #   https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-
 jobs:
   - job: deployDocker
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
@@ -21,4 +20,5 @@ jobs:
           repository: stencila/executa
           tags: |
             $(Build.BuildId)
+            $(Build.BuildNumber)
             latest
