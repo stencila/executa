@@ -1,28 +1,24 @@
-# Build and push Docker image 
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+# Azure Pipelines config
+#
+# For docs on multi-platform setup see:
+#   https://docs.microsoft.com/en-us/azure/devops/pipelines/get-started-multiplatform?view=azure-devops
+# For docs on building and pushing Docker images
+#   https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-trigger:
-- master
 
-resources:
-- repo: self
-
-variables:
-  tag: '$(Build.BuildId)'
-
-stages:
-- stage: Build
-  displayName: Build image
-  jobs:  
-  - job: Build
-    displayName: Build
+jobs:
+  - job: deployDocker
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: ubuntu-latest
     steps:
-    - task: Docker@2
-      displayName: Build an image
-      inputs:
-        command: build
-        dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          $(tag)
+      - task: Docker@2
+        displayName: Build image
+        inputs:
+          command: buildAndPush
+          containerRegistry: DockerHub
+          repository: stencila/executa
+          tags: |
+            $(Build.BuildId)
+            $(Date:yyyy-MM-ddTHH:mm:ss)
+            latest
