@@ -13,9 +13,10 @@ jobs:
       vmImage: ubuntu-latest
     steps:
       - task: Docker@2
-        displayName: Build image
+        displayName: Build and push image
         inputs:
           command: buildAndPush
+          dockerfile: Dockerfile
           containerRegistry: DockerHub
           repository: stencila/executa
           tags: |
