@@ -98,7 +98,8 @@ npm run cli:debug -- compile test.md
 
 ### Integration testing with Docker
 
-The [`Dockerfile`][Dockerfile] installs all know executor packages (e.g. `basha`, `pyla`) into a container so that they can be easily be tested for API compatibility (with one another, and clients). Get it from Docker Hub,
+The [`Dockerfile`](Dockerfile) installs all known executor packages (e.g. `basha`, `pyla`) into a container so that they
+can be easily tested for API compatibility (with one another, and clients). Get it from Docker Hub,
 
 ```bash
 docker pull stencila/executa
@@ -128,5 +129,6 @@ That will serve Executa from within the container and make it available at http:
 
 #### Why is `@types/ws` a production dependency?
 
-This package has several dependents e.g `@stencila/basha`. If `@types/ws` is not installed as a production dependency, when you try to build dependent packages, you get the error "Cannot find type definition file for 'ws'.". By having it as a production dependency here, each dependent package does not have to install it
-as a development dependency.
+This package has several dependents e.g `@stencila/basha`. If `@types/ws` is not installed as a production dependency,
+when you try to build dependent packages, you get the error "Cannot find type definition file for 'ws'.". By having it
+as a production dependency here, each dependent package does not have to install it as a development dependency.
