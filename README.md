@@ -3,6 +3,7 @@
 > Document executors: protocols, transports and reference implementations
 
 [![Build status](https://travis-ci.org/stencila/executa.svg?branch=master)](https://travis-ci.org/stencila/executa)
+[![Build Status](https://dev.azure.com/stencila/stencila/_apis/build/status/stencila.executa?branchName=master)](https://dev.azure.com/stencila/stencila/_build/latest?definitionId=4&branchName=master)
 [![Code coverage](https://codecov.io/gh/stencila/executa/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/executa)
 [![NPM](https://img.shields.io/npm/v/@stencila/executa.svg?style=flat)](https://www.npmjs.com/package/@stencila/executa)
 
@@ -12,7 +13,7 @@
 npm install --global @stencila/executa
 ```
 
-## Usage
+## Use
 
 <!-- prettier-ignore-start -->
 <!-- CONFIGA-USAGE-BEGIN -->
@@ -62,6 +63,48 @@ fail with an error response to client.
 <!-- CONFIGA-TABLE-END -->
 <!-- prettier-ignore-end -->
 
+### Docker images
+
+The base [`Dockerfile`](Dockerfile) installs all known executor packages (e.g. `basha`, `pyla`) into a container so that they
+can be easily tested for API compatibility (with one another, and clients). It is built, with the latest versions of those packages, and pushed to [Docker Hub](https://hub.docker.com/repository/docker/stencila/executa), as part of continuous integration.
+
+#### Getting the image
+
+You can get the latest version using
+
+```bash
+docker pull stencila/executa
+```
+
+Or, grab a particular, date stamped, build e.g. the first build on 2020-02-10:
+
+```bash
+docker pull stencila/executa:20200210.1
+```
+
+Alternatively, you can build the image locally:
+
+```bash
+npm run docker:build
+```
+
+Or, to _force_ the latest version of all executor packages to be installed:
+
+```bash
+npm run docker:build:latest
+```
+
+#### Running the image
+
+Run the image using:
+
+```bash
+npm run docker:run
+```
+
+That will serve Executa from within the container and make it available at http://localhost:9000 and ws://localhost:9000.
+
+
 ## Develop
 
 ### Testing with the REPL
@@ -95,35 +138,6 @@ There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, fo
 ```bash
 npm run cli:debug -- compile test.md
 ```
-
-### Integration testing with Docker
-
-The [`Dockerfile`](Dockerfile) installs all known executor packages (e.g. `basha`, `pyla`) into a container so that they
-can be easily tested for API compatibility (with one another, and clients). Get it from Docker Hub,
-
-```bash
-docker pull stencila/executa
-```
-
-You can build it locally if you prefer:
-
-```bash
-npm run docker:build
-```
-
-Or, to _force_ the latest version of all executor packages to be installed:
-
-```bash
-npm run docker:build:latest
-```
-
-Then run it using:
-
-```bash
-npm run docker:run
-```
-
-That will serve Executa from within the container and make it available at http://localhost:9000 and ws://localhost:9000.
 
 ## FAQ
 

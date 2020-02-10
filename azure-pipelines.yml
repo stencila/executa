@@ -11,8 +11,19 @@ jobs:
     pool:
       vmImage: ubuntu-latest
     steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: 12.x
+        displayName: Install Node.js
+
+      - script: npm install
+        displayName: Install dependencies
+
+      - script: npm run envs
+        displayName: Compile Dockerfiles
+
       - task: Docker@2
-        displayName: Build and push base image
+        displayName: Build base image
         inputs:
           command: buildAndPush
           dockerfile: Dockerfile
@@ -22,19 +33,8 @@ jobs:
             $(Build.BuildNumber)
             latest
 
-      - task: NodeTool@0
-        inputs:
-          versionSpec: 12.x
-        displayName: Install Node.js
-
-      - script: npm install
-        displayName: Install dependencies
-
-      - script: npm run envs:midi
-        displayName: Compile `midi` Dockerfile
-
       - task: Docker@2
-        displayName: Build and push `midi` image
+        displayName: Build midi image
         inputs:
           command: buildAndPush
           dockerfile: envs/midi/.Dockerfile
