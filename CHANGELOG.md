@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/stencila/executa/compare/v1.7.3...v1.8.0) (2020-02-10)
+
+
+### Features
+
+* **Environments:** Add initial version of `midi` environment ([fb68cfc](https://github.com/stencila/executa/commit/fb68cfc473e156af384537a3df5246bf2f979ede))
+
 ## [1.7.3](https://github.com/stencila/executa/compare/v1.7.2...v1.7.3) (2020-02-04)
 
 
