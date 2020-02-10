@@ -33,13 +33,16 @@
     "docs:readme": "npm run docs:readme:config && npm run docs:readme:toc",
     "docs:readme:config": "configa readme",
     "docs:readme:toc": "markdown-toc -i --maxdepth=4 README.md",
-    "docs:api": "typedoc --options typedoc.js ./src"
+    "docs:api": "typedoc --options typedoc.js ./src",
+    "envs": "npm run envs:midi",
+    "envs:midi": "dockta compile --from stencila/executa envs/midi"
   },
   "author": "Executa contributors (https://github.com/stencila/executa/graphs/contributors)",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/preset-typescript": "7.8.3",
     "@stencila/dev-config": "1.4.11",
+    "@stencila/dockta": "^0.16.3",
     "@types/jest": "25.1.1",
     "@types/jmespath": "0.15.0",
     "@types/json-schema": "7.0.4",

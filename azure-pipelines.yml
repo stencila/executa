@@ -6,18 +6,40 @@
 #   https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 jobs:
-  - job: deployDocker
+  - job: dockers
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
     pool:
       vmImage: ubuntu-latest
     steps:
       - task: Docker@2
-        displayName: Build and push image
+        displayName: Build and push base image
         inputs:
           command: buildAndPush
           dockerfile: Dockerfile
           containerRegistry: DockerHub
           repository: stencila/executa
+          tags: |
+            $(Build.BuildNumber)
+            latest
+
+      - task: NodeTool@0
+        inputs:
+          versionSpec: 12.x
+        displayName: Install Node.js
+
+      - script: npm install
+        displayName: Install dependencies
+
+      - script: npm run envs:midi
+        displayName: Compile `midi` Dockerfile
+
+      - task: Docker@2
+        displayName: Build and push `midi` image
+        inputs:
+          command: buildAndPush
+          dockerfile: envs/midi/.Dockerfile
+          containerRegistry: DockerHub
+          repository: stencila/executa-midi
           tags: |
             $(Build.BuildNumber)
             latest
