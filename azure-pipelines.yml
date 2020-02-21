@@ -43,3 +43,11 @@ jobs:
           tags: |
             $(Build.BuildNumber)
             latest
+
+schedules:
+  - cron: "0 0 * * *"
+    displayName: Daily builds
+    branches:
+      include:
+        - master
+    always: true
