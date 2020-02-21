@@ -421,7 +421,7 @@ export abstract class Executor {
   public notify(
     level: string,
     message: string,
-    node?: Node,
+    node?: schema.Node,
     clients?: string[]
   ): Promise<void> {
     throw new InternalError(
@@ -436,7 +436,7 @@ export abstract class Executor {
    * @param message The notification message
    * @param node The node to which this notification relates e.g. a `SoftwareSession`
    */
-  public notified(level: string, message: string, node?: Node): void {
+  public notified(level: string, message: string, node?: schema.Node): void {
     switch (level) {
       case 'debug':
       case 'info':
