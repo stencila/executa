@@ -33,6 +33,7 @@ export { VsockServer } from './vsock/VsockServer'
 export { TcpAddress } from './base/Transports'
 export { TcpClient } from './tcp/TcpClient'
 export { TcpServer, TcpConnection } from './tcp/TcpServer'
+export { globalIP, localIP } from './tcp/util'
 
 export { HttpAddress } from './base/Transports'
 export { HttpClient } from './http/HttpClient'
