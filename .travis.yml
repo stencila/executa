@@ -1,6 +1,7 @@
 language: node_js
 node_js:
   - '10'
+  - '12'
 
 os:
   - linux
@@ -26,7 +27,7 @@ deploy:
     local-dir: docs
     on:
       branch: master
-      condition: $TRAVIS_OS_NAME = linux
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_NODE_VERSION = '12'
 
   # Do a semantic release (only on Linux)
   - provider: script
@@ -34,5 +35,5 @@ deploy:
     script: npx semantic-release
     on:
       branch: master
-      condition: $TRAVIS_OS_NAME = linux
+      condition: $TRAVIS_OS_NAME = linux && $TRAVIS_NODE_VERSION = '12'
 
