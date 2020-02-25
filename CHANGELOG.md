@@ -1,3 +1,19 @@
+# [1.9.0](https://github.com/stencila/executa/compare/v1.8.0...v1.9.0) (2020-02-25)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/configa to ^0.4.3 ([c4c40d6](https://github.com/stencila/executa/commit/c4c40d6a37ba64722ae7adde2af3fc9f06c5a648))
+* **dependencies:** update dependency @stencila/schema ([3401848](https://github.com/stencila/executa/commit/3401848314ff6bff53341b2bcfe4cfa645eae87f))
+* **dependencies:** update dependency ajv to ^6.12.0 ([2f29cea](https://github.com/stencila/executa/commit/2f29cea2179ab9c255b355f96e9563f04ee275ba))
+* **dependencies:** update dependency fastify-cors to ^3.0.2 ([d401fa8](https://github.com/stencila/executa/commit/d401fa88481914d8713cac77e2d67c13bc87cc89))
+* **Notification:** Use correct Node type ([a2c6f78](https://github.com/stencila/executa/commit/a2c6f78cad29f7bd29acd7347f756dae44fba23a))
+
+
+### Features
+
+* **TCP:** Export globalIP and localIP functions ([7e481a7](https://github.com/stencila/executa/commit/7e481a775a4eeb42f3472f766bdd16d1ad15d5df))
+
 # [1.8.0](https://github.com/stencila/executa/compare/v1.7.3...v1.8.0) (2020-02-10)
 
 
