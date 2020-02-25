@@ -65,8 +65,7 @@ fail with an error response to client.
 
 ### Docker images
 
-The base [`Dockerfile`](Dockerfile) installs all known executor packages (e.g. `basha`, `pyla`) into a container so that they
-can be easily tested for API compatibility (with one another, and clients). It is built, with the latest versions of those packages, and pushed to [Docker Hub](https://hub.docker.com/repository/docker/stencila/executa), as part of continuous integration.
+The base [`Dockerfile`](Dockerfile) installs all known executor packages (e.g. `basha`, `pyla`) into a container so that they can be easily tested for API compatibility (with one another, and clients). It is built, with the latest versions of those packages, and pushed to [Docker Hub](https://hub.docker.com/repository/docker/stencila/executa), on each push to master and daily at midnight UTC.
 
 #### Getting the image
 
@@ -103,7 +102,6 @@ npm run docker:run
 ```
 
 That will serve Executa from within the container and make it available at http://localhost:9000 and ws://localhost:9000.
-
 
 ## Develop
 
