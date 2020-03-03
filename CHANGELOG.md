@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/stencila/executa/compare/v1.9.0...v1.9.1) (2020-03-03)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/configa to ^0.4.5 ([c4c3af7](https://github.com/stencila/executa/commit/c4c3af708c8151e737e0dff23d7b86b7cdf03b12))
+
 # [1.9.0](https://github.com/stencila/executa/compare/v1.8.0...v1.9.0) (2020-02-25)
 
 
