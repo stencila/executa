@@ -1,3 +1,13 @@
+## [1.9.2](https://github.com/stencila/executa/compare/v1.9.1...v1.9.2) (2020-03-08)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/schema to ^0.41.1 ([e09935b](https://github.com/stencila/executa/commit/e09935b186ea309606f3c3e29891932953116353))
+* **dependencies:** update dependency @types/ws to v7.2.2 ([07dc0d8](https://github.com/stencila/executa/commit/07dc0d8993143ae86e1d1d9704ed8068f3a711bb))
+* **Dependencies:** Update nanoid ([aad268d](https://github.com/stencila/executa/commit/aad268da6a1975525c1f3a50b6d9f804bb156775))
+* **Dependencies:** Update schema and rollup ([5635f3f](https://github.com/stencila/executa/commit/5635f3f2984cb1ec4a494bef4ec7cf451f94fcff))
+
 ## [1.9.1](https://github.com/stencila/executa/compare/v1.9.0...v1.9.1) (2020-03-03)
 
 
