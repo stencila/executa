@@ -1,3 +1,14 @@
+## [1.9.3](https://github.com/stencila/executa/compare/v1.9.2...v1.9.3) (2020-03-17)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/configa to ^0.4.6 ([878b761](https://github.com/stencila/executa/commit/878b76126ad6050ea0e57ebe532ef5b67b338c18))
+* **dependencies:** update dependency @stencila/schema to ^0.42.1 ([1cc6a16](https://github.com/stencila/executa/commit/1cc6a1669a24c6363efa5036f93bb1dffe3c06e2))
+* **dependencies:** update dependency fastify-static to ^2.6.0 ([b8f61c3](https://github.com/stencila/executa/commit/b8f61c3fc0ea78e64ecbc6994d5df643d2d1c253))
+* **dependencies:** update dependency fastify-websocket to ^1.1.1 ([101bc4c](https://github.com/stencila/executa/commit/101bc4c37a16aeae372991336c2fbcd4aaa40cc5))
+* **dependencies:** update dependency mkdirp to ^1.0.3 ([5ce7a93](https://github.com/stencila/executa/commit/5ce7a93de603af795dcb4c5e90ee060efd626c83))
+
 ## [1.9.2](https://github.com/stencila/executa/compare/v1.9.1...v1.9.2) (2020-03-08)
 
 
