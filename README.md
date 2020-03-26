@@ -103,6 +103,24 @@ npm run docker:run
 
 That will serve Executa from within the container and make it available at http://localhost:9000 and ws://localhost:9000.
 
+#### Environment images
+
+The `stencila/executa` image is the base for other images, each of which add popular packages for various programming languages. See the [`env`](env) folder for the definitions of those environments. To run one of those, use the `docker:run-image` command followed by the name of the image:
+
+```bash
+npm run docker:run-image stencila/executa-midi
+```
+
+Or, if you don't have `npm` installed:
+
+```bash
+docker run -it --init --rm --cap-add=SYS_ADMIN -p 9000:9000 "stencila/executa-midi"
+```
+
+#### Image versions
+
+All images are built at least nightly (so that they will have the latest versions of packages installed in them) and tagged with a dated build number. See the [Docker Hub](https://hub.docker.com/orgs/stencila/repositories) for the latest versions.
+
 ## Develop
 
 ### Testing with the REPL
