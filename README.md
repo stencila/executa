@@ -105,7 +105,7 @@ That will serve Executa from within the container and make it available at http:
 
 #### Environment images
 
-The `stencila/executa` image is the base for other images, each of which add popular packages for various programming languages. See the [`env`](env) folder for the definitions of those environments. To run one of those, use the `docker:run-image` command followed by the name of the image:
+The `stencila/executa` image is the base for other images, each of which add popular packages for various programming languages. See the [`env`](envs) folder for the definitions of those environments. To run one of those, use the `docker:run-image` command followed by the name of the image:
 
 ```bash
 npm run docker:run-image stencila/executa-midi
@@ -119,7 +119,10 @@ docker run -it --init --rm --cap-add=SYS_ADMIN -p 9000:9000 "stencila/executa-mi
 
 #### Image versions
 
-All images are built at least nightly (so that they will have the latest versions of packages installed in them) and tagged with a dated build number. See the [Docker Hub](https://hub.docker.com/orgs/stencila/repositories) for the latest versions.
+All images are built at least nightly (so that they will have the latest versions of packages installed in them) and tagged with a dated build number. See the Docker Hub for the latest versions:
+
+- [`stencila/executa`](https://hub.docker.com/r/stencila/executa/tags?ordering=last_updated)
+- [`stencila/executa-midi`](https://hub.docker.com/r/stencila/executa-midi/tags?ordering=last_updated)
 
 ## Develop
 
