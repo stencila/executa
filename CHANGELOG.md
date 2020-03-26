@@ -1,3 +1,11 @@
+## [1.9.4](https://github.com/stencila/executa/compare/v1.9.3...v1.9.4) (2020-03-26)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/configa to ^0.4.7 ([2b4a672](https://github.com/stencila/executa/commit/2b4a672930f41d2b911b7ca79eb1a3644a2b8883))
+* **dependencies:** update dependency @types/ws to v7.2.3 ([a7c590d](https://github.com/stencila/executa/commit/a7c590d7ac9e72d8398cf545c092701a26470c34))
+
 ## [1.9.3](https://github.com/stencila/executa/compare/v1.9.2...v1.9.3) (2020-03-17)
 
 
