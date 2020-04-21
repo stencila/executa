@@ -206,7 +206,7 @@ export class HttpServer extends TcpServer {
       .send(
         new JsonRpcError(
           JsonRpcErrorCode.InvalidRequest,
-          `Route not found: "${request.req.url}"`
+          `Route not found: ${request.req.method} ${request.req.url}`
         )
       )
   }

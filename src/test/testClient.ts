@@ -64,7 +64,7 @@ export const testClient = async (client: Client): Promise<void> => {
     client instanceof HttpClient && client.address.protocol === 'restful'
       ? new JsonRpcError(
           JsonRpcErrorCode.InvalidRequest,
-          'Route not found: "/foo"'
+          'Route not found: POST /foo'
         )
       : new JsonRpcError(
           JsonRpcErrorCode.MethodNotFound,
