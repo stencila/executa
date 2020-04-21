@@ -135,6 +135,12 @@ export class Worker extends Executor {
     return super.query(node, query, lang)
   }
 
+  // Enclose in braces to avoid `{}` to be confused with a block.
+  // This function cannot be inside `execute` as Babel complains with:
+  // `Calling eval from inside an async function is not supported`
+  // eslint-disable-next-line no-eval
+  private evaluate = (text: string): schema.Entity => eval(`(${text})`)
+
   /**
    * @override Override of {@link Executor.execute} that
    * provides for execution of Javascript expressions.
@@ -157,9 +163,7 @@ export class Worker extends Executor {
       const { text } = node
       if (text === undefined || text.trim().length === 0) return node
       try {
-        // Enclose in braces to avoid `{}` to be confused with a block.
-        // eslint-disable-next-line no-eval
-        node.output = eval(`(${text})`)
+        node.output = this.evaluate(text)
       } catch (error) {
         const { name, message, trace } = error
         node.errors = [

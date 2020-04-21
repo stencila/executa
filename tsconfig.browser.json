@@ -1,9 +1,7 @@
 {
-  "extends": "@stencila/dev-config/tsconfig.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "moduleResolution": "node",
-    "module": "esnext",
-    "experimentalDecorators": true
+    "outDir": "dist/browser"
   },
   "include": ["src/**/*.ts"]
 }
