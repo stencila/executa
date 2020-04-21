@@ -1,3 +1,21 @@
+# [1.10.0](https://github.com/stencila/executa/compare/v1.9.5...v1.10.0) (2020-04-21)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency ajv to ^6.12.2 ([6173d3d](https://github.com/stencila/executa/commit/6173d3d6fffaf5446bf29cf2c9885c289dfe14b1))
+* **dependencies:** update dependency fastify-jwt to ^1.3.1 ([0ebc817](https://github.com/stencila/executa/commit/0ebc8172c6e94bd501a9fdec788171fa38592e1e))
+* **dependencies:** update dependency nanoid to v3 ([3788b07](https://github.com/stencila/executa/commit/3788b07cb46f2da28881caba901b7c1c5635f8e7))
+* **Dependencies:** Upgrade Schema and Logga ([2eef213](https://github.com/stencila/executa/commit/2eef213b156a0b45213cab1a2ac088a14e9fe753)), closes [#121](https://github.com/stencila/executa/issues/121)
+* **HttpServer:** Add HTTP method to error message ([b305027](https://github.com/stencila/executa/commit/b3050275e58c87dbd06e73a9e8481fe6d2478890))
+* **HttpServer:** Modify for added type definition for request.user ([7df6b2d](https://github.com/stencila/executa/commit/7df6b2d3a345e2b6a9fc95b07dc94e5fd2b8d876))
+* **Unique ids:** upgrade to nanoid v3 and add separating dots ([eba4462](https://github.com/stencila/executa/commit/eba4462bbdfcabe2920bc09545185d573b76c957))
+
+
+### Features
+
+* **Build:** Create & publish modern JS builds ([428e8d0](https://github.com/stencila/executa/commit/428e8d0d0c8c1d7e1c923057d7a8d009a69d349f))
+
 ## [1.9.5](https://github.com/stencila/executa/compare/v1.9.4...v1.9.5) (2020-04-21)
 
 
