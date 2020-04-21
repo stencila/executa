@@ -111,7 +111,7 @@ export class HttpServer extends TcpServer {
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
       const { body, user } = request
-      const claims = typeof user == 'object' ? user : {}
+      const claims = typeof user === 'object' ? user : {}
       reply.send(await this.receive(body, claims, false))
     })
 
@@ -122,7 +122,7 @@ export class HttpServer extends TcpServer {
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
         const { body, user } = request
-        const claims = typeof user == 'object' ? user : {}
+        const claims = typeof user === 'object' ? user : {}
         const jsonRpcRequest = new JsonRpcRequest(method, body)
         const jsonRpcResponse = await this.receive(
           jsonRpcRequest,
