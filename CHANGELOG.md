@@ -1,3 +1,14 @@
+## [1.9.5](https://github.com/stencila/executa/compare/v1.9.4...v1.9.5) (2020-04-21)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @types/ws to v7.2.4 ([a1e9bfd](https://github.com/stencila/executa/commit/a1e9bfdac756c974e6a9f3ad7094a1b501df5615))
+* **dependencies:** update dependency chalk to v4 ([651d498](https://github.com/stencila/executa/commit/651d4984846810fcbbdf9e3a260cfff2b8dbd05d))
+* **dependencies:** update dependency fastify-static to ^2.7.0 ([48befa2](https://github.com/stencila/executa/commit/48befa294c162fa6872dac109598aa02cc5ad539))
+* **dependencies:** update dependency fastify-websocket to ^1.1.2 ([7ac188f](https://github.com/stencila/executa/commit/7ac188f5dbe0aa255e9d81f9ac84704a80614b2d))
+* **dependencies:** update dependency mkdirp to ^1.0.4 ([aa97492](https://github.com/stencila/executa/commit/aa974921c220be78031baf1f05cc51ce058e6f50))
+
 ## [1.9.4](https://github.com/stencila/executa/compare/v1.9.3...v1.9.4) (2020-03-26)
 
 
