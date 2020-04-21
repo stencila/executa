@@ -47,7 +47,7 @@ export { cli }
 export { uid }
 
 // The following re-exports are provided for dependant packages
-// so that they can re-use them instead on creating another dependency
+// so that they can re-use them instead of creating another dependency
 
 export { logga }
 export { schema }

@@ -44,7 +44,7 @@ RUN npm install --global @stencila/basha
 RUN pip3 install stencila-pyla
 RUN R -e 'install.packages("remotes"); remotes::install_github("stencila/rasta")'
 
-# Setup container user prior to installing registering executors
+# Setup container user prior to registering executors
 RUN useradd --create-home guest
 WORKDIR /home/guest
 USER guest
