@@ -1,18 +1,16 @@
 import { getLogger } from '@stencila/logga'
-import * as schema from '@stencila/schema'
+import { softwareSession, SoftwareSession, CodeChunk } from '@stencila/schema'
 import { WebSocketAddressInitializer } from '../base/Transports'
 import { WebSocketClient } from '../ws/WebSocketClient'
 
 const log = getLogger('executa:browser')
 
 let client: WebSocketClient
-let session: null | schema.SoftwareSession = null
+let session: null | SoftwareSession = null
 
-const executeCodeChunk = async (
-  codeChunk: schema.CodeChunk
-): Promise<schema.CodeChunk> => {
+const executeCodeChunk = async (codeChunk: CodeChunk): Promise<CodeChunk> => {
   if (session === null) {
-    session = await client.begin(schema.softwareSession())
+    session = await client.begin(softwareSession())
   }
   try {
     return client.execute(codeChunk, session)

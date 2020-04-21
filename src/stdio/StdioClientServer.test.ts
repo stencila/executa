@@ -14,7 +14,12 @@ jest.setTimeout(30 * 1000)
 
 describe('StdioClient and StdioServer', () => {
   const testServer = (arg = ''): string =>
-    `npx ts-node --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
+    `npx ts-node -P ${path.join(
+      __dirname,
+      '..',
+      '..',
+      'tsconfig.test.json'
+    )} --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
 
   const nextClientMessages = async (count = 1) =>
     (await nextLogData(['executa:client', 'executa:stdio:client'], count)).map(

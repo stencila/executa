@@ -10,7 +10,7 @@
  * not for end users.
  */
 import { Method, Params } from './Executor'
-import * as schema from '@stencila/schema'
+import { isEntity, nodeType } from '@stencila/schema'
 
 export class InternalError extends Error {
   constructor(message: string) {
@@ -71,8 +71,8 @@ export class CapabilityError extends Error {
       Object.entries(params)
         .map(([name, value]) => {
           let repr
-          if (schema.isEntity(value)) {
-            repr = `<${schema.nodeType(value)}>`
+          if (isEntity(value)) {
+            repr = `<${nodeType(value)}>`
           } else {
             repr = JSON.stringify(value)
             if (repr !== undefined && repr.length > 20) {
