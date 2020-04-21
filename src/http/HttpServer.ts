@@ -110,8 +110,8 @@ export class HttpServer extends TcpServer {
     // in the bodies.
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
-      // @ts-ignore that user does not exist on request
-      const { body, user: claims = {} } = request
+      const { body, user } = request
+      const claims = typeof user == 'object' ? user : {}
       reply.send(await this.receive(body, claims, false))
     })
 
@@ -121,8 +121,8 @@ export class HttpServer extends TcpServer {
     // bare, un-enveloped results and errors
     const wrap = (method: string) => {
       return async (request: FastifyRequest, reply: FastifyReply<any>) => {
-        // @ts-ignore that user does not exist on request
-        const { body, user: claims = {} } = request
+        const { body, user } = request
+        const claims = typeof user == 'object' ? user : {}
         const jsonRpcRequest = new JsonRpcRequest(method, body)
         const jsonRpcResponse = await this.receive(
           jsonRpcRequest,
