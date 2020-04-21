@@ -30,10 +30,10 @@ export abstract class StreamServer extends Server {
     decoder.on('data', (data: Buffer) => {
       const json = data.toString()
       this.receive(json)
-        .then(response => {
+        .then((response) => {
           if (response !== undefined) this.send(response)
         })
-        .catch(error => log.error(error))
+        .catch((error) => log.error(error))
     })
 
     this.encoder.pipe(outgoing)

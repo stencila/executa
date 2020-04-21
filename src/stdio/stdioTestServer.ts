@@ -37,6 +37,6 @@ if (arg === 'crash-on-start') {
   setTimeout(() => process.exit(0), 500)
 }
 
-server.start(executor).catch(error => {
+server.start(executor).catch((error) => {
   throw error
 })

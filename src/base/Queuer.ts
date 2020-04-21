@@ -54,13 +54,13 @@ export class Queuer extends Executor {
    */
   public async manifest(): Promise<Manifest> {
     const manifest = await super.manifest()
-    const queue = this.queue.map(job => {
+    const queue = this.queue.map((job) => {
       const { id, date, method, params } = job
       return { id, date, method, params }
     })
     return {
       ...manifest,
-      queue
+      queue,
     }
   }
 
@@ -78,7 +78,7 @@ export class Queuer extends Executor {
   ): Promise<Type> {
     const {
       queue,
-      config: { queueLength }
+      config: { queueLength },
     } = this
 
     if (queue.length >= queueLength)
@@ -101,7 +101,7 @@ export class Queuer extends Executor {
         reject: async (error: Error) => {
           await this.cancel(id)
           reject(error)
-        }
+        },
       }
       const position = queue.push(job)
       this.notifyDelegator(
@@ -117,7 +117,7 @@ export class Queuer extends Executor {
    * a job from the queue.
    */
   public cancel(job: string): Promise<boolean> {
-    const index = this.queue.findIndex(item => item.id === job)
+    const index = this.queue.findIndex((item) => item.id === job)
     if (index >= 0) {
       this.queue.splice(index, 1)
       return Promise.resolve(true)
@@ -132,7 +132,7 @@ export class Queuer extends Executor {
       const { claims: { clients = [] } = {} } = params
       delegator
         .notify(subject, message, undefined, clients)
-        .catch(error => log.error(error))
+        .catch((error) => log.error(error))
     }
   }
 
@@ -149,7 +149,7 @@ export class Queuer extends Executor {
   public async check(executor: Executor): Promise<void> {
     await this.reduce(executor)
     this.checkInterval = setInterval(() => {
-      this.reduce(executor).catch(error => log.error(error))
+      this.reduce(executor).catch((error) => log.error(error))
     }, this.config.queueInterval)
   }
 

@@ -77,7 +77,7 @@ export async function execute(
       dest,
       format,
       lang,
-      debug
+      debug,
     })
   } else {
     const encoded = await executor.encode(executed, dest, to)

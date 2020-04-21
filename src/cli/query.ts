@@ -22,7 +22,7 @@ export async function query(
     to = 'json5',
     lang = 'jmp',
     repl: repl_ = false,
-    debug
+    debug,
   } = options
 
   const decoded = await executor.decode(source, from)
@@ -41,7 +41,7 @@ export async function query(
       dest,
       format: to,
       lang,
-      debug
+      debug,
     })
   } else {
     const result = await executor.query(compiled, query, lang)

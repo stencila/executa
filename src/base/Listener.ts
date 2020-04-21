@@ -37,7 +37,7 @@ export abstract class Listener extends Executor {
       this.servers.reduce(
         async (prev, server) => ({
           ...(await prev),
-          ...(await server.addresses())
+          ...(await server.addresses()),
         }),
         {}
       )
@@ -75,7 +75,7 @@ export abstract class Listener extends Executor {
     }
 
     log.debug(`Starting servers`)
-    await Promise.all(this.servers.map(server => server.start(this)))
+    await Promise.all(this.servers.map((server) => server.start(this)))
   }
 
   /**
@@ -83,7 +83,7 @@ export abstract class Listener extends Executor {
    */
   public async stop(): Promise<void> {
     log.debug('Stopping servers')
-    await Promise.all(this.servers.map(server => server.stop()))
+    await Promise.all(this.servers.map((server) => server.stop()))
   }
 
   /**
@@ -97,7 +97,7 @@ export abstract class Listener extends Executor {
     const stop = (): void => {
       this.stop()
         .then(() => process.exit())
-        .catch(error =>
+        .catch((error) =>
           log.error(`Error when stopping executor: ${error.message}`)
         )
     }

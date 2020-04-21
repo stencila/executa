@@ -46,14 +46,14 @@ test('WebSocketClient and WebSocketServer', async () => {
     const sessionRequests = schema.softwareSession({
       environment: schema.softwareEnvironment({ name: 'some-environment' }),
       cpuRequest: 4,
-      memoryRequest: 5
+      memoryRequest: 5,
     })
     const claims: Claims = {
       session: schema.softwareSession({
         environment: schema.softwareEnvironment({ name: 'some-environment' }),
         cpuLimit: 2,
-        memoryLimit: 2
-      })
+        memoryLimit: 2,
+      }),
     }
     // Sign with the server's secret
     const jwt = JWT.sign(claims, server.jwtSecret)
@@ -88,7 +88,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientLogs = []
     const client = new WebSocketClient({
       ...server.address,
-      jwt: JWT.sign({}, 'not-the-right-secret')
+      jwt: JWT.sign({}, 'not-the-right-secret'),
     })
     await client.start()
     await delay(25)

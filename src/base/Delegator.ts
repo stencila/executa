@@ -60,18 +60,18 @@ export class Delegator extends Executor {
    */
   public async manifest(): Promise<Manifest> {
     const manifest = await super.manifest()
-    const clientTypes = this.clientTypes.map(clientType => clientType.name)
+    const clientTypes = this.clientTypes.map((clientType) => clientType.name)
     const peers = Object.entries(this.peers).reduce(
       (prev, [key, peer]) => ({
         ...prev,
-        ...{ [key]: peer.manifest !== undefined ? peer.manifest : null }
+        ...{ [key]: peer.manifest !== undefined ? peer.manifest : null },
       }),
       {}
     )
     return {
       ...manifest,
       clientTypes,
-      peers
+      peers,
     }
   }
 
@@ -145,7 +145,7 @@ export class Delegator extends Executor {
    * stops any child processes it may have started.
    */
   async stop(): Promise<void> {
-    await Promise.all(Object.values(this.peers).map(peer => peer.stop()))
+    await Promise.all(Object.values(this.peers).map((peer) => peer.stop()))
   }
 }
 
@@ -201,7 +201,7 @@ export class Peer {
 
     // Reconnect to the executor, potentially changing
     // to a more preferred client / transport / address.
-    this.connect(true).catch(error => log.error(error))
+    this.connect(true).catch((error) => log.error(error))
   }
 
   /**
@@ -272,7 +272,7 @@ export class Peer {
       if (!Array.isArray(capabilities)) capabilities = [capabilities]
 
       // Compile JSON Schema definitions to validation functions
-      validators = this.validators[method] = capabilities.map(schema =>
+      validators = this.validators[method] = capabilities.map((schema) =>
         ajv.compile(schema)
       )
     }

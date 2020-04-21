@@ -34,7 +34,7 @@ export function localIP(): string {
 export function globalIP(): Promise<string> {
   if (globalIP_ !== undefined) return Promise.resolve(globalIP_)
 
-  return new Promise(resolve =>
+  return new Promise((resolve) =>
     externalIP({ getIP: 'parallel' })((error: Error | null, ip: string) => {
       if (error !== null) resolve('0.0.0.0')
       globalIP_ = ip
@@ -57,7 +57,7 @@ export async function expandAddress(
   defaults = {
     scheme: 'ws',
     host: '0.0.0.0',
-    port: 80
+    port: 80,
   }
 ): Promise<string[]> {
   const orig = parseTcpAddress(address, defaults)
@@ -69,7 +69,7 @@ export async function expandAddress(
     scheme === 'https' || scheme === 'wss'
       ? {
           scheme: scheme.slice(0, -1),
-          port: scheme === 'https' ? 8000 : 9000
+          port: scheme === 'https' ? 8000 : 9000,
         }
       : { scheme, port }
 

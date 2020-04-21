@@ -18,12 +18,12 @@ describe('StdioClient and StdioServer', () => {
 
   const nextClientMessages = async (count = 1) =>
     (await nextLogData(['executa:client', 'executa:stdio:client'], count)).map(
-      data => data.message
+      (data) => data.message
     )
 
   const nextServerMessages = async (count = 1) =>
     (await nextLogData(['executa:stdio:server'], count)).map(
-      data => data.message
+      (data) => data.message
     )
 
   test('main', async () => {
@@ -110,8 +110,8 @@ describe('StdioClient and StdioServer', () => {
     const filePath = StdioServer.register('stdio-test', {
       version: 1,
       addresses: {
-        stdio: 'dummy address'
-      }
+        stdio: 'dummy address',
+      },
     })
     expect(filePath).toBe(manifestFile)
     expect(fs.existsSync(manifestFile)).toBe(true)

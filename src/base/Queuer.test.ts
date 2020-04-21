@@ -15,7 +15,7 @@ test('construct', () => {
     ...new Config(),
     queueLength: 100,
     queueStale: 10,
-    queueInterval: 1
+    queueInterval: 1,
   })
   expect(queuer2).toBeInstanceOf(Queuer)
 })
@@ -122,7 +122,7 @@ test('start + stop', async () => {
   const queuer = new Queuer({
     ...new Config(),
     queueInterval: 1,
-    queueStale: 0.5
+    queueStale: 0.5,
   })
   const { queue } = queuer
 

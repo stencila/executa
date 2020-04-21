@@ -11,19 +11,19 @@ export default [
 
     plugins: [
       typescript({
-        tsconfig: 'tsconfig.browser.json'
+        tsconfig: 'tsconfig.browser.json',
       }),
       commonjs({
-        extensions: ['.js', '.ts']
+        extensions: ['.js', '.ts'],
       }),
       json(),
       babel({
-        exclude: 'node_modules/**'
+        exclude: 'node_modules/**',
       }),
       builtins(),
       resolve({
-        mainFields: ['browser', 'module', 'main']
-      })
+        mainFields: ['browser', 'module', 'main'],
+      }),
     ],
 
     // Do not bundle modules that provide things already
@@ -36,8 +36,8 @@ export default [
       format: 'iife',
       globals: {
         'cross-fetch': 'fetch',
-        'isomorphic-ws': 'WebSocket'
-      }
-    }
-  }
+        'isomorphic-ws': 'WebSocket',
+      },
+    },
+  },
 ]

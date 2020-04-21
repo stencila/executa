@@ -27,36 +27,36 @@ test('calling methods', async () => {
 
   expect(await client.manifest()).toEqual({
     method: 'manifest',
-    params: {}
+    params: {},
   })
 
   expect(await client.decode('the source', 'the format')).toEqual({
     method: 'decode',
     params: {
       source: 'the source',
-      format: 'the format'
-    }
+      format: 'the format',
+    },
   })
 
   expect(await client.compile({ type: 'Entity' })).toEqual({
     method: 'compile',
     params: {
-      node: { type: 'Entity' }
-    }
+      node: { type: 'Entity' },
+    },
   })
 
   expect(await client.build({ type: 'Entity' })).toEqual({
     method: 'build',
     params: {
-      node: { type: 'Entity' }
-    }
+      node: { type: 'Entity' },
+    },
   })
 
   expect(await client.execute({ type: 'Entity' })).toEqual({
     method: 'execute',
     params: {
-      node: { type: 'Entity' }
-    }
+      node: { type: 'Entity' },
+    },
   })
 })
 
@@ -93,7 +93,7 @@ test('receiving bad response', async () => {
   client.requests[42] = {
     resolve: () => {
       throw Error("Yo! I'm an error")
-    }
+    },
   }
   // @ts-ignore that receive is protected
   client.receive({ id: 42 })

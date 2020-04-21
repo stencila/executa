@@ -5,7 +5,7 @@ import {
   InternalError,
   MethodUnknownError,
   ParamRequiredError,
-  CapabilityError
+  CapabilityError,
 } from './errors'
 import { JsonRpcError, JsonRpcErrorCode } from './JsonRpcError'
 import { JsonRpcRequest } from './JsonRpcRequest'

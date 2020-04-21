@@ -24,7 +24,7 @@ const executeCodeChunk = async (
 
 const setCodeChunkProps = (): void => {
   const codeChunks = document.querySelectorAll('stencila-code-chunk')
-  codeChunks.forEach(chunk => {
+  codeChunks.forEach((chunk) => {
     // @ts-ignore executeHandler is not a property of Element
     chunk.executeHandler = executeCodeChunk
   })
@@ -44,13 +44,13 @@ export const init = (address: WebSocketAddressInitializer): void => {
 }
 
 const executa = {
-  init
+  init,
 }
 
 const Stencila = {
   // @ts-ignore
   ...(window.Stencila !== undefined ? window.Stencila : {}),
-  executa
+  executa,
 }
 
 // @ts-ignore

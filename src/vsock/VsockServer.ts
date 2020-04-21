@@ -22,7 +22,7 @@ export class VsockServer extends StreamServer {
    */
   public addresses(): Promise<Addresses> {
     return Promise.resolve({
-      [Transport.vsock]: this.address
+      [Transport.vsock]: this.address,
     })
   }
 
@@ -32,7 +32,7 @@ export class VsockServer extends StreamServer {
         path.join(__dirname, 'vsock-server'),
         [`${this.address.port}`]
       ))
-      server.on('error', err => log.error(err))
+      server.on('error', (err) => log.error(err))
       return super.start(executor, server.stdout, server.stdin)
     }
   }

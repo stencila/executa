@@ -65,7 +65,7 @@ export async function repl(
     // the spinner is running and it affects subsequent
     // lines. Instead, we implement out own muting of stdin
     // while command is running.
-    discardStdin: false
+    discardStdin: false,
   })
 
   // Only print log and notification messages to the console
@@ -92,7 +92,7 @@ export async function repl(
   // Reconfigure log handler to only show `debug` events
   // and error stacks when `--debug` option is set and to ensure
   // the spinner is cleared first
-  replaceHandlers(data => {
+  replaceHandlers((data) => {
     const { level, tag, message, stack } = data
     if (!debug && level > LogLevel.info) return
     const emoji = ['🚨', '⚠', '🛈', '🔧'][level]
@@ -129,29 +129,31 @@ export async function repl(
     maxLength: 500,
     path: home('history', `executa-repl-${tag}.txt`),
 
-    next: (instance: readline.ReadLine) => (rl = instance)
+    next: (instance: readline.ReadLine) => (rl = instance),
   })
   setPrompt()
   mute = true
   rl.prompt()
-  rl.on('line', (line: string) => onLine(line).catch(error => log.error(error)))
+  rl.on('line', (line: string) =>
+    onLine(line).catch((error) => log.error(error))
+  )
 
   // On  interrupt signal (Ctrl+C) cancel current request
   let job: string | undefined
 
   // On close signal (Ctrl+D) resolve this promise
   // so any clean up can be done after it.
-  return new Promise<void>(resolve => {
+  return new Promise<void>((resolve) => {
     rl.on('SIGINT', () => {
       if (job !== undefined) {
         spinner.clear()
         spinnerMessage = 'Cancelling'
         executor
           .cancel(job)
-          .then(cancelled => {
+          .then((cancelled) => {
             spinnerMessage = cancelled ? 'Cancelled' : 'Noncancellable'
           })
-          .catch(error => log.error(error))
+          .catch((error) => log.error(error))
       } else {
         rl.close()
         resolve()
@@ -197,7 +199,7 @@ export async function repl(
         'green',
         'yellow',
         'magenta',
-        'red'
+        'red',
       ][Math.max(0, Math.min(Math.round(Math.log(seconds)), 6))] as Ora['color']
       spinner.text = chalk.grey(`+${seconds}s ${spinnerMessage}`)
     }
@@ -336,7 +338,7 @@ function displayOutput(encoded: string, format: string): string {
   // add an entry here!
   const languages: { [key: string]: string } = {
     jsonld: 'json',
-    json5: 'javascript'
+    json5: 'javascript',
   }
   let language = languages[format]
   if (language === undefined) language = format
@@ -349,8 +351,8 @@ function displayOutput(encoded: string, format: string): string {
       theme: {
         // Default theme overrides
         // https://github.com/felixfbecker/cli-highlight/blob/b3bd5222c/src/theme.ts#L299
-        string: chalk.yellow
-      }
+        string: chalk.yellow,
+      },
     })
   } catch {
     return encoded

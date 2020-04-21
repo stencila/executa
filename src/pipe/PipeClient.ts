@@ -86,7 +86,7 @@ export class PipeClient extends StreamClient {
 
     // Stop if either stream closes
     const stop = (): void => {
-      this.stop().catch(error => log.error(error))
+      this.stop().catch((error) => log.error(error))
     }
     this.outgoing.on('close', stop)
     this.incoming.on('close', stop)

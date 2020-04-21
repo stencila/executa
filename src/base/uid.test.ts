@@ -48,7 +48,7 @@ describe('parse', () => {
     expect(parse('aa0000000011111111111111111111')).toEqual({
       family: 'aa',
       time: new Date(epoch),
-      rand: '11111111111111111111'
+      rand: '11111111111111111111',
     })
   })
 

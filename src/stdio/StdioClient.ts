@@ -55,7 +55,7 @@ export class StdioClient extends StreamClient {
       // and `this` is defined. There is not a better way to test for
       // success of startup other than `this !== undefined`
       if (this !== undefined) {
-        this.stop().catch(error => log.error(error))
+        this.stop().catch((error) => log.error(error))
       }
     })
 
@@ -63,7 +63,7 @@ export class StdioClient extends StreamClient {
       log.error(
         `Server exited prematurely with exit code ${code} and signal ${signal}`
       )
-      this.stop().catch(error => log.error(error))
+      this.stop().catch((error) => log.error(error))
     })
 
     const { stdin, stdout, stderr } = child
@@ -73,7 +73,7 @@ export class StdioClient extends StreamClient {
     // actually be using Logga)
     stderr
       .pipe(
-        split(data => {
+        split((data) => {
           try {
             return JSON.parse(data)
           } catch {
@@ -86,7 +86,7 @@ export class StdioClient extends StreamClient {
           const {
             level = LogLevel.debug,
             tag = 'executa:stdio:client:child',
-            message
+            message,
           } = object as any
           if (message !== undefined) {
             const logger = getLogger(tag)

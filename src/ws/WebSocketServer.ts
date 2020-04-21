@@ -9,7 +9,7 @@ import {
   WebSocketAddress,
   WebSocketAddressInitializer,
   Transport,
-  Addresses
+  Addresses,
 } from '../base/Transports'
 import { HttpServer } from '../http/HttpServer'
 import { send, isOpen, parseProtocol } from './util'
@@ -107,7 +107,7 @@ export class WebSocketServer extends HttpServer {
    */
   public async addresses(): Promise<Addresses> {
     return {
-      [Transport.ws]: await expandAddress(this.address.url())
+      [Transport.ws]: await expandAddress(this.address.url()),
     }
   }
 
@@ -162,7 +162,7 @@ export class WebSocketServer extends HttpServer {
         // Handle any errors
         socket.on('error', (error: Error) => log.error(error))
       },
-      options: {}
+      options: {},
     })
     return app
   }

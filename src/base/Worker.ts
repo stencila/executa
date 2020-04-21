@@ -29,16 +29,16 @@ export class Worker extends Executor {
         required: ['source', 'format'],
         properties: {
           source: { type: 'string' },
-          format: { const: 'json' }
-        }
+          format: { const: 'json' },
+        },
       },
       // Can encode any node to JSON format
       encode: {
         required: ['node', 'format'],
         properties: {
           node: true,
-          format: { const: 'json' }
-        }
+          format: { const: 'json' },
+        },
       },
       // Can query any node using JMES Path or JSON Pointer
       query: {
@@ -47,9 +47,9 @@ export class Worker extends Executor {
           node: true,
           query: { type: 'string' },
           lang: {
-            enum: ['jmp', 'jmes-path', 'jpo', 'json-pointer']
-          }
-        }
+            enum: ['jmp', 'jmes-path', 'jpo', 'json-pointer'],
+          },
+        },
       },
       // Can execute a Javascript `CodeExpression` but
       // only if it is not associated with a session
@@ -61,20 +61,20 @@ export class Worker extends Executor {
             required: ['type', 'programmingLanguage', 'text'],
             properties: {
               type: {
-                const: 'CodeExpression'
+                const: 'CodeExpression',
               },
               programmingLanguage: {
-                enum: ['js', 'javascript']
+                enum: ['js', 'javascript'],
               },
               text: {
-                type: 'string'
-              }
-            }
-          }
-        }
+                type: 'string',
+              },
+            },
+          },
+        },
       },
       // Can pipe together methods
-      pipe: true
+      pipe: true,
     })
   }
 
@@ -115,7 +115,7 @@ export class Worker extends Executor {
         .split('/')
         // Handle escaped character sequences
         // As per https://tools.ietf.org/html/rfc6901#section-4
-        .map(item => item.replace('~1', '/').replace('~0', '~'))
+        .map((item) => item.replace('~1', '/').replace('~0', '~'))
       let child = node
       for (const item of path) {
         // @ts-ignore
@@ -166,8 +166,8 @@ export class Worker extends Executor {
           schema.codeError({
             errorType: name,
             errorMessage: message,
-            stackTrace: trace
-          })
+            stackTrace: trace,
+          }),
         ]
       }
       return node

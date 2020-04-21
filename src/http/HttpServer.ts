@@ -4,7 +4,7 @@ import fastify, {
   FastifyInstance,
   FastifyReply,
   FastifyRequest,
-  FastifyError
+  FastifyError,
 } from 'fastify'
 import fastifyCors from 'fastify-cors'
 import fastifyJwt from 'fastify-jwt'
@@ -16,7 +16,7 @@ import {
   HttpAddress,
   HttpAddressInitializer,
   Transport,
-  Addresses
+  Addresses,
 } from '../base/Transports'
 import path from 'path'
 import { TcpServer } from '../tcp/TcpServer'
@@ -70,7 +70,7 @@ export class HttpServer extends TcpServer {
    */
   public async addresses(): Promise<Addresses> {
     return {
-      [Transport.http]: await expandAddress(this.address.url())
+      [Transport.http]: await expandAddress(this.address.url()),
     }
   }
 
@@ -92,7 +92,7 @@ export class HttpServer extends TcpServer {
 
     // Register static file serving plugin
     app.register(fastifyStatic, {
-      root: path.join(__dirname, 'static')
+      root: path.join(__dirname, 'static'),
     })
 
     // Set custom, override-able, hooks and handlers

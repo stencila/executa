@@ -5,7 +5,7 @@ import {
   InternalError,
   MethodUnknownError,
   ParamRequiredError,
-  CapabilityError
+  CapabilityError,
 } from './errors'
 import { Addresses, Transport } from './Transports'
 import { generate } from './uid'
@@ -26,7 +26,7 @@ export enum Method {
   begin = 'begin',
   end = 'end',
   pipe = 'pipe',
-  cancel = 'cancel'
+  cancel = 'cancel',
 }
 
 /**
@@ -165,7 +165,7 @@ export abstract class Executor {
       version: 1,
       id: this.id.toString(),
       addresses: await this.addresses(),
-      capabilities: await this.capabilities()
+      capabilities: await this.capabilities(),
     }
   }
 

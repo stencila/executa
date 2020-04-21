@@ -8,7 +8,7 @@ import {
   HttpAddress,
   Addresses,
   Transport,
-  WebSocketAddress
+  WebSocketAddress,
 } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { Server } from '../base/Server'
@@ -94,7 +94,7 @@ export class TcpServer extends Server {
    */
   public async addresses(): Promise<Addresses> {
     return Promise.resolve({
-      [Transport.tcp]: await expandAddress(this.address.url())
+      [Transport.tcp]: await expandAddress(this.address.url()),
     })
   }
 
@@ -147,11 +147,13 @@ export class TcpServer extends Server {
         // Handle messages from connection
         connection
           .start(executor, socket, socket)
-          .catch(error => log.error(error))
+          .catch((error) => log.error(error))
       })
 
       const { host, port } = this.address
-      return new Promise(resolve => server.listen(port, host, () => resolve()))
+      return new Promise((resolve) =>
+        server.listen(port, host, () => resolve())
+      )
     }
   }
 
@@ -174,15 +176,15 @@ export class TcpServer extends Server {
   }
 
   public async stop(): Promise<void> {
-    Object.values(this.connections).forEach(connection => {
-      connection.stop().catch(error => log.error(error))
+    Object.values(this.connections).forEach((connection) => {
+      connection.stop().catch((error) => log.error(error))
     })
     this.connections = {}
 
     if (this.server !== undefined) {
       log.debug(`Stopping server: ${this.address.url()}`)
 
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         if (this.server !== undefined)
           this.server.close(() => {
             if (this.server !== undefined) {

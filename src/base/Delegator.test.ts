@@ -22,8 +22,8 @@ describe('Peer', () => {
       capabilities: {
         decode: false,
         compile: true,
-        execute: false
-      }
+        execute: false,
+      },
     })
 
     expect(await peer.capable(Method.decode, {})).toBe(false)
@@ -39,12 +39,12 @@ describe('Peer', () => {
           required: ['content', 'format'],
           properties: {
             content: {
-              type: 'string'
+              type: 'string',
             },
             format: {
-              enum: ['julia']
-            }
-          }
+              enum: ['julia'],
+            },
+          },
         },
         compile: {
           type: 'object',
@@ -55,17 +55,17 @@ describe('Peer', () => {
               required: ['type', 'programmingLanguage'],
               properties: {
                 type: {
-                  enum: ['CodeChunk', 'CodeExpression']
+                  enum: ['CodeChunk', 'CodeExpression'],
                 },
                 programmingLanguage: {
-                  enum: ['python']
-                }
-              }
-            }
-          }
-        }
+                  enum: ['python'],
+                },
+              },
+            },
+          },
+        },
       },
-      addresses: {}
+      addresses: {},
     })
 
     expect(await peer.capable(Method.decode, {})).toBe(false)
@@ -85,17 +85,17 @@ describe('Peer', () => {
     ).toBe(false)
     expect(
       await peer.capable(Method.compile, {
-        node: { type: 'CodeChunk', programmingLanguage: 'javascript' }
+        node: { type: 'CodeChunk', programmingLanguage: 'javascript' },
       })
     ).toBe(false)
     expect(
       await peer.capable(Method.compile, {
-        node: { type: 'CodeChunk', programmingLanguage: 'python' }
+        node: { type: 'CodeChunk', programmingLanguage: 'python' },
       })
     ).toBe(true)
     expect(
       await peer.capable(Method.compile, {
-        node: { type: 'CodeExpression', programmingLanguage: 'python' }
+        node: { type: 'CodeExpression', programmingLanguage: 'python' },
       })
     ).toBe(true)
   })
@@ -109,27 +109,27 @@ describe('Peer', () => {
             required: ['content', 'format'],
             properties: {
               content: {
-                type: 'string'
+                type: 'string',
               },
               format: {
-                enum: ['julia']
-              }
-            }
+                enum: ['julia'],
+              },
+            },
           },
           {
             required: ['content', 'format'],
             properties: {
               content: {
-                type: 'string'
+                type: 'string',
               },
               format: {
-                enum: ['haskell']
-              }
-            }
-          }
-        ]
+                enum: ['haskell'],
+              },
+            },
+          },
+        ],
       },
-      addresses: {}
+      addresses: {},
     })
 
     const canDecode = (format: string): Promise<boolean> =>
@@ -144,7 +144,7 @@ describe('Peer', () => {
       {
         version: 1,
         capabilities: {},
-        addresses: {}
+        addresses: {},
       },
       [DirectClient]
     )
@@ -156,7 +156,7 @@ describe('Peer', () => {
     const peer = new Peer({
       version: 1,
       capabilities: {},
-      addresses: {}
+      addresses: {},
     })
 
     expect(await peer.connect()).toBe(false)
@@ -170,9 +170,9 @@ describe('Peer', () => {
         addresses: {
           http: {
             host: '127.0.0.1',
-            port: 8000
-          }
-        }
+            port: 8000,
+          },
+        },
       },
       [DirectClient, StdioClient]
     )
@@ -186,8 +186,8 @@ describe('Peer', () => {
       capabilities: {},
       addresses: {
         direct: new DirectAddress(new DirectServer()),
-        stdio: 'echo'
-      }
+        stdio: 'echo',
+      },
     }
     const peer1 = new Peer(manifest, [DirectClient, StdioClient])
     const peer2 = new Peer(manifest, [StdioClient, DirectClient])
@@ -218,15 +218,15 @@ class DeepThought extends Worker {
             required: ['type', 'text'],
             properties: {
               type: {
-                const: 'CodeChunk'
+                const: 'CodeChunk',
               },
               text: {
-                const: DeepThought.question
-              }
-            }
-          }
-        }
-      }
+                const: DeepThought.question,
+              },
+            },
+          },
+        },
+      },
     })
   }
 
@@ -251,15 +251,15 @@ class Calculator extends Worker {
             required: ['type', 'text'],
             properties: {
               type: {
-                const: 'CodeExpression'
+                const: 'CodeExpression',
               },
               text: {
-                type: 'string'
-              }
-            }
-          }
-        }
-      }
+                type: 'string',
+              },
+            },
+          },
+        },
+      },
     })
   }
 
@@ -300,7 +300,7 @@ describe('Delegator', () => {
     ).toEqual({
       type: 'CodeChunk',
       text: DeepThought.question,
-      outputs: [42]
+      outputs: [42],
     })
 
     expect(
@@ -308,7 +308,7 @@ describe('Delegator', () => {
     ).toEqual({
       type: 'CodeExpression',
       text: '6 * 7',
-      output: 42
+      output: 42,
     })
 
     expect(
@@ -316,7 +316,7 @@ describe('Delegator', () => {
     ).toEqual({
       type: 'CodeExpression',
       text: '2 * Math.PI',
-      output: 2 * Math.PI
+      output: 2 * Math.PI,
     })
 
     // Throws a capability error if not able to delegate

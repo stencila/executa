@@ -5,7 +5,7 @@ describe('TcpAddress', () => {
     type: 'tcp',
     scheme: 'tcp',
     host: '127.0.0.1',
-    port: 7000
+    port: 7000,
   }
 
   test('constructor: default', () => {
@@ -23,7 +23,7 @@ describe('TcpAddress', () => {
   test('constructor: string with just host', () => {
     expect(new TcpAddress('example.com')).toEqual({
       ...defaults,
-      host: 'example.com'
+      host: 'example.com',
     })
   })
 
@@ -31,7 +31,7 @@ describe('TcpAddress', () => {
     expect(new TcpAddress('example.com:2020')).toEqual({
       ...defaults,
       host: 'example.com',
-      port: 2020
+      port: 2020,
     })
   })
 
@@ -39,7 +39,7 @@ describe('TcpAddress', () => {
     expect(new TcpAddress('tcp://example.com:2020')).toEqual({
       ...defaults,
       host: 'example.com',
-      port: 2020
+      port: 2020,
     })
   })
 
@@ -53,7 +53,7 @@ describe('HttpAddress', () => {
     type: 'http',
     scheme: 'http',
     host: '127.0.0.1',
-    port: 80
+    port: 80,
   }
 
   test('constructor: defaults', () => {
@@ -64,7 +64,7 @@ describe('HttpAddress', () => {
     expect(new HttpAddress('https://127.0.0.1')).toEqual({
       ...defaults,
       scheme: 'https',
-      port: 443
+      port: 443,
     })
   })
 
@@ -74,7 +74,7 @@ describe('HttpAddress', () => {
       scheme: 'https',
       host: 'server1.example.com',
       port: 443,
-      path: 'a-path'
+      path: 'a-path',
     })
   })
 
@@ -86,7 +86,7 @@ describe('HttpAddress', () => {
       scheme: 'https',
       host: 'server1.example.com',
       port: 8000,
-      path: 'path/2/a/place'
+      path: 'path/2/a/place',
     })
   })
 
@@ -95,13 +95,13 @@ describe('HttpAddress', () => {
       new HttpAddress({
         scheme: 'https',
         port: 8991,
-        path: 'custom/path'
+        path: 'custom/path',
       })
     ).toEqual({
       ...defaults,
       scheme: 'https',
       port: 8991,
-      path: 'custom/path'
+      path: 'custom/path',
     })
   })
 
@@ -127,7 +127,7 @@ describe('WebSocketAddress', () => {
     type: 'ws',
     scheme: 'ws',
     host: '127.0.0.1',
-    port: 80
+    port: 80,
   }
 
   test('constructor: defaults', () => {
@@ -142,7 +142,7 @@ describe('WebSocketAddress', () => {
       scheme: 'wss',
       host: 'server1.example.com',
       port: 8000,
-      path: 'path/2/a/place'
+      path: 'path/2/a/place',
     })
   })
 
@@ -151,13 +151,13 @@ describe('WebSocketAddress', () => {
       new WebSocketAddress({
         scheme: 'wss',
         port: 8991,
-        path: 'custom/path'
+        path: 'custom/path',
       })
     ).toEqual({
       ...defaults,
       scheme: 'wss',
       port: 8991,
-      path: 'custom/path'
+      path: 'custom/path',
     })
   })
 

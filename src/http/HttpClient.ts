@@ -50,11 +50,11 @@ export class HttpClient extends Client {
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
         Accept: 'application/json; charset=utf-8',
-        ...(jwt !== undefined ? { Authorization: `Bearer ${jwt}` } : {})
+        ...(jwt !== undefined ? { Authorization: `Bearer ${jwt}` } : {}),
       },
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     })
-      .then(async reply => {
+      .then(async (reply) => {
         // Ensure that the response id is the same as
         // the request id
         let response
@@ -73,7 +73,7 @@ export class HttpClient extends Client {
       .then((response: JsonRpcResponse) => {
         this.receive(response)
       })
-      .catch(err => log.error(err))
+      .catch((err) => log.error(err))
   }
 
   /**

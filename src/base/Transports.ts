@@ -8,7 +8,7 @@ export enum Transport {
   vsock = 'vsock',
   tcp = 'tcp',
   http = 'http',
-  ws = 'ws'
+  ws = 'ws',
 }
 
 export type Address =
@@ -65,7 +65,7 @@ export class StdioAddress {
       // shell style command lines
       this.args = parts
         .slice(1)
-        .map(arg =>
+        .map((arg) =>
           (arg.startsWith('"') && arg.endsWith('"')) ||
           (arg.startsWith("'") && arg.endsWith("'"))
             ? arg.slice(1, -1)
@@ -193,7 +193,7 @@ export class TcpAddress {
     defaults: TcpAddressProperties = {
       scheme: 'tcp',
       host: '127.0.0.1',
-      port: 7000
+      port: 7000,
     }
   ) {
     const { scheme, host, port } = parseTcpAddress(address, defaults)
@@ -256,7 +256,7 @@ export class HttpAddress extends TcpAddress {
     defaults: HttpAddressProperties = {
       scheme: 'http',
       host: '127.0.0.1',
-      port: 80
+      port: 80,
     }
   ) {
     super(address, defaults)
@@ -279,7 +279,7 @@ export class WebSocketAddress extends HttpAddress {
     super(address, {
       scheme: 'ws',
       host: '127.0.0.1',
-      port: 80
+      port: 80,
     })
   }
 }

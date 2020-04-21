@@ -7,7 +7,7 @@ import {
   StdioAddress,
   StdioAddressInitializer,
   Addresses,
-  Transport
+  Transport,
 } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
 import { home } from '../util'
@@ -24,7 +24,7 @@ export class StdioServer extends StreamServer {
         ? address
         : {
             command: process.argv[0],
-            args: process.argv.slice(1)
+            args: process.argv.slice(1),
           }
     )
   }
@@ -34,7 +34,7 @@ export class StdioServer extends StreamServer {
    */
   public addresses(): Promise<Addresses> {
     return Promise.resolve({
-      [Transport.stdio]: this.address
+      [Transport.stdio]: this.address,
     })
   }
 

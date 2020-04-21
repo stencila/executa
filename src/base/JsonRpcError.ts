@@ -1,7 +1,7 @@
 import {
   CapabilityError,
   MethodUnknownError,
-  ParamRequiredError
+  ParamRequiredError,
 } from './errors'
 
 /**
@@ -52,7 +52,7 @@ export enum JsonRpcErrorCode {
   /**
    * Capability error
    **/
-  CapabilityError = -32005
+  CapabilityError = -32005,
 }
 
 export class JsonRpcError {

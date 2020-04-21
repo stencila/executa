@@ -108,7 +108,7 @@ export abstract class Client extends Executor {
         id,
         date: new Date(),
         resolve,
-        reject
+        reject,
       }
     })
     await this.send(request)
@@ -136,7 +136,7 @@ export abstract class Client extends Executor {
       id: this.notificationsCount,
       date: new Date(),
       subject,
-      message
+      message,
     })
     if (notifications.length > notificationsLength) {
       notifications.splice(0, notifications.length - notificationsLength)
@@ -261,7 +261,7 @@ const clientTypeTransportMap: { [key: string]: Transport } = {
   VsockClient: Transport.vsock,
   TcpClient: Transport.tcp,
   HttpClient: Transport.http,
-  WebSocketClient: Transport.ws
+  WebSocketClient: Transport.ws,
 }
 
 /**
@@ -343,7 +343,7 @@ export function addressToClients(
   }
 
   const ClientType = clientTypes.filter(
-    clientType => clientType.name === clientTypeName
+    (clientType) => clientType.name === clientTypeName
   )[0]
   if (ClientType === undefined) {
     log.error(`Client type not available: ${clientTypeName}`)
@@ -371,7 +371,7 @@ export function addressesToClients(
     async (clients: Promise<Client[]>, address: string) => {
       return [
         ...(await clients),
-        ...(await addressToClients(address, clientTypes))
+        ...(await addressToClients(address, clientTypes)),
       ]
     },
     Promise.resolve([])

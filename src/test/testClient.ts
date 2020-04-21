@@ -19,7 +19,7 @@ export const testClient = async (client: Client): Promise<void> => {
   const expr = {
     type: 'CodeExpression',
     programmingLanguage: 'js',
-    text: '6 * 7'
+    text: '6 * 7',
   }
 
   /**
@@ -39,7 +39,7 @@ export const testClient = async (client: Client): Promise<void> => {
       [Method.decode, { format: 'json' }],
       Method.execute,
       [Method.query, { query: 'output' }],
-      [Method.encode, { format: 'json' }]
+      [Method.encode, { format: 'json' }],
     ])
   ).toBe('42')
 

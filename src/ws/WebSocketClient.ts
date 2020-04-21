@@ -6,7 +6,7 @@ import { generate } from '../base/uid'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import {
   WebSocketAddress,
-  WebSocketAddressInitializer
+  WebSocketAddressInitializer,
 } from '../base/Transports'
 import { isOpen, send, generateProtocol } from './util'
 
@@ -34,7 +34,7 @@ interface WebSocketClientOptions {
 const defaultWebSocketClientOptions: WebSocketClientOptions = {
   logging: true,
   timeout: 60,
-  retries: 10
+  retries: 10,
 }
 
 /**
@@ -90,7 +90,7 @@ export class WebSocketClient extends Client {
     const {
       id,
       address,
-      options: { retries, logging }
+      options: { retries, logging },
     } = this
     const socket = (this.socket = new WebSocket(
       address.url(),
@@ -111,8 +111,8 @@ export class WebSocketClient extends Client {
         if (logging) log.info(`Connection closed, trying to reconnect`)
         retry(() => this.start(), {
           retries,
-          randomize: true
-        }).catch(error => log.error(error))
+          randomize: true,
+        }).catch((error) => log.error(error))
       }
     }
     socket.onerror = (error: ErrorEvent) => {
@@ -132,7 +132,7 @@ export class WebSocketClient extends Client {
   protected async send(request: JsonRpcRequest): Promise<void> {
     const {
       socket,
-      options: { timeout }
+      options: { timeout },
     } = this
     if (socket === undefined) {
       await this.start()
@@ -148,7 +148,7 @@ export class WebSocketClient extends Client {
   protected receive(message: string): void {
     const {
       socket,
-      options: { logging }
+      options: { logging },
     } = this
     if (socket === undefined) return
     if (isOpen(socket)) super.receive(message)

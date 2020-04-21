@@ -43,7 +43,7 @@ export class VsockFirecrackerClient extends StreamClient {
       log.debug(`${path}:${port}: connecting`)
       socket.write(`CONNECT ${port}\n`)
     })
-    socket.on('error', error => {
+    socket.on('error', (error) => {
       log.error(`${path}:${port}: ${error}`)
     })
     socket.on('close', () => {

@@ -12,7 +12,7 @@ export class DirectServer extends Server {
    */
   public addresses(): Promise<Addresses> {
     return Promise.resolve({
-      [Transport.direct]: new DirectAddress({ server: this })
+      [Transport.direct]: new DirectAddress({ server: this }),
     })
   }
 

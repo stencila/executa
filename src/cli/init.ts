@@ -27,10 +27,10 @@ import { WebSocketServer } from '../ws/WebSocketServer'
 export async function init(config: Config): Promise<Listener> {
   // Configure log handler
   const { debug } = config
-  replaceHandlers(data =>
+  replaceHandlers((data) =>
     defaultHandler(data, {
       maxLevel: debug ? LogLevel.debug : LogLevel.info,
-      showStack: debug
+      showStack: debug,
     })
   )
 
@@ -54,14 +54,14 @@ export async function init(config: Config): Promise<Listener> {
     PipeClient,
     TcpClient,
     HttpClient,
-    WebSocketClient
+    WebSocketClient,
   ]
 
   // Configure the delegator with clients for each peer
   const { peers } = config
   const clients: Client[] = [
     new DirectClient(new DirectServer(new Worker())),
-    ...(await addressesToClients(peers, clientTypes))
+    ...(await addressesToClients(peers, clientTypes)),
   ]
   const delegator = new Delegator(clients, clientTypes)
 

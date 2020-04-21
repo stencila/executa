@@ -55,15 +55,15 @@ describe('query', () => {
           required: ['type', 'programmingLanguage'],
           properties: {
             type: {
-              const: 'CodeChunk'
+              const: 'CodeChunk',
             },
             programmingLanguage: {
               // Langs specified as an enum of alternatives
-              enum: ['py', 'python']
-            }
-          }
-        }
-      }
+              enum: ['py', 'python'],
+            },
+          },
+        },
+      },
     }
 
     // For brevity, the following omit props not
@@ -75,42 +75,42 @@ describe('query', () => {
           properties: {
             programmingLanguage: {
               // Single lang specified as a const
-              const: 'r'
-            }
-          }
-        }
-      }
+              const: 'r',
+            },
+          },
+        },
+      },
     }
 
     const jesta: JSONSchema7 = {
       properties: {
         node: {
           // Lazy programmer didn't specify langs
-        }
-      }
+        },
+      },
     }
 
     const encoda: JSONSchema7 = {
       properties: {
         format: {
-          enum: ['rmd', 'docx', 'pdf']
-        }
-      }
+          enum: ['rmd', 'docx', 'pdf'],
+        },
+      },
     }
 
     const workerEncode: JSONSchema7 = {
       properties: {
         format: {
-          enum: ['json']
-        }
-      }
+          enum: ['json'],
+        },
+      },
     }
 
     const manifest = {
       capabilities: {
         execute: [pyla, rasta, jesta],
-        encode: [workerEncode, encoda]
-      }
+        encode: [workerEncode, encoda],
+      },
     }
 
     expect(
@@ -150,20 +150,20 @@ describe('query', () => {
           givenNames: ['Jane'],
           affiliations: [
             schema.organization({
-              name: 'Acme Corp'
-            })
-          ]
+              name: 'Acme Corp',
+            }),
+          ],
         }),
         schema.person({
           givenNames: ['John'],
           affiliations: [
             schema.organization({
-              name: 'Example University'
-            })
-          ]
-        })
+              name: 'Example University',
+            }),
+          ],
+        }),
       ],
-      title: 'On treating documents as a database'
+      title: 'On treating documents as a database',
     })
 
     expect(
@@ -198,8 +198,8 @@ describe('execute', () => {
     expect(await error('foo')).toEqual([
       schema.codeError({
         errorType: 'ReferenceError',
-        errorMessage: 'foo is not defined'
-      })
+        errorMessage: 'foo is not defined',
+      }),
     ])
   })
 })

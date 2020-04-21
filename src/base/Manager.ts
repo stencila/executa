@@ -39,7 +39,7 @@ export class Manager extends Listener {
     return {
       ...manifest,
       delegator,
-      queuer
+      queuer,
     }
   }
 
@@ -49,7 +49,7 @@ export class Manager extends Listener {
    * nodes to peers.
    */
   public async compile<Type extends schema.Node>(node: Type): Promise<Type> {
-    return this.walk(node, async child => {
+    return this.walk(node, async (child) => {
       if (!['CodeChunk', 'CodeExpression'].includes(schema.nodeType(child)))
         return child
       try {
@@ -75,7 +75,7 @@ export class Manager extends Listener {
     claims?: Claims,
     job?: string
   ): Promise<Type> {
-    return this.walk(node, async child => {
+    return this.walk(node, async (child) => {
       if (!['CodeChunk', 'CodeExpression'].includes(schema.nodeType(child)))
         return child
       try {
@@ -155,7 +155,7 @@ export class Manager extends Listener {
       return Object.entries(transformed).reduce(
         async (prev, [key, child]) => ({
           ...(await prev),
-          [key]: await walk(child)
+          [key]: await walk(child),
         }),
         Promise.resolve({})
       )

@@ -1,7 +1,7 @@
 import {
   pattern,
   minimum,
-  exclusiveMinimum
+  exclusiveMinimum,
 } from '@stencila/configa/dist/define'
 
 /**
