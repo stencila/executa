@@ -1,4 +1,4 @@
-import nanoid from 'nanoid/generate'
+import { customAlphabet } from 'nanoid'
 
 export class Id<Family extends string> extends String {
   family: Family
@@ -18,6 +18,14 @@ export class Id<Family extends string> extends String {
 export const epoch = 1500000000000
 
 /**
+ * A random id generator using custom alphabet and length.
+ */
+const nanoid = customAlphabet(
+  '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  20
+)
+
+/**
  * Generate a unique identifier.
  *
  * Generated identifiers:
@@ -29,7 +37,7 @@ export const epoch = 1500000000000
  * - have an extremely low probability of collision
  *
  * Generated identifiers have a fixed length of 32 characters made up
- * of the following parts:
+ * of three parts separated by dots:
  *
  * - 2 characters in the range `[a-z]` that identifying the "family" of
  *   identifiers, usually the type of object
@@ -53,14 +61,16 @@ export function generate<Family extends string>(code: Family): Id<Family> {
       ? code.repeat(2)
       : code.slice(0, 2)
   const time = (Date.now() - epoch).toString(16).padStart(10, '0')
-  const rand = nanoid(
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-    20
-  )
-  const value = `${family}${time}${rand}`
+  const rand = nanoid()
+  const value = `${family}.${time}.${rand}`
   return new Id<Family>(family as Family, value)
 }
 
+/**
+ * Parse a unique identifier.
+ *
+ * Extracts the parts from the identifier: `family`, `time` and `rand`.
+ */
 export function parse(
   id: string
 ):
@@ -70,7 +80,9 @@ export function parse(
       rand: string
     }
   | undefined {
-  const match = /^([a-z]{2})([0-9a-f]{8})([0-9A-Za-z]{20})$/.exec(id.toString())
+  const match = /^([a-z]{2})\.([0-9a-f]{8})\.([0-9A-Za-z]{20})$/.exec(
+    id.toString()
+  )
   if (match === null) return
   let seconds
   try {
