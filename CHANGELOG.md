@@ -1,3 +1,13 @@
+## [1.10.2](https://github.com/stencila/executa/compare/v1.10.1...v1.10.2) (2020-04-22)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency fastify to ^2.13.1 ([c447430](https://github.com/stencila/executa/commit/c44743068fdbcfd5e83c98669b9bb7a0a52fec23))
+* **dependencies:** update dependency fastify-cors to ^3.0.3 ([1a30e8c](https://github.com/stencila/executa/commit/1a30e8c6cf8d765fa6aec71fa65a1317e4646882))
+* **HttpServer:** Make the trailing slash in routes allowable / optional ([93fbf01](https://github.com/stencila/executa/commit/93fbf01bcd4adc9be634f7d1fbb8ee1a5352b1bc))
+* **HttpServer:** Send strings as JSON strings [skip release] ([27aa5a9](https://github.com/stencila/executa/commit/27aa5a9679f97b038eabe15a05fdfd44aa7330ef))
+
 ## [1.10.1](https://github.com/stencila/executa/compare/v1.10.0...v1.10.1) (2020-04-22)
 
 
