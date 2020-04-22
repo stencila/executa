@@ -1,6 +1,5 @@
 import fetch from 'cross-fetch'
 import { Client } from '../base/Client'
-import { JsonRpcError } from '../base/JsonRpcError'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { JsonRpcResponse } from '../base/JsonRpcResponse'
 import { HttpAddress, HttpAddressInitializer } from '../base/Transports'

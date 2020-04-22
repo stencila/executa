@@ -82,7 +82,9 @@ export class HttpServer extends TcpServer {
    */
   protected buildApp(): FastifyInstance {
     // Define the routes
-    const app = fastify()
+    const app = fastify({
+      ignoreTrailingSlash: true,
+    })
 
     // Register CORS plugin
     app.register(fastifyCors)

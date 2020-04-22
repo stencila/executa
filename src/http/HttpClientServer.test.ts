@@ -1,3 +1,5 @@
+import fetch from 'cross-fetch'
+
 import { testClient } from '../test/testClient'
 import { HttpClient } from './HttpClient'
 import { HttpServer } from './HttpServer'
@@ -16,6 +18,11 @@ test('HttpClient and HttpServer', async () => {
   const clientR = new HttpClient({ ...server.address, protocol: 'restful' })
   await testClient(clientR)
   await clientR.stop()
+
+  // Trailing slashes are ignored
+  const response1 = await fetch(server.address.url() + '/manifest')
+  const response2 = await fetch(server.address.url() + '/manifest/')
+  expect(response2.status).toEqual(response1.status)
 
   await server.stop()
 })
