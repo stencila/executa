@@ -13,11 +13,10 @@
     "dist"
   ],
   "scripts": {
-    "cli": "ts-node --files src/cli",
-    "cli:dev": "ts-node-dev --files src/cli --debug=1",
+    "cli": "ts-node --project tsconfig.test.json --files src/cli",
+    "cli:dev": "ts-node-dev --project tsconfig.test.json --files src/cli --debug=1",
     "cli:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli --debug=1",
     "repl:debug": "node --require ./ts-node-register.js --inspect=9229 src/cli repl --debug=1",
-    "console": "ts-node --files src/console.ts",
     "format": "npx prettier --write './**/*.{js,json,md,ts,yaml}'",
     "lint": "eslint 'src/**/*.{ts,js}' --fix",
     "depcheck": "npx depcheck --ignore-dirs=docs,dist",

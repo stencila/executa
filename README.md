@@ -148,14 +148,16 @@ npm run build:browser
 npm run cli:dev -- serve --ws
 ```
 
-3. Visit http://localhost:9000 in your browser.
+The `:dev` suffix uses `ts-node-dev` which will restart the process when any source files change.
+
+1. Visit http://localhost:9000 in your browser.
 
 ### Debug inspecting
 
-There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, for example from within VSCode (which will auto attach to the Node process), e.g.
+There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, for example, from within VSCode (which will auto attach to the Node process), e.g.
 
 ```bash
-npm run cli:debug -- compile test.md
+npm run cli:debug -- serve --http
 ```
 
 ## FAQ
