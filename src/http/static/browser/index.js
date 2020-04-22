@@ -1,1 +1,1 @@
-../../../../dist/browser/index.js
+../../../../dist/browser/executa.umd.js
