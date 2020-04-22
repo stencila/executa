@@ -1,3 +1,10 @@
+## [1.10.1](https://github.com/stencila/executa/compare/v1.10.0...v1.10.1) (2020-04-22)
+
+
+### Bug Fixes
+
+* **HTTP static files:** Update sym link to local build ([5e1d2fb](https://github.com/stencila/executa/commit/5e1d2fbe57764cc8b472c46e5764567097097324))
+
 # [1.10.0](https://github.com/stencila/executa/compare/v1.9.5...v1.10.0) (2020-04-21)
 
 
