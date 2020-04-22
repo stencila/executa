@@ -141,7 +141,10 @@ export class HttpServer extends TcpServer {
             .send(error)
         } else {
           // Send bare result
-          reply.send(result)
+          // To to fastify's (change in) handling of strings it is necessary
+          // to stringify them before sending.
+          // See https://github.com/stencila/executa/pull/95#issuecomment-591054049
+          reply.send(typeof result === 'string' ? `"${result}"` : result)
         }
       }
     }
