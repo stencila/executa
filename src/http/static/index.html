@@ -7,9 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="/browser/index.js"></script>
     <script>
-      window.Stencila.executa.init({
+      window.executa.init({
         host: window.location.hostname,
-        port: 9000
+        port: 9000,
       })
     </script>
     <script
@@ -36,8 +36,12 @@
   </head>
   <body>
     <h1>
-      <img style="vertical-align:top" src="https://stenci.la/img/logo-name.png" height="40px">
-      <span style="color: #777">Executa</span>
+      <img
+        style="vertical-align: top;"
+        src="https://stenci.la/img/logo-name.png"
+        height="40px"
+      />
+      <span style="color: #777;">Executa</span>
     </h1>
     <stencila-code-chunk
       data-collapsed="false"

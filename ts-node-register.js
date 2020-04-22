@@ -2,4 +2,4 @@
 // option when using it for the `npm run repl:debug`
 // script.
 // See https://stackoverflow.com/questions/51610583/ts-node-ignores-d-ts-files-while-tsc-successfully-compiles-the-project#comment90321934_51666714
-require('ts-node').register({ project: 'tsconfig.test.json', files: true })
+require('ts-node').register({ project: 'tsconfig.cli.json', files: true })

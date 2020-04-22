@@ -1,4 +1,4 @@
-import { collectConfig, helpUsage } from '@stencila/configa/dist/run'
+import { collectConfig, helpUsage } from '@stencila/configa'
 import * as schema from '@stencila/schema'
 import { Executor } from '../base/Executor'
 import { Listener } from '../base/Listener'

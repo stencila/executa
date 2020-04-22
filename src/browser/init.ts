@@ -40,16 +40,3 @@ export const init = (address: WebSocketAddressInitializer): void => {
     onReadyHandler()
   }
 }
-
-const executa = {
-  init,
-}
-
-const Stencila = {
-  // @ts-ignore
-  ...(window.Stencila !== undefined ? window.Stencila : {}),
-  executa,
-}
-
-// @ts-ignore
-window.Stencila = Stencila
