@@ -1,3 +1,10 @@
+## [1.10.3](https://github.com/stencila/executa/compare/v1.10.2...v1.10.3) (2020-04-23)
+
+
+### Bug Fixes
+
+* **Build:** Fix package compilation ([68e14f2](https://github.com/stencila/executa/commit/68e14f2f4059026691c6d3c217e5dfd72feed840))
+
 ## [1.10.2](https://github.com/stencila/executa/compare/v1.10.1...v1.10.2) (2020-04-22)
 
 
