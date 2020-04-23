@@ -18,7 +18,7 @@ describe('StdioClient and StdioServer', () => {
       __dirname,
       '..',
       '..',
-      'tsconfig.test.json'
+      'tsconfig.cli.json'
     )} --files ${path.join(__dirname, 'stdioTestServer.ts')} ${arg}`
 
   const nextClientMessages = async (count = 1) =>

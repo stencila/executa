@@ -2,7 +2,8 @@
   "extends": "@stencila/dev-config/tsconfig.json",
   "compilerOptions": {
     "module": "commonjs",
+    "outDir": "dist/cli",
     "experimentalDecorators": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/cli/*.ts", "src/declarations.d.ts"]
 }
