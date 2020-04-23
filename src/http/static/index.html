@@ -6,12 +6,6 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="/browser/index.js"></script>
-    <script>
-      window.executa.init({
-        host: window.location.hostname,
-        port: 9000,
-      })
-    </script>
     <script
       type="module"
       src="https://unpkg.com/@stencila/components/dist/stencila-components/stencila-components.esm.js"
@@ -24,6 +18,7 @@
       rel="stylesheet"
       href="https://unpkg.com/@stencila/components/dist/stencila-components/stencila-components.css"
     />
+    <script src="https://unpkg.com/@stencila/schema"></script>
     <style>
       body {
         max-width: 50em;
@@ -49,5 +44,49 @@
     >
       <pre slot="text"><code># Edit this code</code></pre>
     </stencila-code-chunk>
+
+    <script>
+      var client = new window.executa.WebSocketClient({
+        host: window.location.hostname,
+        port: 9000,
+      })
+
+      var session = null
+
+      // The execution handler attached to the CodeChunk component must always return a CodeChunk JSON
+      var executeCodeChunk = function (codeChunk) {
+        // Execution handler to call when clicking Run
+        var run = function () {
+          try {
+            return client.execute(codeChunk, session)
+          } catch (error) {
+            console.error(error)
+            return codeChunk
+          }
+        }
+
+        // If a session connection hasn't been established yet, create one,
+        // otherwise call the execution handler
+        if (session === null) {
+          return client
+            .begin(window.schema.softwareSession())
+            .then(function (sessionInstance) {
+              session = sessionInstance
+            })
+            .then(function () {
+              return run()
+            })
+        } else {
+          return run()
+        }
+      }
+
+      // Find all instances of CodeChunk web components and attach the execution handler callback function
+      document
+        .querySelectorAll('stencila-code-chunk')
+        .forEach(function (chunk) {
+          chunk.executeHandler = executeCodeChunk
+        })
+    </script>
   </body>
 </html>
