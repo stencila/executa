@@ -138,9 +138,9 @@ npm run cli -- execute --repl --debug
 
 1. Serve Executa on ws://localhost:9000:
 
-    ```bash
-    npm run cli:dev -- serve --ws
-    ```
+   ```bash
+   npm run cli:dev -- serve --ws
+   ```
 
 2. Visit http://localhost:9000 in your browser and play around with the `<stencila-code-chunk>` WebComponent that is connected to the Executa WebSocket that you just started.
 
