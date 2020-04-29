@@ -136,21 +136,15 @@ npm run cli -- execute --repl --debug
 
 ### Testing in the browser
 
-1. Build the browser Javascript
+1. Serve Executa on ws://localhost:9000:
 
-```bash
-npm run build:browser
-```
+    ```bash
+    npm run cli:dev -- serve --ws
+    ```
 
-2. Serve Executa on ws://localhost:9000 (with reloading when source changes):
+2. Visit http://localhost:9000 in your browser and play around with the `<stencila-code-chunk>` WebComponent that is connected to the Executa WebSocket that you just started.
 
-```bash
-npm run cli:dev -- serve --ws
-```
-
-The `:dev` suffix uses `ts-node-dev` which will restart the process when any source files change.
-
-1. Visit http://localhost:9000 in your browser.
+> The `:dev` suffix to `cli` uses `ts-node-dev` which will restart the process when any source files change.
 
 ### Debug inspecting
 
@@ -159,6 +153,8 @@ There is a NPM script, `cli:debug`, that can be useful for debugging the CLI, fo
 ```bash
 npm run cli:debug -- serve --http
 ```
+
+> The `:debug` suffix to `cli` enables the Node [debug inspector](https://nodejs.org/en/docs/guides/debugging-getting-started/) so you can use your favorite IDE to attach to the CLI and step through the code.
 
 ## FAQ
 
