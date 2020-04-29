@@ -1,3 +1,15 @@
+# [1.11.0](https://github.com/stencila/executa/compare/v1.10.3...v1.11.0) (2020-04-29)
+
+
+### Bug Fixes
+
+* **Dependencies:** Update external-ip, fastify, ora ([03b08fc](https://github.com/stencila/executa/commit/03b08fc119ad646fe0b3aea98ecb13cdfc379585))
+
+
+### Features
+
+* **HTTP:** Serve HTML with server when using CLI build ([c5c1451](https://github.com/stencila/executa/commit/c5c14514987d9af9b837ea6d5e7e3fac8af77aff))
+
 ## [1.10.3](https://github.com/stencila/executa/compare/v1.10.2...v1.10.3) (2020-04-23)
 
 
