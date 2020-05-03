@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/stencila/executa/compare/v1.11.0...v1.11.1) (2020-05-03)
+
+
+### Bug Fixes
+
+* **Package:** Fix file paths and add dependencies ([27e566d](https://github.com/stencila/executa/commit/27e566d440bebd21518aab3c0ff8eb032e1acc1b))
+
 # [1.11.0](https://github.com/stencila/executa/compare/v1.10.3...v1.11.0) (2020-04-29)
 
 
