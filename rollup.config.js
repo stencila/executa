@@ -10,6 +10,8 @@ import { terser } from 'rollup-plugin-terser'
 import typescript from 'rollup-plugin-typescript2'
 import nodeBuiltins from 'builtin-modules'
 
+import pkg from './package.json'
+
 const plugins = (options, before = [], after = []) => [
   ...before,
   hashbang(),
@@ -64,10 +66,10 @@ export default [
       ],
       [minify]
     ),
-    external: nodeBuiltins,
+    external: [...nodeBuiltins, ...Object.keys(pkg.dependencies)],
     output: [
       {
-        file: 'dist/lib/executa.js',
+        file: pkg.main,
         sourcemap: true,
         format: 'cjs',
       },
@@ -79,10 +81,10 @@ export default [
       propertyReadSideEffects: false,
     },
     plugins: plugins({ target: 'node' }),
-    external: nodeBuiltins,
+    external: [...nodeBuiltins, ...Object.keys(pkg.dependencies)],
     output: [
       {
-        file: 'dist/lib/executa.mjs',
+        file: pkg.module,
         sourcemap: true,
         format: 'esm',
       },
@@ -114,7 +116,7 @@ export default [
     output: [
       {
         name: 'executa',
-        file: 'dist/browser/executa.umd.js',
+        file: pkg.unpkg,
         format: 'umd',
         extend: true,
         sourcemap: true,
@@ -147,7 +149,7 @@ export default [
     external: ['cross-fetch', 'isomorphic-ws', '@stencila/configa'],
     output: [
       {
-        file: 'dist/browser/executa.mjs',
+        file: pkg.browser,
         sourcemap: true,
         format: 'esm',
       },

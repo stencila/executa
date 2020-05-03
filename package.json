@@ -5,9 +5,9 @@
   "source": "src/index.ts",
   "main": "./dist/lib/executa.js",
   "types": "./dist/lib/index.d.ts",
-  "module": "./dist/executa.mjs",
+  "module": "./dist/lib/executa.mjs",
   "browser": "./dist/browser/executa.mjs",
-  "unpkg": "./dist/browser/index.umd.js",
+  "unpkg": "./dist/browser/executa.umd.js",
   "bin": "./dist/cli/cli/index.js",
   "files": [
     "dist"
