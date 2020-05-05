@@ -57,7 +57,7 @@
     "@types/split2": "2.1.6",
     "builtin-modules": "3.1.0",
     "depcheck": "0.9.2",
-    "jest": "25.5.2",
+    "jest": "26.0.0",
     "lolex": "6.0.0",
     "markdown-toc": "1.2.0",
     "rollup": "2.7.5",
