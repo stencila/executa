@@ -1,3 +1,11 @@
+## [1.11.3](https://github.com/stencila/executa/compare/v1.11.2...v1.11.3) (2020-05-16)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency fastify to ^2.14.1 ([bd57158](https://github.com/stencila/executa/commit/bd57158c7fada2eeb8fdea80d56a2ef1237bb068))
+* **dependencies:** update dependency nanoid to ^3.1.8 ([8814468](https://github.com/stencila/executa/commit/88144684e6e8b5dadce47922fa2aecc195f24e1f))
+
 ## [1.11.2](https://github.com/stencila/executa/compare/v1.11.1...v1.11.2) (2020-05-05)
 
 
