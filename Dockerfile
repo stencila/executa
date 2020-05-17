@@ -44,6 +44,11 @@ RUN npm install --global @stencila/basha
 RUN pip3 install stencila-pyla
 RUN R -e 'install.packages("remotes"); remotes::install_github("stencila/rasta")'
 
+# Temporary fix. Install Typscript to avoid this
+# https://dev.azure.com/stencila/stencila/_build/results?buildId=2035&view=logs&j=1b7bf37f-59a6-5457-eae3-62ce29cb19a4&t=9d3843fb-f716-59bf-683b-829e70871150&l=3860
+# which seems to be caused by TS being a peer dependency of Typedoc
+RUN npm install --global typescript
+
 # Setup container user prior to registering executors
 RUN useradd --create-home guest
 WORKDIR /home/guest
