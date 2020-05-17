@@ -1,3 +1,11 @@
+## [1.11.4](https://github.com/stencila/executa/compare/v1.11.3...v1.11.4) (2020-05-17)
+
+
+### Bug Fixes
+
+* **Deps:** npm audit fix ([6bfb00f](https://github.com/stencila/executa/commit/6bfb00fe54ddf23e94f60f33a4e819866953da97))
+* **Dockerfile:** Install Typescript ([61bea7d](https://github.com/stencila/executa/commit/61bea7dbca2f44691cfbf1af64d366e93feb283d))
+
 ## [1.11.3](https://github.com/stencila/executa/compare/v1.11.2...v1.11.3) (2020-05-16)
 
 
