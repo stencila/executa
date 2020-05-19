@@ -1,3 +1,10 @@
+## [1.11.5](https://github.com/stencila/executa/compare/v1.11.4...v1.11.5) (2020-05-19)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency nanoid to ^3.1.9 ([17c84d6](https://github.com/stencila/executa/commit/17c84d65672a4b83c9fad03dd992f37ca9650ad1))
+
 ## [1.11.4](https://github.com/stencila/executa/compare/v1.11.3...v1.11.4) (2020-05-17)
 
 
