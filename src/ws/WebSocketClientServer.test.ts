@@ -196,3 +196,26 @@ test('WebSocketClient and WebSocketServer', async () => {
 
   await server.stop()
 })
+
+jest.setTimeout(5 * 60 * 1000)
+
+test.only('Large Websocket message sizes', async () => {
+  const server = new WebSocketServer()
+  const client = new WebSocketClient(server.address)
+
+  const executor = new Worker()
+  await server.start(executor)
+
+  for (let exponent = 1; exponent < 20; exponent++) {
+    for (let replicate = 0; replicate < 10; replicate++) {
+      const size = Math.pow(2, exponent)
+      console.log(exponent, size, replicate)
+      const sent = `${exponent},${replicate}:` + '-'.repeat(size)
+      const received = await client.decode(`"${sent}"`, 'json')
+      expect(received).toBe(sent)
+    }
+  }
+
+  await client.stop()
+  await server.stop()
+})
