@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * A script for testing sending several messages of increasing sizes to
  * various WebSocket server implementations with different client creation
@@ -10,7 +12,7 @@
  * ```
  *
  * Written to try to resolve issue https://github.com/stencila/executa/issues/141.
- * These results, showing the highest exponent / repetition befor hanging
+ * These results, showing the highest exponent / repetition before hanging
  * suggest that problem resides in the fastify server:
  *
  * Combo                                Exponent   Replicate
@@ -23,11 +25,13 @@
  *
  * `server-ws` + `client-one`:            19        9
  * `server-ws` + `client-many`:           19        9
+ *
+ * After these results, `WebSockerServer` was refactored
+ * to use `ws` and `fastify-websocket`was removed from the project.
+ * After that the results for `server-executa` + `client-one`,
+ * were the same as for `server-ws` + `client-one`.
  */
 
-
-import fastify from 'fastify'
-import fastifyWebsocket from 'fastify-websocket'
 import WebSocket from 'ws'
 import { JsonRpcRequest } from '../base/JsonRpcRequest'
 import { Worker } from '../base/Worker'
@@ -41,42 +45,18 @@ if (mode === 'server-executa') {
    */
   const server = new WebSocketServer()
   const executor = new Worker()
-  server.start(executor)
-} else if (mode === 'server-fastify') {
-  /**
-   * Run `fastify` server with the `fastify-websocket`
-   * plugin. This is what Executa's `WebSocketServer`
-   * is currently built on.
-   */
-  const server = fastify()
-  server.register(fastifyWebsocket, {
-    handle: (connection: any) => {
-      const { socket } = connection
-      socket.on('message', (message: string) => {
-        console.log('recv', message.substring(0, 60))
-        socket.send(message, (error: any) => {
-          if (error !== undefined) {
-            console.error(error)
-            process.exit(1)
-          }
-          console.log('sent', message.substring(0, 60))
-        })
-      })
-    }
-  })
-  server.listen(9000)
+  server.start(executor).catch(console.error)
 } else if (mode === 'server-ws') {
   /**
-   * Run a `ws` server.  This is what `fastify-websocket`
-   * is built on.
+   * Run a `ws` server.
    */
   const server = new WebSocket.Server({
-    port: 9000
+    port: 9000,
   })
-  server.on('connection', socket => {
-    socket.on('message', message => {
+  server.on('connection', (socket) => {
+    socket.on('message', (message) => {
       console.log('recv', message.toString().substring(0, 60))
-      socket.send(message, error => {
+      socket.send(message, (error) => {
         if (error !== undefined) {
           console.error(error)
           process.exit(1)
@@ -105,10 +85,10 @@ if (mode === 'server-executa') {
     )
     const request = new JsonRpcRequest('decode', {
       source: payload,
-      format: 'json'
+      format: 'json',
     })
     const message = JSON.stringify(request)
-    client.send(message, error => {
+    client.send(message, (error) => {
       if (error !== undefined) {
         console.error(error)
         process.exit(1)
@@ -121,7 +101,7 @@ if (mode === 'server-executa') {
     .on('open', () => {
       send()
     })
-    .on('error', err => {
+    .on('error', (err) => {
       console.error(`Connection error: ${err}`)
       process.exit(1)
     })
@@ -149,15 +129,15 @@ if (mode === 'server-executa') {
           )
           const request = new JsonRpcRequest('decode', {
             source: payload,
-            format: 'json'
+            format: 'json',
           })
           const message = JSON.stringify(request)
-          client.send(message, error => {
+          client.send(message, (error) => {
             if (error !== undefined) console.error(error)
             console.log('sent', exponent, replicate, message.substring(0, 60))
           })
         })
-        .on('error', err => {
+        .on('error', (err) => {
           console.error(`Connection error: ${err}`)
           process.exit(1)
         })

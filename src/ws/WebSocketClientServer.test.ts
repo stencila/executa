@@ -197,24 +197,30 @@ test('WebSocketClient and WebSocketServer', async () => {
   await server.stop()
 })
 
-jest.setTimeout(5 * 60 * 1000)
+test('Many messages of increasing sizes', async () => {
+  // A regression test for https://github.com/stencila/executa/issues/141/
+  jest.setTimeout(60 * 1000)
 
-test.only('Large Websocket message sizes', async () => {
   const server = new WebSocketServer()
   const client = new WebSocketClient(server.address)
 
   const executor = new Worker()
   await server.start(executor)
 
-  for (let exponent = 1; exponent < 20; exponent++) {
-    for (let replicate = 0; replicate < 10; replicate++) {
+  const maxExponent = 25
+  const maxReplicate = 10
+  let exponent
+  let replicate
+  for (exponent = 1; exponent < maxExponent; exponent++) {
+    for (replicate = 0; replicate < maxReplicate; replicate++) {
       const size = Math.pow(2, exponent)
-      console.log(exponent, size, replicate)
       const sent = `${exponent},${replicate}:` + '-'.repeat(size)
       const received = await client.decode(`"${sent}"`, 'json')
       expect(received).toBe(sent)
     }
   }
+  expect(exponent).toBe(maxExponent)
+  expect(replicate).toBe(maxReplicate)
 
   await client.stop()
   await server.stop()
