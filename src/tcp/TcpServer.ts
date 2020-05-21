@@ -1,20 +1,19 @@
 import { getLogger } from '@stencila/logga'
+import * as schema from '@stencila/schema'
 import crypto from 'crypto'
 import net from 'net'
-import { Executor, Claims } from '../base/Executor'
+import { Connection } from '../base/Connection'
+import { Executor } from '../base/Executor'
+import { Server } from '../base/Server'
 import {
+  Addresses,
+  HttpAddress,
   TcpAddress,
   TcpAddressInitializer,
-  HttpAddress,
-  Addresses,
   Transport,
   WebSocketAddress,
 } from '../base/Transports'
 import { StreamServer } from '../stream/StreamServer'
-import { Server } from '../base/Server'
-import { Connection } from '../base/Connection'
-import * as schema from '@stencila/schema'
-import { thisExpression } from '@babel/types'
 import { expandAddress } from './util'
 
 const log = getLogger('executa:tcp:server')
