@@ -1,3 +1,10 @@
+## [1.11.6](https://github.com/stencila/executa/compare/v1.11.5...v1.11.6) (2020-05-21)
+
+
+### Bug Fixes
+
+* **WebSockerServer:** Use ws directly, drop fastify-websocket ([c281b65](https://github.com/stencila/executa/commit/c281b65498246f72960e3a30b53b1678e61d7f80)), closes [#141](https://github.com/stencila/executa/issues/141)
+
 ## [1.11.5](https://github.com/stencila/executa/compare/v1.11.4...v1.11.5) (2020-05-19)
 
 
