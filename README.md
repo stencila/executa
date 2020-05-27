@@ -136,15 +136,17 @@ npm run cli -- execute --repl --debug
 
 ### Testing in the browser
 
-1. Serve Executa on ws://localhost:9000:
+1. Serve Executa over HTTP (to provide static HTML) and WebSocket (to provide JSON RPC):
 
    ```bash
-   npm run cli:dev -- serve --ws
+   npm run cli:dev -- serve --http --ws
    ```
 
-2. Visit http://localhost:9000 in your browser and play around with the `<stencila-code-chunk>` WebComponent that is connected to the Executa WebSocket that you just started.
-
 > The `:dev` suffix to `cli` uses `ts-node-dev` which will restart the process when any source files change.
+
+2. Visit http://localhost:8000 in your browser and play around with the `<stencila-code-chunk>` WebComponent that is connected to the Executa WebSocket that you just started.
+
+![](.github/executa-in-browser.png)
 
 ### Debug inspecting
 
