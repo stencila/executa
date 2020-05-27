@@ -10,7 +10,7 @@ import {
   Addresses,
   Transport,
   WebSocketAddress,
-  WebSocketAddressInitializer
+  WebSocketAddressInitializer,
 } from '../base/Transports'
 import { TcpServer } from '../tcp/TcpServer'
 import { expandAddress } from '../tcp/util'
