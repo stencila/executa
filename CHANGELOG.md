@@ -1,3 +1,12 @@
+## [1.11.7](https://github.com/stencila/executa/compare/v1.11.6...v1.11.7) (2020-05-27)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/configa to ^0.4.8 ([c5e190b](https://github.com/stencila/executa/commit/c5e190b11ca4f36003cd0318df6bd6a40e0fb19b))
+* **dependencies:** update dependency @stencila/schema to ^0.43.1 ([c38b7ef](https://github.com/stencila/executa/commit/c38b7efa570d53c8e868dcde8449d0df56311107))
+* **dependencies:** update dependency fastify-jwt to ^1.4.0 ([ea98e13](https://github.com/stencila/executa/commit/ea98e138c060f143ed6496a659ec47a537ad15c8))
+
 ## [1.11.6](https://github.com/stencila/executa/compare/v1.11.5...v1.11.6) (2020-05-21)
 
 
