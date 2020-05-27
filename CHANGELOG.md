@@ -1,3 +1,10 @@
+## [1.11.8](https://github.com/stencila/executa/compare/v1.11.7...v1.11.8) (2020-05-27)
+
+
+### Bug Fixes
+
+* **Deps:** Add ws as dependency ([7a2c746](https://github.com/stencila/executa/commit/7a2c746e1645b31a5fe68cb7f39da775567c213d))
+
 ## [1.11.7](https://github.com/stencila/executa/compare/v1.11.6...v1.11.7) (2020-05-27)
 
 
