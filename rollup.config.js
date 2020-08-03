@@ -37,7 +37,6 @@ const plugins = (options, before = [], after = []) => [
 ]
 
 const minify = terser({
-  sourcemap: true,
   output: { comments: false },
   compress: {
     keep_infinity: true,
