@@ -1,3 +1,19 @@
+## [1.11.9](https://github.com/stencila/executa/compare/v1.11.8...v1.11.9) (2020-08-03)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/schema to ^0.43.3 ([9d487ba](https://github.com/stencila/executa/commit/9d487baa99bf0804a75df3f5c299a2b5e8bb5ea9))
+* **dependencies:** update dependency @types/ws to v7.2.5 ([eed1636](https://github.com/stencila/executa/commit/eed163698a9634a0e222a0c80fa0936bce8b1b44))
+* **dependencies:** update dependency ajv to ^6.12.3 ([d14f216](https://github.com/stencila/executa/commit/d14f21693d6307b3088bf56b0a5d134486608cb7))
+* **dependencies:** update dependency chalk to ^4.1.0 ([a58af9c](https://github.com/stencila/executa/commit/a58af9cc94e2f6e4ca218bcb156ab3d71f90fcca))
+* **dependencies:** update dependency cross-fetch to ^3.0.5 ([ff1e224](https://github.com/stencila/executa/commit/ff1e224e953aac4b7e5c9fda60ddb483aa4106b3))
+* **dependencies:** update dependency fastify to ^2.15.2 ([7eacccf](https://github.com/stencila/executa/commit/7eacccfd42aa95ddc97db582437e0a718cd1ae72))
+* **dependencies:** update dependency globby to ^11.0.1 ([230665a](https://github.com/stencila/executa/commit/230665aa8b26ce54056073790538d430bab5a826))
+* **dependencies:** update dependency nanoid to ^3.1.12 ([0c4d48d](https://github.com/stencila/executa/commit/0c4d48d260817228fa20be9865cdaf1cff417040))
+* **dependencies:** update dependency ora to ^4.0.5 ([0c91577](https://github.com/stencila/executa/commit/0c915776ffcef0de6ecf9465d29c7c9130ca27df))
+* **dependencies:** update dependency ws to ^7.3.1 ([8b6f571](https://github.com/stencila/executa/commit/8b6f57101c07309bf323e10540dab49654adc1b1))
+
 ## [1.11.8](https://github.com/stencila/executa/compare/v1.11.7...v1.11.8) (2020-05-27)
 
 
