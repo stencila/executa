@@ -22,9 +22,10 @@ export class Manager extends Listener {
     servers: Server[] = [],
     delegator: Delegator = new Delegator([new Worker()]),
     queuer: Queuer = new Queuer(),
-    timeout = 0
+    timeout = 0,
+    timelimit = 0
   ) {
-    super('ma', servers, timeout)
+    super('ma', servers, timeout, timelimit)
     this.delegator = delegator
     this.queuer = queuer
   }

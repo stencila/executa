@@ -28,15 +28,31 @@ export abstract class Listener extends Executor {
   public readonly timeout: number = 0
 
   /**
+   * Maximum time that the process will run.
+   */
+  public readonly timelimit: number = 0
+
+  /**
+   * The UNIX timestamp when the listener was `start`ed.
+   */
+  private started = 0
+
+  /**
    * The UNIX timestamp of the last call to `dispatch`
    * or `notified`.
    */
   private heartbeat = 0
 
-  public constructor(family = 'li', servers: Server[] = [], timeout = 0) {
+  public constructor(
+    family = 'li',
+    servers: Server[] = [],
+    timeout = 0,
+    timelimit = 0
+  ) {
     super(family)
     this.servers = servers
     this.timeout = timeout
+    this.timelimit = timelimit
   }
 
   /**
@@ -137,14 +153,18 @@ export abstract class Listener extends Executor {
     process.on('SIGINT', stop)
     process.on('SIGTERM', stop)
 
+    this.started = Date.now()
     this.heartbeat = Date.now()
-    if (this.timeout > 0) {
+    if (this.timeout > 0 || this.timelimit > 0) {
       const interval = setInterval((): void => {
-        const duration = (Date.now() - this.heartbeat) / 1000
-        console.log(duration, this.heartbeat, this.timeout)
-        if (duration > this.timeout) {
+        const now = Date.now()
+        const sinceHeartbeat = (now - this.heartbeat) / 1000
+        const sinceStarted = (now - this.started) / 1000
+        if (sinceHeartbeat > this.timeout || sinceStarted > this.timelimit) {
           clearInterval(interval)
-          log.info(`Timed out after ${Math.round(duration)}s`)
+          if (sinceHeartbeat > this.timeout)
+            log.info(`Timed out after ${Math.round(sinceHeartbeat)}s`)
+          else log.info(`Time limit reached after ${Math.round(sinceStarted)}s`)
           stop()
         }
       }, 1000)

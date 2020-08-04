@@ -60,11 +60,18 @@ export class Config {
   ws: boolean | string = false
 
   /**
-   * Seconds of inactivity after which the process should stop.
+   * Duration of inactivity after which the process should stop.
    *
-   * Zero means no timeout.
+   * Seconds. Zero means no timeout.
    */
   timeout = 0
+
+  /**
+   * Maximum duration for the process.
+   *
+   * Seconds. Zero means no time limit.
+   */
+  timelimit = 0
 
   /**
    * List of peer addresses.

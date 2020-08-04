@@ -70,8 +70,14 @@
       "default": false
     },
     "timeout": {
-      "description": "Seconds of inactivity after which the process should stop.",
-      "$comment": "Zero means no timeout.",
+      "description": "Duration of inactivity after which the process should stop.",
+      "$comment": "Seconds. Zero means no timeout.",
+      "type": "number",
+      "default": 0
+    },
+    "timelimit": {
+      "description": "Maximum duration for the process.",
+      "$comment": "Seconds. Zero means no time limit.",
       "type": "number",
       "default": 0
     },
