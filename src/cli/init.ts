@@ -68,5 +68,6 @@ export async function init(config: Config): Promise<Listener> {
   // Configure the queue
   const queuer = new Queuer(config)
 
-  return new Manager(servers, delegator, queuer)
+  const { timeout, timelimit } = config
+  return new Manager(servers, delegator, queuer, timeout, timelimit)
 }

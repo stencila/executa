@@ -69,6 +69,18 @@
       ],
       "default": false
     },
+    "timeout": {
+      "description": "Duration of inactivity after which the process should stop.",
+      "$comment": "Seconds. Zero means no timeout.",
+      "type": "number",
+      "default": 0
+    },
+    "timelimit": {
+      "description": "Maximum duration for the process.",
+      "$comment": "Seconds. Zero means no time limit.",
+      "type": "number",
+      "default": 0
+    },
     "peers": {
       "description": "List of peer addresses.",
       "$comment": "Each string in this list is parsed as an address to\na peer executor. e.g. `https://123.45.67.89/`, `docker://image`",
