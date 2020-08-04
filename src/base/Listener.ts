@@ -1,6 +1,6 @@
 import { getLogger } from '@stencila/logga'
 import * as schema from '@stencila/schema'
-import { Executor } from './Executor'
+import { Executor, Method, Params } from './Executor'
 import { Server } from './Server'
 import { Addresses } from './Transports'
 import { StdioServer } from '../stdio/StdioServer'
@@ -21,9 +21,22 @@ export abstract class Listener extends Executor {
    */
   protected servers: Server[] = []
 
-  public constructor(family = 'li', servers: Server[] = []) {
+  /**
+   * Seconds of inactivity after which the listener
+   * stops.
+   */
+  public readonly timeout: number = 0
+
+  /**
+   * The UNIX timestamp of the last call to `dispatch`
+   * or `notified`.
+   */
+  private heartbeat = 0
+
+  public constructor(family = 'li', servers: Server[] = [], timeout = 0) {
     super(family)
     this.servers = servers
+    this.timeout = timeout
   }
 
   /**
@@ -45,6 +58,15 @@ export abstract class Listener extends Executor {
   }
 
   /**
+   * @override Override of {@link Executor.dispatch} to
+   * update heartbeat with current time.
+   */
+  public dispatch(method: Method, params: Params = {}): Promise<any> {
+    this.heartbeat = Date.now()
+    return super.dispatch(method, params)
+  }
+
+  /**
    * @implements {Executor.notify}
    *
    * Send a notification to clients via each of this
@@ -59,6 +81,15 @@ export abstract class Listener extends Executor {
     for (const server of this.servers)
       server.notify(level, message, node, clients)
     return Promise.resolve()
+  }
+
+  /**
+   * @override Override of {@link Executor.notify} to
+   * update heartbeat with current time.
+   */
+  public notified(level: string, message: string, node?: schema.Node): void {
+    this.heartbeat = Date.now()
+    return super.notified(level, message, node)
   }
 
   /**
@@ -89,7 +120,8 @@ export abstract class Listener extends Executor {
   /**
    * Run this executor
    *
-   * Starts listening with graceful shutdown on `SIGINT` or `SIGTERM`.
+   * Starts listening with graceful shutdown on `SIGINT` or `SIGTERM`,
+   * and checking for timeout (if set).
    *
    * @see {@link Server.run}
    */
@@ -101,8 +133,22 @@ export abstract class Listener extends Executor {
           log.error(`Error when stopping executor: ${error.message}`)
         )
     }
+
     process.on('SIGINT', stop)
     process.on('SIGTERM', stop)
+
+    this.heartbeat = Date.now()
+    if (this.timeout > 0) {
+      const interval = setInterval((): void => {
+        const duration = (Date.now() - this.heartbeat) / 1000
+        console.log(duration, this.heartbeat, this.timeout)
+        if (duration > this.timeout) {
+          clearInterval(interval)
+          log.info(`Timed out after ${Math.round(duration)}s`)
+          stop()
+        }
+      }, 1000)
+    }
 
     return this.start()
   }

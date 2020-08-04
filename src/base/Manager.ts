@@ -21,9 +21,10 @@ export class Manager extends Listener {
   constructor(
     servers: Server[] = [],
     delegator: Delegator = new Delegator([new Worker()]),
-    queuer: Queuer = new Queuer()
+    queuer: Queuer = new Queuer(),
+    timeout = 0
   ) {
-    super('ma', servers)
+    super('ma', servers, timeout)
     this.delegator = delegator
     this.queuer = queuer
   }

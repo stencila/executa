@@ -35,7 +35,7 @@ export const main = async (
           return register(executor)
         case 'start':
         case 'serve':
-          return start(executor)
+          return run(executor)
         case 'convert':
           await convert(executor, log, args, options)
           break
@@ -78,4 +78,4 @@ const register = (listener: Listener): Promise<string> => {
 /**
  * Start the executor
  */
-const start = (executor: Executor): Promise<void> => executor.start()
+const run = (executor: Listener): Promise<void> => executor.run()

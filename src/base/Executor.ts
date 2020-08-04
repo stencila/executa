@@ -324,9 +324,9 @@ export abstract class Executor {
    * Dispatch a call to one of the above methods.
    *
    * This method does run time dispatching. It is used
-   * by classes such as `Server` (to fulfil and JSON-RPC request),
-   * `Queuer` (to remove calls from a queue) and elsewhere for
-   * running the `pipe` method.
+   * by classes such as `Server` (to fulfil a JSON-RPC request),
+   * `Queuer` (to remove calls from a queue) and in `Worker`
+   * for implementing the `pipe` method.
    *
    * It does runtime checking for the method name and
    * required parameters.
