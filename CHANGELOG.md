@@ -1,3 +1,11 @@
+# [1.12.0](https://github.com/stencila/executa/compare/v1.11.9...v1.12.0) (2020-08-04)
+
+
+### Features
+
+* **Listener:** Add timelimit option ([8d33475](https://github.com/stencila/executa/commit/8d33475a3f775ed0b896c14eb32e4eaf143cda1d))
+* **Listener:** Add timeout option ([e1b0097](https://github.com/stencila/executa/commit/e1b0097151e4f86d79d5423a92a1e30171166cc1))
+
 ## [1.11.9](https://github.com/stencila/executa/compare/v1.11.8...v1.11.9) (2020-08-03)
 
 

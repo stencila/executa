@@ -1,6 +1,6 @@
 {
   "name": "@stencila/executa",
-  "version": "1.11.9",
+  "version": "1.12.0",
   "description": "Document executors: protocols, transports and reference implementations",
   "source": "src/index.ts",
   "main": "./dist/lib/executa.js",
