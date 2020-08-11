@@ -1,3 +1,10 @@
+# [1.13.0](https://github.com/stencila/executa/compare/v1.12.0...v1.13.0) (2020-08-11)
+
+
+### Features
+
+* **Midi image:** Add R packages ([836bf58](https://github.com/stencila/executa/commit/836bf5891dc919ce6dc3ee6386d84f6294700cfa))
+
 # [1.12.0](https://github.com/stencila/executa/compare/v1.11.9...v1.12.0) (2020-08-04)
 
 
