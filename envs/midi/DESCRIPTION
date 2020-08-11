@@ -4,4 +4,13 @@ Date: 2020-02-10
 Description:
   A R package for specifying dependencies of the Executa 'Midi' environment.
 Imports:
+  broomExtra,
+  corpcor,
+  cowplot,
+  GGally,
+  lme4,
+  MuMIn,
+  Rcpp,
+  reshape,
+  Rmisc,
   tidyverse
