@@ -1,3 +1,10 @@
+# [1.14.0](https://github.com/stencila/executa/compare/v1.13.0...v1.14.0) (2020-08-14)
+
+
+### Features
+
+* **Midi image:** Adds lsmeans R package ([03d48ba](https://github.com/stencila/executa/commit/03d48bac3e2a7890335e3b9fdc6dc07ce3e70b9d))
+
 # [1.13.0](https://github.com/stencila/executa/compare/v1.12.0...v1.13.0) (2020-08-11)
 
 
