@@ -98,7 +98,7 @@
     "nanoid": "^3.1.12",
     "ora": "^4.0.5",
     "p-retry": "^4.2.0",
-    "split2": "^3.1.1",
+    "split2": "^3.2.1",
     "ws": "^7.3.1"
   },
   "prettier": "@stencila/dev-config/prettier-config.json",
