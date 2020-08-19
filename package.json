@@ -46,7 +46,7 @@
     "@babel/preset-typescript": "7.10.4",
     "@rollup/plugin-alias": "3.1.1",
     "@rollup/plugin-replace": "2.3.3",
-    "@stencila/dev-config": "1.4.60",
+    "@stencila/dev-config": "1.4.63",
     "@stencila/dockta": "0.16.7",
     "@types/jest": "26.0.8",
     "@types/jmespath": "0.15.0",
