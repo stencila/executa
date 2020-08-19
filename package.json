@@ -60,7 +60,7 @@
     "jest": "26.2.2",
     "lolex": "6.0.0",
     "markdown-toc": "1.2.0",
-    "rollup": "2.23.0",
+    "rollup": "2.26.4",
     "rollup-plugin-babel": "4.4.0",
     "rollup-plugin-commonjs": "10.1.0",
     "rollup-plugin-hashbang": "2.2.2",
