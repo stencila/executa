@@ -78,7 +78,7 @@
   "dependencies": {
     "@stencila/configa": "^0.4.8",
     "@stencila/logga": "^2.2.0",
-    "@stencila/schema": "^0.43.3",
+    "@stencila/schema": "^0.44.2",
     "@types/ws": "7.2.6",
     "ajv": "^6.12.3",
     "chalk": "^4.1.0",
