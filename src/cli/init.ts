@@ -29,6 +29,7 @@ export async function init(config: Config): Promise<Listener> {
   const { debug } = config
   replaceHandlers((data) =>
     defaultHandler(data, {
+      exitOnError: false,
       maxLevel: debug ? LogLevel.debug : LogLevel.info,
       showStack: debug,
     })
