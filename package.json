@@ -96,7 +96,7 @@
     "length-prefixed-stream": "^2.0.0",
     "mkdirp": "^1.0.4",
     "nanoid": "^3.1.12",
-    "ora": "^4.0.5",
+    "ora": "^5.1.0",
     "p-retry": "^4.2.0",
     "split2": "^3.1.1",
     "ws": "^7.3.1"
