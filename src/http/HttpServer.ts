@@ -25,6 +25,10 @@ import { expandAddress } from '../tcp/util'
 
 const log = getLogger('executa:http:server')
 
+// Typescript seems to think that some of the `Fastify.Reply`
+// methods e.g. `headers`, `send`, return promises when they don't
+/* eslint-disable @typescript-eslint/no-floating-promises */
+
 /**
  * A `Server` for the HTTP transport.
  *
@@ -80,20 +84,20 @@ export class HttpServer extends TcpServer {
    * Derived classes may want to override this method
    * to extend the set of endpoints etc.
    */
-  protected buildApp(): FastifyInstance {
+  protected async buildApp(): Promise<FastifyInstance> {
     // Define the routes
     const app = fastify({
       ignoreTrailingSlash: true,
     })
 
     // Register CORS plugin
-    app.register(fastifyCors)
+    await app.register(fastifyCors)
 
     // Register JWT plugin
-    app.register(fastifyJwt, { secret: this.jwtSecret })
+    await app.register(fastifyJwt, { secret: this.jwtSecret })
 
     // Register static file serving plugin
-    app.register(fastifyStatic, {
+    await app.register(fastifyStatic, {
       root: path.join(__dirname, 'static'),
     })
 
@@ -113,8 +117,18 @@ export class HttpServer extends TcpServer {
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
       const { body, user } = request
-      const claims = typeof user === 'object' ? user : {}
-      reply.send(await this.receive(body, claims, false))
+      if (typeof body === 'object' && body !== null && 'jsonrpc' in body) {
+        const jsonRpcRequest = body as JsonRpcRequest
+        const claims = typeof user === 'object' ? user : {}
+        const jsonRpcResponse = await this.receive(
+          jsonRpcRequest,
+          claims,
+          false
+        )
+        reply.send(jsonRpcResponse)
+      } else {
+        reply.status(400).send('Request body must be a JSON-RPC request')
+      }
     })
 
     // RESTful-like JSON-RPC wrapped in HTTP
@@ -122,10 +136,13 @@ export class HttpServer extends TcpServer {
     // unwrap the JSON-RPC response as HTTP response with
     // bare, un-enveloped results and errors
     const wrap = (method: string) => {
-      return async (request: FastifyRequest, reply: FastifyReply<any>) => {
+      return async (request: FastifyRequest, reply: FastifyReply) => {
         const { body, user } = request
         const claims = typeof user === 'object' ? user : {}
-        const jsonRpcRequest = new JsonRpcRequest(method, body)
+        const jsonRpcRequest = new JsonRpcRequest(
+          method,
+          body as Record<string, unknown>
+        )
         const jsonRpcResponse = await this.receive(
           jsonRpcRequest,
           claims,
@@ -169,9 +186,10 @@ export class HttpServer extends TcpServer {
    */
   protected async onRequest(
     request: FastifyRequest,
-    reply: FastifyReply<any>
+    reply: FastifyReply
   ): Promise<void> {
-    const { headers, query } = request
+    const { headers } = request
+    const query = request.query as Record<string, string>
     // If there is no `Authorization` header...
     if (headers.authorization === undefined) {
       // but there is a `jwt` query parameter, then use that
@@ -204,14 +222,14 @@ export class HttpServer extends TcpServer {
    */
   protected notFoundHandler(
     request: FastifyRequest,
-    reply: FastifyReply<any>
+    reply: FastifyReply
   ): void {
     reply
       .status(404)
       .send(
         new JsonRpcError(
           JsonRpcErrorCode.InvalidRequest,
-          `Route not found: ${request.req.method} ${request.req.url}`
+          `Route not found: ${request.method} ${request.url}`
         )
       )
   }
@@ -223,7 +241,7 @@ export class HttpServer extends TcpServer {
   protected errorHandler(
     error: FastifyError,
     request: FastifyRequest,
-    reply: FastifyReply<any>
+    reply: FastifyReply
   ): void {
     const { statusCode, message } = error
     reply
@@ -240,7 +258,7 @@ export class HttpServer extends TcpServer {
     this.executor = executor
 
     log.debug(`Starting server: ${this.address.url()}`)
-    const app = (this.app = this.buildApp())
+    const app = (this.app = await this.buildApp())
 
     // Wait for plugins to be ready
     await app.ready()
@@ -269,6 +287,9 @@ export class HttpServer extends TcpServer {
  * This is only used to send an error when the server has not yet,
  * or does not want to, resolve the is of the request.
  */
-function jsonRpcErrorResponse(code: JsonRpcErrorCode, message: string) {
+function jsonRpcErrorResponse(
+  code: JsonRpcErrorCode,
+  message: string
+): JsonRpcResponse {
   return new JsonRpcResponse('', undefined, new JsonRpcError(code, message))
 }
