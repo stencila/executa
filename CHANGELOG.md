@@ -1,3 +1,11 @@
+## [1.14.1](https://github.com/stencila/executa/compare/v1.14.0...v1.14.1) (2020-09-07)
+
+
+### Bug Fixes
+
+* **Deps:** Upgrade dependencies ([0fef0fa](https://github.com/stencila/executa/commit/0fef0fa5e218e18fef1579718cd40c80f5f7aaa7))
+* **Deps:** Upgrade to Fastify v3 ([8aba2c7](https://github.com/stencila/executa/commit/8aba2c760f67e5dcfd99021fc94e4dbc5cd2fd18))
+
 # [1.14.0](https://github.com/stencila/executa/compare/v1.13.0...v1.14.0) (2020-08-14)
 
 
