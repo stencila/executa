@@ -83,7 +83,7 @@
     "ajv": "^6.12.4",
     "chalk": "^4.1.0",
     "cli-highlight": "^2.1.4",
-    "cross-fetch": "^3.0.5",
+    "cross-fetch": "^3.0.6",
     "external-ip": "^2.3.1",
     "fastify": "^3.3.0",
     "fastify-cors": "^4.1.0",
