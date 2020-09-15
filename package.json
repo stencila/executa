@@ -80,7 +80,7 @@
     "@stencila/logga": "^3.0.0",
     "@stencila/schema": "^0.44.2",
     "@types/ws": "7.2.6",
-    "ajv": "^6.12.4",
+    "ajv": "^6.12.5",
     "chalk": "^4.1.0",
     "cli-highlight": "^2.1.4",
     "cross-fetch": "^3.0.5",
