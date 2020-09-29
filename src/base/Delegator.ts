@@ -12,144 +12,6 @@ const ajv = new Ajv()
 const log = getLogger('executa:delegator')
 
 /**
- * An `Executor` class that delegates to peers.
- *
- * This executor class has no capabilities itself and
- * instead, delegates to other executors. If unable
- * to delegate to a peer, then calls a fallback function
- * which can be used to perform other handling.
- */
-export class Delegator extends Executor {
-  /**
-   * Classes of `Client` that can be used
-   * to connect to peer executors.
-   *
-   * This allows for dependency injection:
-   * rather than importing clients for all transports into this module when they may
-   * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
-   * The order of this list, defines the preference for the transport.
-   */
-  protected readonly clientTypes: ClientType[]
-
-  /**
-   * Peer executors that are delegated to depending
-   * upon their capabilities and the particular request.
-   */
-  protected readonly peers: { [key: string]: Peer } = {}
-
-  /**
-   * A map of jobs to the peers that they have been delegated to.
-   *
-   * Used to route the cancellation of a job to the peer that
-   * it was originally delegated to.
-   */
-  protected readonly jobs: { [key: string]: Peer } = {}
-
-  /**
-   * Construct a `Delegator`.
-   */
-  constructor(executors: Executor[] = [], clientTypes: ClientType[] = []) {
-    super('de')
-    this.clientTypes = clientTypes
-    for (const executor of executors) this.add(executor)
-  }
-
-  /**
-   * @override Override of {@link Executor.manifest} to
-   * provide additional properties for inspection.
-   */
-  public async manifest(): Promise<Manifest> {
-    const manifest = await super.manifest()
-    const clientTypes = this.clientTypes.map((clientType) => clientType.name)
-    const peers = Object.entries(this.peers).reduce(
-      (prev, [key, peer]) => ({
-        ...prev,
-        ...{ [key]: peer.manifest !== undefined ? peer.manifest : null },
-      }),
-      {}
-    )
-    return {
-      ...manifest,
-      clientTypes,
-      peers,
-    }
-  }
-
-  /**
-   * @override Override of {@link Executor.cancel} that passes on the
-   * cancellation request to the peer that was delegated the job.
-   */
-  public async cancel(job: string): Promise<boolean> {
-    const peer = this.jobs[job]
-    if (peer !== undefined) {
-      if (await peer.capable(Method.cancel, { job })) {
-        log.debug(`Cancelling job: ${job}`)
-        return peer.call<boolean>(Method.cancel, { job })
-      }
-    }
-    return Promise.resolve(false)
-  }
-
-  /**
-   * @override Override of {@link Executor.call} that delegates
-   * calls to peers where possible.
-   */
-  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
-    for (const peer of Object.values(this.peers)) {
-      if (await peer.capable(method, params)) {
-        if (await peer.connect()) {
-          const { job = uid.generate('jo').toString() } = params
-          this.jobs[job] = peer
-
-          log.debug(`Delegating job "${job}" to peer "${peer.client?.id}"`)
-          const result = await peer.call<Type>(method, params)
-          log.debug(`Received result for job "${job}"`)
-
-          delete this.jobs[job]
-          return result
-        }
-      }
-    }
-    throw new CapabilityError('Unable to delegate', method, params)
-  }
-
-  /* eslint-disable @typescript-eslint/no-use-before-define */
-
-  public add(executor: Executor): string {
-    const id =
-      executor.id !== undefined ? executor.id : uid.generate('pe').toString()
-    log.debug(`Adding peer ${id}`)
-    const peer = new Peer(executor, this.clientTypes)
-    this.peers[id] = peer
-    return id
-  }
-
-  public update(id: string, manifest: Manifest): void {
-    const peer = this.peers[id]
-    if (peer !== undefined) {
-      peer.update(manifest)
-    } else {
-      log.warn(`Peer with id not found, adding new peer: ${id}`)
-      this.peers[id] = new Peer(manifest, this.clientTypes)
-    }
-  }
-
-  /* eslint-enable @typescript-eslint/no-use-before-define */
-
-  public remove(id: string): void {
-    delete this.peers[id]
-  }
-
-  /**
-   * @override Override of {@link Executor.stop} which
-   * stops any child processes it may have started.
-   */
-  async stop(): Promise<void> {
-    await Promise.all(Object.values(this.peers).map((peer) => peer.stop()))
-  }
-}
-
-/**
  * A instance of a `Executor` used as a peer
  * to delegate method calls to.
  */
@@ -348,5 +210,143 @@ export class Peer {
     //  istanbul ignore next
     if (this.client === undefined) throw new InternalError('Not connected yet')
     return this.client.call<Type>(method, params)
+  }
+}
+
+/**
+ * An `Executor` class that delegates to peers.
+ *
+ * This executor class has no capabilities itself and
+ * instead, delegates to other executors. If unable
+ * to delegate to a peer, then calls a fallback function
+ * which can be used to perform other handling.
+ */
+export class Delegator extends Executor {
+  /**
+   * Classes of `Client` that can be used
+   * to connect to peer executors.
+   *
+   * This allows for dependency injection:
+   * rather than importing clients for all transports into this module when they may
+   * not be used (e.g. `StdioClient` in a browser hosted `Executor`).
+   * The order of this list, defines the preference for the transport.
+   */
+  protected readonly clientTypes: ClientType[]
+
+  /**
+   * Peer executors that are delegated to depending
+   * upon their capabilities and the particular request.
+   */
+  protected readonly peers: { [key: string]: Peer } = {}
+
+  /**
+   * A map of jobs to the peers that they have been delegated to.
+   *
+   * Used to route the cancellation of a job to the peer that
+   * it was originally delegated to.
+   */
+  protected readonly jobs: { [key: string]: Peer } = {}
+
+  /**
+   * Construct a `Delegator`.
+   */
+  constructor(executors: Executor[] = [], clientTypes: ClientType[] = []) {
+    super('de')
+    this.clientTypes = clientTypes
+    for (const executor of executors) this.add(executor)
+  }
+
+  /**
+   * @override Override of {@link Executor.manifest} to
+   * provide additional properties for inspection.
+   */
+  public async manifest(): Promise<Manifest> {
+    const manifest = await super.manifest()
+    const clientTypes = this.clientTypes.map((clientType) => clientType.name)
+    const peers = Object.entries(this.peers).reduce(
+      (prev, [key, peer]) => ({
+        ...prev,
+        ...{ [key]: peer.manifest !== undefined ? peer.manifest : null },
+      }),
+      {}
+    )
+    return {
+      ...manifest,
+      clientTypes,
+      peers,
+    }
+  }
+
+  /**
+   * @override Override of {@link Executor.cancel} that passes on the
+   * cancellation request to the peer that was delegated the job.
+   */
+  public async cancel(job: string): Promise<boolean> {
+    const peer = this.jobs[job]
+    if (peer !== undefined) {
+      if (await peer.capable(Method.cancel, { job })) {
+        log.debug(`Cancelling job: ${job}`)
+        return peer.call<boolean>(Method.cancel, { job })
+      }
+    }
+    return Promise.resolve(false)
+  }
+
+  /**
+   * @override Override of {@link Executor.call} that delegates
+   * calls to peers where possible.
+   */
+  public async call<Type>(method: Method, params: Params = {}): Promise<Type> {
+    for (const peer of Object.values(this.peers)) {
+      if (await peer.capable(method, params)) {
+        if (await peer.connect()) {
+          const { job = uid.generate('jo').toString() } = params
+          this.jobs[job] = peer
+
+          log.debug(`Delegating job "${job}" to peer "${peer.client?.id}"`)
+          const result = await peer.call<Type>(method, params)
+          log.debug(`Received result for job "${job}"`)
+
+          delete this.jobs[job]
+          return result
+        }
+      }
+    }
+    throw new CapabilityError('Unable to delegate', method, params)
+  }
+
+  /* eslint-disable @typescript-eslint/no-use-before-define */
+
+  public add(executor: Executor): string {
+    const id =
+      executor.id !== undefined ? executor.id : uid.generate('pe').toString()
+    log.debug(`Adding peer ${id}`)
+    const peer = new Peer(executor, this.clientTypes)
+    this.peers[id] = peer
+    return id
+  }
+
+  public update(id: string, manifest: Manifest): void {
+    const peer = this.peers[id]
+    if (peer !== undefined) {
+      peer.update(manifest)
+    } else {
+      log.warn(`Peer with id not found, adding new peer: ${id}`)
+      this.peers[id] = new Peer(manifest, this.clientTypes)
+    }
+  }
+
+  /* eslint-enable @typescript-eslint/no-use-before-define */
+
+  public remove(id: string): void {
+    delete this.peers[id]
+  }
+
+  /**
+   * @override Override of {@link Executor.stop} which
+   * stops any child processes it may have started.
+   */
+  async stop(): Promise<void> {
+    await Promise.all(Object.values(this.peers).map((peer) => peer.stop()))
   }
 }

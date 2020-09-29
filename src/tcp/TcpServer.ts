@@ -41,6 +41,7 @@ export class TcpConnection extends StreamServer implements Connection {
    *
    * Used to implement {@link TcpConnection.addresses}.
    */
+  // eslint-disable-next-line no-use-before-define
   server: TcpServer
 
   constructor(socket: net.Socket, server: TcpServer) {

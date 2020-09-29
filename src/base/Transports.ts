@@ -11,28 +11,6 @@ export enum Transport {
   ws = 'ws',
 }
 
-export type Address =
-  | DirectAddress
-  | StdioAddress
-  | PipeAddress
-  | UdsAddress
-  | VsockAddress
-  | TcpAddress
-  | HttpAddress
-  | WebSocketAddress
-
-export interface Addresses {
-  direct?: DirectAddressInitializer
-  stdio?: StdioAddressInitializer
-  pipe?: PipeAddressInitializer
-  uds?: UdsAddress
-  vsock?: VsockAddress
-  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
-  http?: HttpAddressInitializer | HttpAddressInitializer[]
-  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
-}
-
-export type DirectAddressInitializer = Pick<DirectAddress, 'server'>
 export class DirectAddress {
   public readonly type: Transport.direct = Transport.direct
   public readonly server: any
@@ -46,8 +24,11 @@ export class DirectAddress {
   }
 }
 
+export type DirectAddressInitializer = Pick<DirectAddress, 'server'>
+
 export type StdioAddressInitializer =
   | string
+  // eslint-disable-next-line no-use-before-define
   | Pick<StdioAddress, 'command' | 'args' | 'cwd'>
 export class StdioAddress {
   public readonly type: Transport.stdio = Transport.stdio
@@ -282,6 +263,27 @@ export class WebSocketAddress extends HttpAddress {
       port: 80,
     })
   }
+}
+
+export type Address =
+  | DirectAddress
+  | StdioAddress
+  | PipeAddress
+  | UdsAddress
+  | VsockAddress
+  | TcpAddress
+  | HttpAddress
+  | WebSocketAddress
+
+export interface Addresses {
+  direct?: DirectAddressInitializer
+  stdio?: StdioAddressInitializer
+  pipe?: PipeAddressInitializer
+  uds?: UdsAddress
+  vsock?: VsockAddress
+  tcp?: TcpAddressInitializer | TcpAddressInitializer[]
+  http?: HttpAddressInitializer | HttpAddressInitializer[]
+  ws?: WebSocketAddressInitializer | WebSocketAddressInitializer[]
 }
 
 export function parseTcpAddress(
