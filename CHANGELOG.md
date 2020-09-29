@@ -1,3 +1,15 @@
+## [1.14.2](https://github.com/stencila/executa/compare/v1.14.1...v1.14.2) (2020-09-29)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/schema to ^0.46.2 ([6b7e983](https://github.com/stencila/executa/commit/6b7e983ee888af6220c4f5c9c9851cf57e6311d4))
+* **dependencies:** update dependency @types/ws to v7.2.7 ([ced9fa9](https://github.com/stencila/executa/commit/ced9fa994558b61802de1bb5ba33b47a6e44edc1))
+* **dependencies:** update dependency ajv to ^6.12.5 ([9fd03c9](https://github.com/stencila/executa/commit/9fd03c968d12c811763b3332b9a56bf0e9894509))
+* **dependencies:** update dependency cross-fetch to ^3.0.6 ([fa0e8c4](https://github.com/stencila/executa/commit/fa0e8c450fb1c4c02f87fa866770170cbbda62d2))
+* **dependencies:** update dependency fastify to ^3.4.1 ([a4d4cd1](https://github.com/stencila/executa/commit/a4d4cd1b667ba515c0b251640bbb12e33dfb4633))
+* **Deps:** Update package-lock.json ([1d967f5](https://github.com/stencila/executa/commit/1d967f511ee3d5cd630a8cedfb4d1e877b6a586b))
+
 ## [1.14.1](https://github.com/stencila/executa/compare/v1.14.0...v1.14.1) (2020-09-07)
 
 
