@@ -1,3 +1,10 @@
+# [1.15.0](https://github.com/stencila/executa/compare/v1.14.2...v1.15.0) (2020-10-21)
+
+
+### Features
+
+* **Docker images:** Remove Docker images ([f735836](https://github.com/stencila/executa/commit/f735836a2b90946119e7d6775528f34406fd6afe))
+
 ## [1.14.2](https://github.com/stencila/executa/compare/v1.14.1...v1.14.2) (2020-09-29)
 
 
