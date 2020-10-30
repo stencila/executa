@@ -87,13 +87,14 @@ export class StdioClient extends StreamClient {
             level = LogLevel.debug,
             tag = 'executa:stdio:client:child',
             message,
+            stack,
           } = object as any
           if (message !== undefined) {
             const logger = getLogger(tag)
             if (level === LogLevel.debug) logger.debug(message)
             else if (level === LogLevel.info) logger.info(message)
             else if (level === LogLevel.warn) logger.warn(message)
-            else if (level === LogLevel.error) logger.error(message)
+            else if (level === LogLevel.error) logger.error({ message, stack })
             return
           }
         }
