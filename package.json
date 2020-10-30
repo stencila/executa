@@ -88,7 +88,7 @@
     "jmespath": "^0.15.0",
     "length-prefixed-stream": "^2.0.0",
     "mkdirp": "^1.0.4",
-    "nanoid": "^3.1.12",
+    "nanoid": "^3.1.16",
     "ora": "^5.1.0",
     "p-retry": "^4.2.0",
     "split2": "^3.2.2",
