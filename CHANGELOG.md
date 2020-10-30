@@ -1,3 +1,18 @@
+## [1.15.1](https://github.com/stencila/executa/compare/v1.15.0...v1.15.1) (2020-10-30)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/logga to ^3.0.1 ([cd044cc](https://github.com/stencila/executa/commit/cd044ccdc509452a23428f40543c0fbec7f1ebba))
+* **dependencies:** update dependency @stencila/schema to ^0.46.5 ([2a92919](https://github.com/stencila/executa/commit/2a929194c5894caafe86590bd0a66e867ea65b83))
+* **dependencies:** update dependency @types/ws to v7.2.9 ([753f3e9](https://github.com/stencila/executa/commit/753f3e937aaed6f22fbc68fb047316f551f5b9e7))
+* **dependencies:** update dependency ajv to ^6.12.6 ([4dcc27e](https://github.com/stencila/executa/commit/4dcc27e4b6d419ff443ccdd0c0bc5ee18e57392b))
+* **dependencies:** update dependency fastify to ^3.7.0 ([d79b545](https://github.com/stencila/executa/commit/d79b54583e8dd2978ba845dc97a7afe758f9abd5))
+* **dependencies:** update dependency fastify-static to ^3.3.0 ([ecea517](https://github.com/stencila/executa/commit/ecea5173c0ae8d464f762cce0ae0a8d9fa956385))
+* **dependencies:** update dependency nanoid to ^3.1.16 ([229e0a7](https://github.com/stencila/executa/commit/229e0a75cf197bbb7d18d7067a0e2af045d20d08))
+* **HTTP and WebSocket servers:** Instantiate correct type of address ([e747f0f](https://github.com/stencila/executa/commit/e747f0f9c176b3afaae2b9d47aabc01fedecc2ca))
+* **StdioClient:** Extract stack from server log entry if available ([11c641b](https://github.com/stencila/executa/commit/11c641b9bfff587d368f3079ee531ec6ec9be797))
+
 # [1.15.0](https://github.com/stencila/executa/compare/v1.14.2...v1.15.0) (2020-10-21)
 
 
