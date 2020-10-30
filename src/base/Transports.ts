@@ -293,7 +293,7 @@ export function parseTcpAddress(
   let { scheme, host, path } = { path: undefined, ...defaults }
   let port
   if (typeof address === 'string') {
-    // Parse as string of port number (useful for C)
+    // Attempt to parse string as port number
     const match = /^[0-9]{2,5}$/.exec(address)
     if (match !== null) {
       port = parseInt(match[0])

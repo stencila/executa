@@ -60,6 +60,11 @@ describe('HttpAddress', () => {
     expect(new HttpAddress()).toEqual(defaults)
   })
 
+  test('constructor: port only', () => {
+    expect(new HttpAddress(8000)).toEqual({ ...defaults, port: 8000 })
+    expect(new HttpAddress('8000')).toEqual({ ...defaults, port: 8000 })
+  })
+
   test('constructor: port is scheme default', () => {
     expect(new HttpAddress('https://127.0.0.1')).toEqual({
       ...defaults,

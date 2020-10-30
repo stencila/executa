@@ -34,9 +34,15 @@ const log = getLogger('executa:http:server')
  *
  * This server class performs JSON-RPC over HTTP.
  *
- * For the `/` endpoint, the request body should be
- * an JSON-RPC request and the response body will be
- * a JSON-RPC request.
+ * For the `POST /` route, the request body should be
+ * a JSON-RPC request. The response body will be
+ * a JSON-RPC response.
+ *
+ * For the `POST /<method>` routes, the request body should
+ * correspond to the `params` property of a JSON-RPC request.
+ * The response body corresponds to the `result` property of
+ * a JSON-RPC response for `200 OK` responses and the `error`
+ * property otherwise.
  */
 export class HttpServer extends TcpServer {
   /**
@@ -59,7 +65,7 @@ export class HttpServer extends TcpServer {
     address: HttpAddressInitializer = new HttpAddress({ port: 8000 }),
     jwtSecret?: string
   ) {
-    super(address)
+    super(new HttpAddress(address))
 
     if (jwtSecret === undefined) {
       jwtSecret = crypto.randomBytes(16).toString('hex')
@@ -117,7 +123,12 @@ export class HttpServer extends TcpServer {
     app.post('/', async (request, reply) => {
       reply.header('Content-Type', 'application/json')
       const { body, user } = request
-      if (typeof body === 'object' && body !== null && 'jsonrpc' in body) {
+      if (
+        typeof body === 'object' &&
+        body !== null &&
+        'jsonrpc' in body &&
+        'id' in body
+      ) {
         const jsonRpcRequest = body as JsonRpcRequest
         const claims = typeof user === 'object' ? user : {}
         const jsonRpcResponse = await this.receive(
@@ -127,7 +138,7 @@ export class HttpServer extends TcpServer {
         )
         reply.send(jsonRpcResponse)
       } else {
-        reply.status(400).send('Request body must be a JSON-RPC request')
+        reply.status(400).send('Request body must be a valid JSON-RPC request')
       }
     })
 
@@ -158,7 +169,7 @@ export class HttpServer extends TcpServer {
             .send(error)
         } else {
           // Send bare result
-          // To to fastify's (change in) handling of strings it is necessary
+          // Due to Fastify's (change in) handling of strings it is necessary
           // to stringify them before sending.
           // See https://github.com/stencila/executa/pull/95#issuecomment-591054049
           reply.send(typeof result === 'string' ? `"${result}"` : result)
@@ -257,7 +268,7 @@ export class HttpServer extends TcpServer {
   public async start(executor: Executor): Promise<void> {
     this.executor = executor
 
-    log.debug(`Starting server: ${this.address.url()}`)
+    log.debug(`Starting HTTP server: ${this.address.url()}`)
     const app = (this.app = await this.buildApp())
 
     // Wait for plugins to be ready

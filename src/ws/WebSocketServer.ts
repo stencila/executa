@@ -111,7 +111,7 @@ export class WebSocketServer extends TcpServer {
     address: WebSocketAddressInitializer = new WebSocketAddress({ port: 9000 }),
     jwtSecret?: string
   ) {
-    super(address)
+    super(new WebSocketAddress(address))
 
     if (jwtSecret === undefined) {
       jwtSecret = crypto.randomBytes(16).toString('hex')
