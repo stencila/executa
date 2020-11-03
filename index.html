@@ -1,0 +1,453 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@stencila/executa</title>
+	<meta name="description" content="Documentation for @stencila/executa">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">@stencila/executa</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@stencila/executa</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#executa" id="executa" style="color: inherit; text-decoration: none;">
+					<h1>Executa</h1>
+				</a>
+				<blockquote>
+					<p>Document executors: protocols, transports and reference implementations</p>
+				</blockquote>
+				<p><a href="https://travis-ci.org/stencila/executa"><img src="https://travis-ci.org/stencila/executa.svg?branch=master" alt="Build status"></a>
+					<a href="https://dev.azure.com/stencila/stencila/_build/latest?definitionId=4&amp;branchName=master"><img src="https://dev.azure.com/stencila/stencila/_apis/build/status/stencila.executa?branchName=master" alt="Build Status"></a>
+					<a href="https://codecov.io/gh/stencila/executa"><img src="https://codecov.io/gh/stencila/executa/branch/master/graph/badge.svg" alt="Code coverage"></a>
+				<a href="https://www.npmjs.com/package/@stencila/executa"><img src="https://img.shields.io/npm/v/@stencila/executa.svg?style=flat" alt="NPM"></a></p>
+				<a href="#install" id="install" style="color: inherit; text-decoration: none;">
+					<h2>Install</h2>
+				</a>
+				<pre><code class="language-bash">npm install --global @stencila/executa</code></pre>
+				<a href="#use" id="use" style="color: inherit; text-decoration: none;">
+					<h2>Use</h2>
+				</a>
+				<!-- prettier-ignore-start -->
+				<!-- CONFIGA-USAGE-BEGIN -->
+				<p>All configuration options can be set, in descending order of priority, by:</p>
+				<ul>
+					<li>a command line argument e.g. <code>--&lt;value&gt; &lt;value&gt;</code></li>
+					<li>an environment variable prefixed with <code>EXECUTA_</code> e.g. <code>EXECUTA_&lt;option&gt;=&lt;value&gt;</code></li>
+					<li>a <code>.json</code> or <code>.ini</code> configuration file, set using the <code>--config</code> option, or <code>.executarc</code> by default<!-- CONFIGA-USAGE-END -->
+					</li>
+				</ul>
+				<!-- CONFIGA-TABLE-BEGIN -->
+				<table>
+					<thead>
+						<tr>
+							<th>Name</th>
+							<th>Description</th>
+							<th>Type</th>
+							<th>Validators</th>
+							<th>Default</th>
+						</tr>
+					</thead>
+					<tbody><tr>
+							<td>debug</td>
+							<td>Display debug log data?</td>
+							<td><code>boolean</code></td>
+							<td></td>
+							<td><code>false</code></td>
+						</tr>
+						<tr>
+							<td>stdio</td>
+							<td>Start a <code>stdio</code> server.</td>
+							<td><code>boolean</code></td>
+							<td></td>
+							<td><code>false</code></td>
+						</tr>
+						<tr>
+							<td>vsock</td>
+							<td>Start a <code>vsock</code> server.<a href="#vsock-details"><sup>1</sup></a></td>
+							<td>`boolean</td>
+							<td>number`</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>tcp</td>
+							<td>Start a TCP server.<a href="#tcp-details"><sup>2</sup></a></td>
+							<td>`boolean</td>
+							<td>string`</td>
+							<td>pattern: `/^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)</td>
+						</tr>
+						<tr>
+							<td>http</td>
+							<td>Start a HTTP server.<a href="#http-details"><sup>3</sup></a></td>
+							<td>`boolean</td>
+							<td>string`</td>
+							<td>pattern: `/^((https?://)?([^:/]+)(:(d+))?(/(.+))?)</td>
+						</tr>
+						<tr>
+							<td>ws</td>
+							<td>Start a WebSocket server.<a href="#ws-details"><sup>4</sup></a></td>
+							<td>`boolean</td>
+							<td>string`</td>
+							<td>pattern: `/^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)</td>
+						</tr>
+						<tr>
+							<td>timeout</td>
+							<td>Duration of inactivity after which the process should stop.<a href="#timeout-details"><sup>5</sup></a></td>
+							<td><code>number</code></td>
+							<td></td>
+							<td><code>0</code></td>
+						</tr>
+						<tr>
+							<td>timelimit</td>
+							<td>Maximum duration for the process.<a href="#timelimit-details"><sup>6</sup></a></td>
+							<td><code>number</code></td>
+							<td></td>
+							<td><code>0</code></td>
+						</tr>
+						<tr>
+							<td>peers</td>
+							<td>List of peer addresses.<a href="#peers-details"><sup>7</sup></a></td>
+							<td><code>string[]</code></td>
+							<td></td>
+							<td><code>[&quot;stdio://*&quot;]</code></td>
+						</tr>
+						<tr>
+							<td>queueLength</td>
+							<td>Maximum length of the request queue.<a href="#queueLength-details"><sup>8</sup></a></td>
+							<td><code>number</code></td>
+							<td>minimum: <code>0</code></td>
+							<td><code>1000</code></td>
+						</tr>
+						<tr>
+							<td>queueInterval</td>
+							<td>Interval between attempts to reduce request queue.<a href="#queueInterval-details"><sup>9</sup></a></td>
+							<td><code>number</code></td>
+							<td>exclusiveMinimum: <code>0</code></td>
+							<td><code>1</code></td>
+						</tr>
+						<tr>
+							<td>queueStale</td>
+							<td>Duration after which a request is removed from queue.<a href="#queueStale-details"><sup>10</sup></a></td>
+							<td><code>number</code></td>
+							<td>exclusiveMinimum: <code>0</code></td>
+							<td><code>3600</code></td>
+						</tr>
+				</tbody></table>
+				<ol>
+					<li><a id="vsock-details"></a>If a <code>number</code>, it will be used as the port number.
+					If <code>true</code>, the default Vsock port <code>6000</code> will be used.</li>
+					<li><a id="tcp-details"></a>If a <code>string</code>, it will be parsed and used as the address
+						of the TCP server.
+						If <code>true</code>, the default TCP address <code>tcp://127.0.0.1:7000</code>
+					will be used.</li>
+					<li><a id="http-details"></a>If a <code>string</code>, it will be parsed and used as the address
+						of the HTTP server.
+						If <code>true</code>, the default HTTP address <code>http://127.0.0.1:8000</code>
+					will be used.</li>
+					<li><a id="ws-details"></a>If a <code>string</code>, it will be parsed and used as the address
+						of the WebSocket server.
+						If <code>true</code>, the default WebSocket address <code>ws://127.0.0.1:9000</code>
+					will be used.</li>
+					<li><a id="timeout-details"></a>Seconds. Zero means no timeout.</li>
+					<li><a id="timelimit-details"></a>Seconds. Zero means no time limit.</li>
+					<li><a id="peers-details"></a>Each string in this list is parsed as an address to
+					a peer executor. e.g. <code>https://123.45.67.89/</code>, <code>docker://image</code></li>
+					<li><a id="queueLength-details"></a>When queue reaches this length, subsequent requests will
+					fail with an error response to client.</li>
+					<li><a id="queueInterval-details"></a>Seconds.</li>
+					<li><a id="queueStale-details"></a>Seconds. Client will be notified when a request is removed.</li>
+				</ol>
+				<!-- CONFIGA-TABLE-END -->
+				<!-- prettier-ignore-end -->
+				<a href="#develop" id="develop" style="color: inherit; text-decoration: none;">
+					<h2>Develop</h2>
+				</a>
+				<a href="#testing-with-the-repl" id="testing-with-the-repl" style="color: inherit; text-decoration: none;">
+					<h3>Testing with the REPL</h3>
+				</a>
+				<p>There is an interactive REPL that can be used with the both <code>query</code> and <code>execute</code> CLI commands e.g.</p>
+				<pre><code class="language-bash">npm run cli -- execute --repl --debug</code></pre>
+				<a href="#testing-in-the-browser" id="testing-in-the-browser" style="color: inherit; text-decoration: none;">
+					<h3>Testing in the browser</h3>
+				</a>
+				<ol>
+					<li><p>Serve Executa over HTTP (to provide static HTML) and WebSocket (to provide JSON RPC):</p>
+						<pre><code class="language-bash">npm run cli:dev -- serve --http --ws</code></pre>
+					</li>
+				</ol>
+				<blockquote>
+					<p>The <code>:dev</code> suffix to <code>cli</code> uses <code>ts-node-dev</code> which will restart the process when any source files change.</p>
+				</blockquote>
+				<ol start="2">
+					<li>Visit <a href="http://localhost:8000">http://localhost:8000</a> in your browser and play around with the <code>&lt;stencila-code-chunk&gt;</code> WebComponent that is connected to the Executa WebSocket that you just started.</li>
+				</ol>
+				<p><img src=".github/executa-in-browser.png" alt=""></p>
+				<a href="#debug-inspecting" id="debug-inspecting" style="color: inherit; text-decoration: none;">
+					<h3>Debug inspecting</h3>
+				</a>
+				<p>There is a NPM script, <code>cli:debug</code>, that can be useful for debugging the CLI, for example, from within VSCode (which will auto attach to the Node process), e.g.</p>
+				<pre><code class="language-bash">npm run cli:debug -- serve --http</code></pre>
+				<blockquote>
+					<p>The <code>:debug</code> suffix to <code>cli</code> enables the Node <a href="https://nodejs.org/en/docs/guides/debugging-getting-started/">debug inspector</a> so you can use your favorite IDE to attach to the CLI and step through the code.</p>
+				</blockquote>
+				<a href="#faq" id="faq" style="color: inherit; text-decoration: none;">
+					<h2>FAQ</h2>
+				</a>
+				<a href="#why-is-typesws-a-production-dependency" id="why-is-typesws-a-production-dependency" style="color: inherit; text-decoration: none;">
+					<h4>Why is <code>@types/ws</code> a production dependency?</h4>
+				</a>
+				<p>This package has several dependents e.g <code>@stencila/basha</code>. If <code>@types/ws</code> is not installed as a production dependency,
+					when you try to build dependent packages, you get the error &quot;Cannot find type definition file for &#39;ws&#39;.&quot;. By having it
+				as a production dependency here, each dependent package does not have to install it as a development dependency.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Internals</span>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_client_.html">&quot;base/<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_connection_.html">&quot;base/<wbr>Connection&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_delegator_.html">&quot;base/<wbr>Delegator&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_executor_.html">&quot;base/<wbr>Executor&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_jsonrpcerror_.html">&quot;base/<wbr>Json<wbr>Rpc<wbr>Error&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_jsonrpcrequest_.html">&quot;base/<wbr>Json<wbr>Rpc<wbr>Request&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_jsonrpcresponse_.html">&quot;base/<wbr>Json<wbr>Rpc<wbr>Response&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_listener_.html">&quot;base/<wbr>Listener&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_manager_.html">&quot;base/<wbr>Manager&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_queuer_.html">&quot;base/<wbr>Queuer&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_server_.html">&quot;base/<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_transports_.html">&quot;base/<wbr>Transports&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_worker_.html">&quot;base/<wbr>Worker&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_errors_.html">&quot;base/errors&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_base_uid_.html">&quot;base/uid&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_compile_.html">&quot;cli/compile&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_convert_.html">&quot;cli/convert&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_execute_.html">&quot;cli/execute&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_index_.html">&quot;cli/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_init_.html">&quot;cli/init&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_main_.html">&quot;cli/main&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_query_.html">&quot;cli/query&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cli_repl_.html">&quot;cli/repl&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_config_.html">&quot;config&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_direct_directclient_.html">&quot;direct/<wbr>Direct<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_direct_directserver_.html">&quot;direct/<wbr>Direct<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_http_httpclient_.html">&quot;http/<wbr>Http<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_http_httpserver_.html">&quot;http/<wbr>Http<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_.html">&quot;index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_index_browser_.html">&quot;index.browser&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_pipe_pipeclient_.html">&quot;pipe/<wbr>Pipe<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stdio_stdioclient_.html">&quot;stdio/<wbr>Stdio<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stdio_stdioserver_.html">&quot;stdio/<wbr>Stdio<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stdio_dockerserver_e2e_.html">&quot;stdio/docker<wbr>Server.e2e&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stdio_stdiotestserver_.html">&quot;stdio/stdio<wbr>Test<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stream_streamclient_.html">&quot;stream/<wbr>Stream<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_stream_streamserver_.html">&quot;stream/<wbr>Stream<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tcp_tcpclient_.html">&quot;tcp/<wbr>Tcp<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tcp_tcpserver_.html">&quot;tcp/<wbr>Tcp<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tcp_util_.html">&quot;tcp/util&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_util_.html">&quot;util&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_vsock_vsockfirecrackerclient_.html">&quot;vsock/<wbr>Vsock<wbr>Firecracker<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_vsock_vsockserver_.html">&quot;vsock/<wbr>Vsock<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ws_websocketclient_.html">&quot;ws/<wbr>Web<wbr>Socket<wbr>Client&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ws_websocketserver_.html">&quot;ws/<wbr>Web<wbr>Socket<wbr>Server&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ws_serverload_e2e_.html">&quot;ws/server<wbr>Load.e2e&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ws_util_.html">&quot;ws/util&quot;</a>
+					</li>
+					<li class="label tsd-is-external">
+						<span>Externals</span>
+					</li>
+					<li class=" tsd-kind-module tsd-is-external">
+						<a href="modules/_config_schema_.html">&quot;config.schema&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>
