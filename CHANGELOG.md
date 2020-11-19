@@ -1,3 +1,12 @@
+## [1.15.2](https://github.com/stencila/executa/compare/v1.15.1...v1.15.2) (2020-11-19)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/schema to ^0.47.2 ([eb42038](https://github.com/stencila/executa/commit/eb42038bde2a472baaa8e12aeda5d3ace21a1bca))
+* **dependencies:** update dependency fastify to ^3.8.0 ([45a3458](https://github.com/stencila/executa/commit/45a3458357e8fe1304f8aa39c41bb2c6f538c977))
+* **Deps:** Update ws ([d8c5188](https://github.com/stencila/executa/commit/d8c51884e093dc6a9b4763272a91c2d6542969b8))
+
 ## [1.15.1](https://github.com/stencila/executa/compare/v1.15.0...v1.15.1) (2020-10-30)
 
 
