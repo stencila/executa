@@ -1,0 +1,76 @@
+jobs:
+  - job: test
+    strategy:
+      matrix:
+        linux_node_14:
+          image_name: ubuntu-latest
+          node_version: 14.x
+          nock_mode: dryrun
+        linux_node_12:
+          image_name: ubuntu-latest
+          node_version: 12.x
+          nock_mode: dryrun
+        mac:
+          node_version: 14.x
+          image_name: macOS-latest
+          nock_mode: dryrun
+        windows:
+          node_version: 14.x
+          image_name: windows-latest
+          nock_mode: dryrun
+    pool:
+      vmImage: $(image_name)
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: $(node_version)
+        displayName: 'Install Node.js $(node_version)'
+
+      - script: npm install
+        displayName: Install dependencies
+
+      # Run linting on Linux only (unncessary to duplicate by OS)
+      - script: npm run lint
+        condition: eq(variables['agent.os'], 'Linux')
+        displayName: Run linting
+
+      # Run browser env test on Linux only (unncessary to duplicate by OS)
+      - script: npm run test:browser -- --testTimeout=120000 --forceExit
+        condition: eq(variables['agent.os'], 'Linux')
+        displayName: Run browser
+
+      - script: npm run test:cover -- --testTimeout=120000 --forceExit
+        displayName: Run node tests
+
+      # Upload coverage on Linux (unncessary to duplicate by OS)
+      - script: bash <(curl -s https://codecov.io/bash)
+        condition: and(succeeded(), eq(variables['agent.os'], 'Linux'))
+        displayName: 'Upload coverage'
+
+      - script: npm run build
+        displayName: Build package
+
+  - job: release
+    dependsOn: [test]
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+      - task: NodeTool@0
+        inputs:
+          versionSpec: 14.x
+        displayName: Install Node.js
+
+      - script: |
+          npm install
+          npm run build
+          npm run docs
+          npx semantic-release
+        env:
+          GIT_AUTHOR_NAME: Stencila CI Bot
+          GIT_AUTHOR_EMAIL: ci@stenci.la
+          GIT_COMMITTER_NAME: Stencila CI Bot
+          GIT_COMMITTER_EMAIL: ci@stenci.la
+          GITHUB_TOKEN: $(GITHUB_TOKEN)
+          NPM_TOKEN: $(NPM_TOKEN)
+        displayName: Release package
