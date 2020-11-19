@@ -1,8 +1,7 @@
-# Executa
+# ⚡ Executa
 
-> Document executors: protocols, transports and reference implementations
+#### Execution engine for executable documents
 
-[![Build status](https://travis-ci.org/stencila/executa.svg?branch=master)](https://travis-ci.org/stencila/executa)
 [![Build Status](https://dev.azure.com/stencila/stencila/_apis/build/status/stencila.executa?branchName=master)](https://dev.azure.com/stencila/stencila/_build/latest?definitionId=4&branchName=master)
 [![Code coverage](https://codecov.io/gh/stencila/executa/branch/master/graph/badge.svg)](https://codecov.io/gh/stencila/executa)
 [![NPM](https://img.shields.io/npm/v/@stencila/executa.svg?style=flat)](https://www.npmjs.com/package/@stencila/executa)
@@ -25,18 +24,20 @@ All configuration options can be set, in descending order of priority, by:
 <!-- CONFIGA-USAGE-END -->
 
 <!-- CONFIGA-TABLE-BEGIN -->
-| Name          | Description                                                                                         | Type               | Validators                                                 | Default         |
-| ------------- | --------------------------------------------------------------------------------------------------- | ------------------ | ---------------------------------------------------------- | --------------- |
-| debug         | Display debug log data?                                                                             | `boolean`          |                                                            | `false`         |
-| stdio         | Start a `stdio` server.                                                                             | `boolean`          |                                                            | `false`         |
-| vsock         | Start a `vsock` server.<a href="#vsock-details"><sup>1</sup></a>                                    | `boolean | number` |                                                            | `false`         |
-| tcp           | Start a TCP server.<a href="#tcp-details"><sup>2</sup></a>                                          | `boolean | string` | pattern: `/^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/`   | `false`         |
-| http          | Start a HTTP server.<a href="#http-details"><sup>3</sup></a>                                        | `boolean | string` | pattern: `/^((https?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/` | `false`         |
-| ws            | Start a WebSocket server.<a href="#ws-details"><sup>4</sup></a>                                     | `boolean | string` | pattern: `/^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/`   | `false`         |
-| peers         | List of peer addresses.<a href="#peers-details"><sup>5</sup></a>                                    | `string[]`         |                                                            | `["stdio://*"]` |
-| queueLength   | Maximum length of the request queue.<a href="#queueLength-details"><sup>6</sup></a>                 | `number`           | minimum: `0`                                               | `1000`          |
-| queueInterval | Interval between attempts to reduce request queue.<a href="#queueInterval-details"><sup>7</sup></a> | `number`           | exclusiveMinimum: `0`                                      | `1`             |
-| queueStale    | Duration after which a request is removed from queue.<a href="#queueStale-details"><sup>8</sup></a> | `number`           | exclusiveMinimum: `0`                                      | `3600`          |
+| Name          | Description                                                                                            | Type               | Validators                                                 | Default         |
+| ------------- | ------------------------------------------------------------------------------------------------------ | ------------------ | ---------------------------------------------------------- | --------------- |
+| debug         | Display debug log data?                                                                                | `boolean`          |                                                            | `false`         |
+| stdio         | Start a `stdio` server.                                                                                | `boolean`          |                                                            | `false`         |
+| vsock         | Start a `vsock` server.<a href="#vsock-details"><sup>1</sup></a>                                       | `boolean | number` |                                                            | `false`         |
+| tcp           | Start a TCP server.<a href="#tcp-details"><sup>2</sup></a>                                             | `boolean | string` | pattern: `/^((tcp?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/`   | `false`         |
+| http          | Start a HTTP server.<a href="#http-details"><sup>3</sup></a>                                           | `boolean | string` | pattern: `/^((https?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/` | `false`         |
+| ws            | Start a WebSocket server.<a href="#ws-details"><sup>4</sup></a>                                        | `boolean | string` | pattern: `/^((wss?://)?([^:/]+)(:(d+))?(/(.+))?)|(d+)$/`   | `false`         |
+| timeout       | Duration of inactivity after which the process should stop.<a href="#timeout-details"><sup>5</sup></a> | `number`           |                                                            | `0`             |
+| timelimit     | Maximum duration for the process.<a href="#timelimit-details"><sup>6</sup></a>                         | `number`           |                                                            | `0`             |
+| peers         | List of peer addresses.<a href="#peers-details"><sup>7</sup></a>                                       | `string[]`         |                                                            | `["stdio://*"]` |
+| queueLength   | Maximum length of the request queue.<a href="#queueLength-details"><sup>8</sup></a>                    | `number`           | minimum: `0`                                               | `1000`          |
+| queueInterval | Interval between attempts to reduce request queue.<a href="#queueInterval-details"><sup>9</sup></a>    | `number`           | exclusiveMinimum: `0`                                      | `1`             |
+| queueStale    | Duration after which a request is removed from queue.<a href="#queueStale-details"><sup>10</sup></a>   | `number`           | exclusiveMinimum: `0`                                      | `3600`          |
 
 
 1. <a id="vsock-details"></a>If a `number`, it will be used as the port number.
@@ -53,12 +54,14 @@ will be used.
 of the WebSocket server.
 If `true`, the default WebSocket address `ws://127.0.0.1:9000`
 will be used.
-5. <a id="peers-details"></a>Each string in this list is parsed as an address to
+5. <a id="timeout-details"></a>Seconds. Zero means no timeout.
+6. <a id="timelimit-details"></a>Seconds. Zero means no time limit.
+7. <a id="peers-details"></a>Each string in this list is parsed as an address to
 a peer executor. e.g. `https://123.45.67.89/`, `docker://image`
-6. <a id="queueLength-details"></a>When queue reaches this length, subsequent requests will
+8. <a id="queueLength-details"></a>When queue reaches this length, subsequent requests will
 fail with an error response to client.
-7. <a id="queueInterval-details"></a>Seconds.
-8. <a id="queueStale-details"></a>Seconds. Client will be notified when a request is removed.
+9. <a id="queueInterval-details"></a>Seconds.
+10. <a id="queueStale-details"></a>Seconds. Client will be notified when a request is removed.
 
 <!-- CONFIGA-TABLE-END -->
 <!-- prettier-ignore-end -->
