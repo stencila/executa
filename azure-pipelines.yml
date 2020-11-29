@@ -35,10 +35,10 @@ jobs:
       # Run browser env test on Linux only (unncessary to duplicate by OS)
       - script: npm run test:browser -- --testTimeout=120000 --forceExit
         condition: eq(variables['agent.os'], 'Linux')
-        displayName: Run browser
+        displayName: Run browser tests
 
       - script: npm run test:cover -- --testTimeout=120000 --forceExit
-        displayName: Run node tests
+        displayName: Run Node tests
 
       # Upload coverage on Linux (unncessary to duplicate by OS)
       - script: bash <(curl -s https://codecov.io/bash)
