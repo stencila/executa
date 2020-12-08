@@ -13,9 +13,13 @@ export const main = async (
   executor?: Listener
 ): Promise<void | schema.Node> => {
   // Collect configuration options
-  const { args = ['help'], options, config, valid, log } = collectConfig<
-    Config
-  >('executa', configSchema)
+  const {
+    args = ['help'],
+    options,
+    config,
+    valid,
+    log,
+  } = collectConfig<Config>('executa', configSchema)
 
   // Run the command
   const command = args[0]
