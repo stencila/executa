@@ -1,3 +1,13 @@
+## [1.15.4](https://github.com/stencila/executa/compare/v1.15.3...v1.15.4) (2020-12-08)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency cli-highlight to ^2.1.9 ([1932d4e](https://github.com/stencila/executa/commit/1932d4e5a3ab1d66954c5700617a985fed08d501))
+* **dependencies:** update dependency fastify to ^3.9.1 ([f6855ab](https://github.com/stencila/executa/commit/f6855abfb608a1e87ccd9aeb41233e7f4a7876cb))
+* **dependencies:** update dependency nanoid to ^3.1.20 ([d57888a](https://github.com/stencila/executa/commit/d57888aef28ae18341b4e457d01adc3439501639))
+* **dependencies:** update dependency ws to ^7.4.1 ([9cfe7f7](https://github.com/stencila/executa/commit/9cfe7f7b08b255e7ff63d8a7ee3d6ec480cbc214))
+
 ## [1.15.3](https://github.com/stencila/executa/compare/v1.15.2...v1.15.3) (2020-11-29)
 
 
