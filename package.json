@@ -92,7 +92,7 @@
     "ora": "^5.1.0",
     "p-retry": "^4.2.0",
     "split2": "^3.2.2",
-    "ws": "^7.4.0"
+    "ws": "^7.4.1"
   },
   "prettier": "@stencila/dev-config/prettier-config.json",
   "commitlint": {
