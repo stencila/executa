@@ -9,6 +9,11 @@ import { WebSocketServer } from './WebSocketServer'
 import { delay } from '../test/delay'
 import { Worker } from '../base/Worker'
 
+// During these tests it is necessary to wait for servers to start
+// and messages to get passed etc. Wait longer on CI to avoid
+// unnecessary failures.
+const delayMilliseconds = process.env.CI !== undefined ? 100 : 25
+
 test('WebSocketClient and WebSocketServer', async () => {
   let serverLogs: LogData[] = []
   addHandler((logData: LogData) => {
@@ -38,7 +43,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.stop()
   }
 
-  await delay(25)
+  await delay(delayMilliseconds)
   expect(serverConnections()).toBe(0)
 
   {
@@ -68,7 +73,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.stop()
   }
 
-  await delay(25)
+  await delay(delayMilliseconds)
   expect(serverConnections()).toBe(0)
 
   {
@@ -76,7 +81,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientLogs = []
     const client = new WebSocketClient({ ...server.address, jwt: 'what?' })
     await client.start()
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
     expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
@@ -91,7 +96,7 @@ test('WebSocketClient and WebSocketServer', async () => {
       jwt: JWT.sign({}, 'not-the-right-secret'),
     })
     await client.start()
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverConnections()).toBe(0)
     expect(clientLogs.length).toBe(1)
     expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
@@ -109,7 +114,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client1.start()
     await client2.start()
     await client3.start()
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverConnections()).toBe(3)
 
     clientLogs = []
@@ -118,7 +123,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(serverConnections()).toBe(0)
 
     await server.start(new Worker())
-    await delay(100)
+    await delay(delayMilliseconds)
 
     expect(serverConnections()).toBe(3)
     expect(clientLogs.length).toBe(3)
@@ -130,7 +135,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client2.stop()
     await client3.stop()
 
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverConnections()).toBe(0)
   }
 
@@ -143,11 +148,11 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client1.start()
     await client2.start()
     await client3.start()
-    await delay(25)
+    await delay(delayMilliseconds)
 
     // Server notification to several clients
     server.notify('debug', 'To all clients')
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(client1.notifications.length).toBe(1)
     expect(client2.notifications.length).toBe(1)
     expect(client3.notifications.length).toBe(1)
@@ -156,7 +161,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     // @ts-ignore that connections is protected
     const clients = Object.keys(server.connections).slice(0, 2)
     server.notify('debug', 'To some clients', undefined, clients)
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(client1.notifications.length).toBe(2)
     expect(client2.notifications.length).toBe(2)
     expect(client3.notifications.length).toBe(1)
@@ -169,7 +174,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientLogs = []
     server.notify('debug', 'Hello, who is still there?')
     // Server has sent notification to 2 closing sockets
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverLogs.length).toBe(0)
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
@@ -184,7 +189,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     clientLogs = []
     server.notify('debug', 'Anybody?')
     // Server has sent notification to 2 closed sockets and one closing
-    await delay(25)
+    await delay(delayMilliseconds)
     expect(serverLogs.length).toBe(0)
     expect(clientLogs[0].message).toMatch(
       /Message received while socket was closing/
