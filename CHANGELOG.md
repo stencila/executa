@@ -1,3 +1,10 @@
+## [1.15.5](https://github.com/stencila/executa/compare/v1.15.4...v1.15.5) (2020-12-21)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency fastify-cors to ^5.1.0 ([3df659f](https://github.com/stencila/executa/commit/3df659ffcb418152a091e6b3a95bd5ca5273d5b3))
+
 ## [1.15.4](https://github.com/stencila/executa/compare/v1.15.3...v1.15.4) (2020-12-08)
 
 
