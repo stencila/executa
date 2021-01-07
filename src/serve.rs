@@ -10,7 +10,7 @@ use futures::{FutureExt, StreamExt};
 
 pub fn serve(
     protocol: Option<Protocol>,
-    _address: Option<String>,
+    address: Option<String>,
     port: Option<u16>,
 ) -> Result<Node> {
     let protocol = protocol.unwrap_or(if cfg!(feature = "serve-stdio") {
@@ -22,6 +22,8 @@ pub fn serve(
     } else {
         return err!("There are no serve-* features enabled");
     });
+
+    let address: std::net::IpAddr = address.unwrap_or_else(|| "127.0.0.1".to_string()).parse()?;
 
     let port = port.unwrap_or(9000);
 
@@ -53,7 +55,8 @@ pub fn serve(
                     .or(post_wrap)
                     .or(ws)
                     .with(warp::cors().allow_any_origin());
-                warp::serve(routes).run(([127, 0, 0, 1], port)).await;
+
+                warp::serve(routes).run((address, port)).await;
             });
 
             Ok(Node::Null)

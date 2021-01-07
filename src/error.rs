@@ -8,6 +8,7 @@ pub enum Category {
     JsonSchema,
     #[cfg(feature = "yaml")]
     Yaml,
+    NetworkAddress,
 }
 
 #[derive(Debug, PartialEq)]
@@ -64,6 +65,16 @@ impl From<serde_yaml::Error> for Error {
         Error {
             code: 0,
             category: Category::Yaml,
+            message: error.to_string(),
+        }
+    }
+}
+
+impl From<std::net::AddrParseError> for Error {
+    fn from(error: std::net::AddrParseError) -> Self {
+        Error {
+            code: 0,
+            category: Category::NetworkAddress,
             message: error.to_string(),
         }
     }
@@ -165,6 +176,23 @@ mod tests {
                         code: 0,
                         category: Category::Yaml,
                         message: "unexpected character: `%' at line 1 column 3".to_string()
+                    }
+                )
+            }
+            Ok(_) => panic!("Should error"),
+        };
+    }
+
+    #[test]
+    fn from_network_address_parse_error() {
+        match "foo".parse() as std::result::Result<std::net::SocketAddr, std::net::AddrParseError> {
+            Err(error) => {
+                assert_eq!(
+                    Error::from(error),
+                    Error {
+                        code: 0,
+                        category: Category::NetworkAddress,
+                        message: "invalid IP address syntax".to_string()
                     }
                 )
             }
