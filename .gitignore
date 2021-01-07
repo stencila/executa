@@ -1,7 +1,7 @@
 .DS_Store
 .idea
-coverage
-dist
-docs
-node_modules
-public
+/coverage
+/dist
+/docs
+/node_modules
+/target
