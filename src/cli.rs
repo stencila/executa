@@ -19,13 +19,10 @@ pub enum Commands {
 }
 
 pub fn cli(out: Option<&mut dyn std::io::Write>) -> i32 {
-    // Allow an output writer to be passed in but default to stdout.
+    // Allow an output writer to be passed in but default to stdout
     // This allows unit testing of output
     let stdout: &mut dyn std::io::Write = &mut std::io::stdout();
-    let out = match out {
-        Some(out) => out,
-        None => stdout,
-    };
+    let out = out.unwrap_or(stdout);
 
     // TODO Get args from passed vector of strings
     let args = Commands::from_args();
