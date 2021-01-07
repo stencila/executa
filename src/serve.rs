@@ -1,11 +1,8 @@
 use crate::decode;
-use crate::err;
-use crate::error::Error;
 use crate::nodes::Node;
 use crate::protocols::Protocol;
-use crate::result::Result;
 use crate::rpc::{Request, Response};
-
+use anyhow::{bail, Result};
 use futures::{FutureExt, StreamExt};
 
 pub fn serve(
@@ -20,7 +17,7 @@ pub fn serve(
     } else if cfg!(feature = "serve-ws") {
         Protocol::Ws
     } else {
-        return err!("There are no serve-* features enabled");
+        bail!("There are no serve-* features enabled")
     });
 
     let address: std::net::IpAddr = address.unwrap_or_else(|| "127.0.0.1".to_string()).parse()?;

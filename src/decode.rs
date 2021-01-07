@@ -1,10 +1,8 @@
+use anyhow::Result;
+
 #[cfg(feature = "delegate")]
 use crate::delegate::*;
-
-use crate::err;
-use crate::error::Error;
 use crate::nodes::Node;
-use crate::result::Result;
 
 // Allow these for when no formats are enabled
 #[allow(unused_variables, unreachable_code)]
@@ -25,7 +23,7 @@ pub fn decode(input: String, format: String) -> Result<Node> {
             );
 
             #[cfg(not(feature = "delegate"))]
-            return err!("Unable to"); // TODO
+            todo!()
         }
     };
 

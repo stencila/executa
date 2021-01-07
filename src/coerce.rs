@@ -1,7 +1,7 @@
 use crate::delegate::delegate;
 use crate::methods::Method;
 use crate::nodes::Node;
-use crate::result::Result;
+use anyhow::Result;
 
 struct Params {
     node: Node,

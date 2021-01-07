@@ -3,7 +3,7 @@ use crate::err;
 use crate::error::Error;
 use crate::methods::Method;
 use crate::nodes::Node;
-use crate::result::Result;
+use anyhow::Result;
 
 pub fn encode(node: Node, format: &str) -> Result<Node> {
     let content = match format {

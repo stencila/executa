@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
-use structopt::StructOpt;
-
+use crate::decode::decode;
+use crate::delegate::delegate;
+use crate::encode::encode;
 use crate::err;
 use crate::error::Error;
 use crate::methods::Method;
 use crate::nodes::Node;
-use crate::result::Result;
 use crate::validate::validate;
-
-use crate::decode::decode;
-use crate::delegate::delegate;
-use crate::encode::encode;
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+use structopt::StructOpt;
 
 #[derive(Debug, Serialize, Deserialize, StructOpt)]
 #[structopt(

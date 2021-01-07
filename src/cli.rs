@@ -1,11 +1,10 @@
-use structopt::StructOpt;
-
 use crate::decode;
-use crate::error::Error;
 use crate::nodes::Node;
-use crate::result::Result;
+use crate::request;
 use crate::serve;
 use crate::validate;
+use anyhow::Result;
+use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
 #[structopt(
@@ -15,6 +14,7 @@ use crate::validate;
 pub enum Commands {
     Decode(decode::cli::Args),
     Validate(validate::cli::Args),
+    Request(request::cli::Args),
     Serve(serve::cli::Args),
 }
 
@@ -29,6 +29,7 @@ pub fn cli(out: Option<&mut dyn std::io::Write>) -> i32 {
     let node = match args {
         Commands::Decode(args) => decode::cli::decode(args),
         Commands::Validate(args) => validate::cli::validate(args),
+        Commands::Request(args) => request::cli::request(args),
         Commands::Serve(args) => serve::cli::serve(args),
     };
     match node {
@@ -59,9 +60,6 @@ pub fn cli(out: Option<&mut dyn std::io::Write>) -> i32 {
 fn render(node: Node) -> Result<String> {
     match node {
         Node::String(string) => Ok(string),
-        _ => match serde_json::to_string_pretty(&node) {
-            Ok(string) => Ok(string),
-            Err(error) => Err(Error::from(error)),
-        },
+        _ => Ok(serde_json::to_string_pretty(&node)?),
     }
 }

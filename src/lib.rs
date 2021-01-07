@@ -3,6 +3,8 @@
 #[cfg(feature = "cli")]
 pub mod cli;
 
+pub mod request;
+
 #[cfg(feature = "serve")]
 pub mod serve;
 
@@ -19,8 +21,6 @@ pub mod validate;
 
 // Utilities
 
-mod error;
 mod nodes;
 mod protocols;
-mod result;
 mod rpc;

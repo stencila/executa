@@ -1,10 +1,8 @@
+use anyhow::{bail, Result};
 use jsonschema::JSONSchema;
 use serde_json::json;
 
-use crate::err;
-use crate::error::Error;
 use crate::nodes::Node;
-use crate::result::Result;
 
 pub fn validate(node: Node) -> Result<Node> {
     // TODO cache compiled schemas in a LRU cache
@@ -19,8 +17,7 @@ pub fn validate(node: Node) -> Result<Node> {
                 .map(|error| error.to_string())
                 .collect::<Vec<String>>()
                 .join("; ");
-            // TODO: generate a json validation error
-            err!("{}", message)
+            bail!("{}", message)
         }
     }
 }

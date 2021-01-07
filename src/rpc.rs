@@ -75,21 +75,17 @@ pub struct Error {
     pub message: String,
 }
 
-impl From<crate::error::Error> for Error {
-    fn from(error: crate::error::Error) -> Self {
+impl From<anyhow::Error> for Error {
+    fn from(error: anyhow::Error) -> Self {
         Error {
             code: 0,
-            message: error.message,
+            message: error.to_string(),
         }
     }
 }
 
 impl Response {
-    pub fn new(
-        id: Option<u64>,
-        result: Option<Node>,
-        error: Option<crate::error::Error>,
-    ) -> Response {
+    pub fn new(id: Option<u64>, result: Option<Node>, error: Option<anyhow::Error>) -> Response {
         Response {
             jsonrpc: "2.0".to_string(),
             id,

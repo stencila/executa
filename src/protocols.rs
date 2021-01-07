@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
-use crate::err;
-use crate::error::Error;
+use anyhow::{bail, Error, Result};
 
 #[derive(Debug, PartialEq)]
 pub enum Protocol {
@@ -15,7 +14,7 @@ pub enum Protocol {
 
 impl FromStr for Protocol {
     type Err = Error;
-    fn from_str(protocol: &str) -> Result<Self, Self::Err> {
+    fn from_str(protocol: &str) -> Result<Self> {
         match protocol.to_lowercase().as_str() {
             #[cfg(any(feature = "delegate-http", feature = "serve-http"))]
             "http" => Ok(Protocol::Http),
@@ -23,7 +22,7 @@ impl FromStr for Protocol {
             "ws" => Ok(Protocol::Ws),
             #[cfg(any(feature = "delegate-stdio", feature = "serve-stdio"))]
             "stdio" => Ok(Protocol::Stdio),
-            _ => err!("Invalid protocol identifier: {}", protocol),
+            _ => bail!("Invalid protocol identifier: {}", protocol),
         }
     }
 }
@@ -46,7 +45,7 @@ mod tests {
         }
         assert_eq!(
             Protocol::from_str("foo"),
-            err!("Invalid protocol identifier: foo")
+            bail!("Invalid protocol identifier: foo")
         )
     }
 }
