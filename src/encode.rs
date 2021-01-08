@@ -1,4 +1,3 @@
-use crate::methods::Method;
 use crate::nodes::Node;
 use anyhow::Result;
 
@@ -34,7 +33,7 @@ pub fn encode(node: Node, format: String) -> Result<String> {
             #[cfg(feature = "request")]
             {
                 let node = crate::delegate::delegate(
-                    Method::Encode,
+                    crate::methods::Method::Encode,
                     rpc::Params {
                         node,
                         format: Some(format),
@@ -51,6 +50,7 @@ pub fn encode(node: Node, format: String) -> Result<String> {
     Ok(content)
 }
 
+#[cfg(feature = "cli")]
 fn encode_cli(node: Node) -> Result<String> {
     match node {
         Node::String(node) => Ok(node),

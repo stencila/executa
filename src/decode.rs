@@ -1,4 +1,3 @@
-use crate::methods::Method;
 use crate::nodes::Node;
 use anyhow::Result;
 
@@ -56,7 +55,7 @@ pub fn decode(input: String, from: String) -> Result<Node> {
         _ => {
             #[cfg(feature = "request")]
             return crate::delegate::delegate(
-                Method::Decode,
+                crate::methods::Method::Decode,
                 rpc::Params {
                     input,
                     from: Some(from),
