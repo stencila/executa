@@ -370,6 +370,7 @@ dependencies = [
  "serde_yaml",
  "structopt",
  "tokio 0.2.24",
+ "tokio-tungstenite",
  "url",
  "warp",
 ]
