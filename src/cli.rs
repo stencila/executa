@@ -1,9 +1,13 @@
 use crate::decode;
+use crate::encode;
 use crate::nodes::Node;
 use crate::request;
 use crate::serve;
 use crate::validate;
-use anyhow::Result;
+use anyhow::Context;
+use std::ffi::OsStr;
+use std::fs;
+use std::path::Path;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -11,38 +15,76 @@ use structopt::StructOpt;
     about = "Executors for stencils",
     setting = structopt::clap::AppSettings::DeriveDisplayOrder
 )]
-pub enum Commands {
+struct Args {
+    #[structopt(subcommand)]
+    command: Command,
+
+    /// Where to write the output to
+    #[structopt(global = true, short, long, default_value = "stdout")]
+    output: String,
+
+    /// Format to encode the output as
+    #[structopt(global = true, short, long, default_value = "derived")]
+    to: String,
+}
+
+#[derive(Debug, StructOpt)]
+#[structopt(
+    setting = structopt::clap::AppSettings::DeriveDisplayOrder
+)]
+pub enum Command {
     Decode(decode::cli::Args),
     Validate(validate::cli::Args),
     Request(request::cli::Args),
     Serve(serve::cli::Args),
 }
 
-pub fn cli(out: Option<&mut dyn std::io::Write>) -> i32 {
-    // Allow an output writer to be passed in but default to stdout
-    // This allows unit testing of output
-    let stdout: &mut dyn std::io::Write = &mut std::io::stdout();
-    let out = out.unwrap_or(stdout);
+pub fn cli(args: Vec<String>) -> i32 {
+    let Args {
+        command,
+        output,
+        to,
+    } = Args::from_iter(args);
 
-    // TODO Get args from passed vector of strings
-    let args = Commands::from_args();
-    let node = match args {
-        Commands::Decode(args) => decode::cli::decode(args),
-        Commands::Validate(args) => validate::cli::validate(args),
-        Commands::Request(args) => request::cli::request(args),
-        Commands::Serve(args) => serve::cli::serve(args),
+    let node = match command {
+        Command::Decode(command) => decode::cli::decode(command),
+        Command::Validate(command) => validate::cli::validate(command),
+        Command::Request(command) => request::cli::request(command),
+        Command::Serve(command) => serve::cli::serve(command),
     };
     match node {
         Ok(node) => {
-            // Render nodes to the terminal
-            // TODO allow user to send output to a file in a particular format e.g. a `Table` to CSV
             match node {
-                // Don't do anything with `null` values
-                Node::Null => {}
-                // Write everything else to the terminal
+                Node::Null => (),
                 _ => {
-                    let rendered = render(node).unwrap();
-                    writeln!(out, "{}", rendered).unwrap()
+                    let format = match to.as_str() {
+                        "derived" => match output.as_str() {
+                            "stdout" => "cli",
+                            _ => Path::new(&output)
+                                .extension()
+                                .and_then(OsStr::to_str)
+                                .unwrap(),
+                        },
+                        _ => to.as_str(),
+                    };
+
+                    let encoded = encode::encode(node, format.to_string())
+                        .context("Encoding to output")
+                        .unwrap();
+
+                    match output.as_str() {
+                        "stdout" => {
+                            let stdout: &mut dyn std::io::Write = &mut std::io::stdout();
+                            writeln!(stdout, "{}", encoded)
+                                .context("Writing output to stdout")
+                                .unwrap();
+                        }
+                        _ => {
+                            fs::write(output, encoded)
+                                .context("Writing output to file")
+                                .unwrap();
+                        }
+                    }
                 }
             }
             exitcode::OK
@@ -50,16 +92,8 @@ pub fn cli(out: Option<&mut dyn std::io::Write>) -> i32 {
         Err(error) => {
             // Write the error to the terminal
             // TODO Send this to a logger
-            writeln!(out, "{}", error).unwrap();
+            eprintln!("{}", error);
             exitcode::SOFTWARE
         }
-    }
-}
-
-// TODO More rendering specializations e.g. Heading, CodeBlocks, Tables
-fn render(node: Node) -> Result<String> {
-    match node {
-        Node::String(string) => Ok(string),
-        _ => Ok(serde_json::to_string_pretty(&node)?),
     }
 }

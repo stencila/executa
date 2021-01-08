@@ -14,10 +14,10 @@ yaml = ["serde_yaml"]
 jsonptr = ["json-pointer"]
 jmespath = ["jmespatch"]
 # JSON-RPC interface and protocols
-delegate = []
-delegate-stdio = ["tokio"]
-delegate-http = []
-delegate-ws = []
+request = []
+request-stdio = ["tokio"]
+request-http = []
+request-ws = []
 serve = []
 serve-stdio = ["tokio"]
 serve-http = ["tokio", "warp", "jsonwebtoken"]
@@ -31,6 +31,10 @@ default = [
     "yaml",
     "jsonptr",
     "jmespath",
+    "request",
+    "request-stdio",
+    "request-http",
+    "request-ws",
     "serve",
     "serve-stdio",
     "serve-http",

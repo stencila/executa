@@ -1,5 +1,3 @@
-use crate::err;
-use crate::error::Error;
 use crate::methods::Method;
 use crate::nodes::Node;
 use anyhow::Result;

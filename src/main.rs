@@ -3,7 +3,7 @@ pub fn main() {
     use std::process::exit;
 
     #[cfg(feature = "cli")]
-    exit(executa::cli::cli(None));
+    exit(executa::cli::cli(std::env::args().collect()));
 
     #[cfg(all(feature = "serve", not(feature = "cli")))]
     exit(match executa::serve::serve(None, None, None) {

@@ -22,7 +22,7 @@ pub fn validate(node: Node) -> Result<Node> {
     }
 }
 
-#[cfg(any(feature = "delegate", feature = "serve"))]
+#[cfg(any(feature = "request", feature = "serve"))]
 pub mod rpc {
     use super::*;
     use serde::{Deserialize, Serialize};

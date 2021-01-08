@@ -1,6 +1,5 @@
-use std::str::FromStr;
-
 use anyhow::{bail, Error, Result};
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
 pub enum Protocol {

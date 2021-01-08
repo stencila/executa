@@ -137,7 +137,7 @@ pub mod cli {
     #[structopt(about = "Serve an executor using HTTP, WebSockets, or Standard I/O")]
     pub struct Args {
         /// Transport protocol to use (defaults to `stdio`)
-        #[structopt(short = "t", long, env = "EXECUTA_PROTOCOL", case_insensitive = true)]
+        #[structopt(long, env = "EXECUTA_PROTOCOL", case_insensitive = true)]
         protocol: Option<Protocol>,
 
         /// Address to listen on (HTTP and Websockets only, defaults to "127.0.0.1")

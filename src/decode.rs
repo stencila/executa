@@ -1,52 +1,6 @@
-use anyhow::Result;
-
-#[cfg(feature = "delegate")]
-use crate::delegate::*;
+use crate::methods::Method;
 use crate::nodes::Node;
-
-// Allow these for when no formats are enabled
-#[allow(unused_variables, unreachable_code)]
-pub fn decode(input: String, format: String) -> Result<Node> {
-    let node = match format.as_str() {
-        #[cfg(feature = "json")]
-        "json" => serde_json::from_str::<Node>(input.as_str())?,
-        #[cfg(feature = "yaml")]
-        "yaml" => serde_yaml::from_str::<Node>(input.as_str())?,
-        _ => {
-            #[cfg(feature = "delegate")]
-            return delegate(
-                Method::Decode,
-                rpc::Params {
-                    input,
-                    format: Some(format),
-                },
-            );
-
-            #[cfg(not(feature = "delegate"))]
-            todo!()
-        }
-    };
-
-    Ok(node)
-}
-
-#[cfg(any(feature = "delegate", feature = "serve"))]
-pub mod rpc {
-    use super::*;
-    use serde::{Deserialize, Serialize};
-
-    #[derive(Debug, Serialize, Deserialize)]
-    pub struct Params {
-        pub input: String,
-
-        pub format: Option<String>,
-    }
-
-    pub fn decode(params: Params) -> Result<Node> {
-        let Params { input, format } = params;
-        super::decode(input, format.unwrap_or_default())
-    }
-}
+use anyhow::Result;
 
 #[cfg(feature = "cli")]
 pub mod cli {
@@ -64,12 +18,54 @@ pub mod cli {
 
         /// TODO docs
         #[structopt(short, long)]
-        format: Option<String>,
+        from: Option<String>,
     }
 
     pub fn decode(args: Args) -> Result<Node> {
-        let Args { input, format } = args;
-
-        super::decode(input, format.unwrap_or_default())
+        let Args { input, from } = args;
+        super::decode(input, from.unwrap_or_default())
     }
+}
+
+#[cfg(any(feature = "request", feature = "serve"))]
+pub mod rpc {
+    use super::*;
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Serialize, Deserialize)]
+    pub struct Params {
+        pub input: String,
+
+        pub from: Option<String>,
+    }
+
+    pub fn decode(params: Params) -> Result<Node> {
+        let Params { input, from } = params;
+        super::decode(input, from.unwrap_or_default())
+    }
+}
+
+// Allow these for when no features are enabled
+#[allow(unused_variables, unreachable_code)]
+pub fn decode(input: String, from: String) -> Result<Node> {
+    let node = match from.as_str() {
+        #[cfg(feature = "json")]
+        "json" => serde_json::from_str::<Node>(input.as_str())?,
+        #[cfg(feature = "yaml")]
+        "yaml" => serde_yaml::from_str::<Node>(input.as_str())?,
+        _ => {
+            #[cfg(feature = "request")]
+            return crate::delegate::delegate(
+                Method::Decode,
+                rpc::Params {
+                    input,
+                    from: Some(from),
+                },
+            );
+
+            #[cfg(not(feature = "request"))]
+            anyhow::bail!("Unable to decode a node from format \"{}\"", from)
+        }
+    };
+    Ok(node)
 }
