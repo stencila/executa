@@ -1,25 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use crate::nodes::Node;
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Method {
-    Decode,
-    //Encode,
-    //Convert,
-    Validate,
-    //Coerce,
-    //Reshape,
-
-    //Query,
-    //Get,
-    //Set,
-
-    //Compile,
-    //Build,
-    //Execute,
-}
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GenericRequest<P> {
@@ -66,6 +46,31 @@ pub struct Response {
     pub error: Option<Error>,
 }
 
+impl Response {
+    pub fn new(id: Option<u64>, result: Option<Node>, error: Option<anyhow::Error>) -> Response {
+        Response {
+            id,
+            result,
+            error: match error {
+                Some(error) => Some(Error::from(error)),
+                None => None,
+            },
+            ..Default::default()
+        }
+    }
+}
+
+impl Default for Response {
+    fn default() -> Self {
+        Response {
+            jsonrpc: "2.0".to_string(),
+            id: None,
+            result: None,
+            error: None,
+        }
+    }
+}
+
 /// A JSON-RPC 2.0 error
 ///
 /// @see {@link https://www.jsonrpc.org/specification#error_object}
@@ -80,20 +85,6 @@ impl From<anyhow::Error> for Error {
         Error {
             code: 0,
             message: error.to_string(),
-        }
-    }
-}
-
-impl Response {
-    pub fn new(id: Option<u64>, result: Option<Node>, error: Option<anyhow::Error>) -> Response {
-        Response {
-            jsonrpc: "2.0".to_string(),
-            id,
-            result,
-            error: match error {
-                Some(error) => Some(Error::from(error)),
-                None => None,
-            },
         }
     }
 }

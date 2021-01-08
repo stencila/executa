@@ -1,7 +1,9 @@
 use anyhow::{bail, Error, Result};
+use serde::Serialize;
 use std::str::FromStr;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Method {
     Decode,
     Encode,

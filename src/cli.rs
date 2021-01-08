@@ -39,7 +39,7 @@ pub enum Command {
     Serve(serve::cli::Args),
 }
 
-pub fn cli(args: Vec<String>) -> i32 {
+pub async fn cli(args: Vec<String>) -> i32 {
     let Args {
         command,
         output,
@@ -49,8 +49,8 @@ pub fn cli(args: Vec<String>) -> i32 {
     let node = match command {
         Command::Decode(command) => decode::cli::decode(command),
         Command::Validate(command) => validate::cli::validate(command),
-        Command::Request(command) => request::cli::request(command),
-        Command::Serve(command) => serve::cli::serve(command),
+        Command::Request(command) => request::cli::request(command).await,
+        Command::Serve(command) => serve::cli::serve(command).await,
     };
     match node {
         Ok(node) => {

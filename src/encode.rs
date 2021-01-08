@@ -54,6 +54,6 @@ pub fn encode(node: Node, format: String) -> Result<String> {
 fn encode_cli(node: Node) -> Result<String> {
     match node {
         Node::String(node) => Ok(node),
-        _ => Ok(serde_yaml::to_string(&node)?)
+        _ => Ok(serde_json::to_string_pretty(&node)?),
     }
 }

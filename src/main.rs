@@ -1,9 +1,10 @@
 #[cfg(not(tarpaulin_include))]
-pub fn main() {
+#[tokio::main]
+async fn main() {
     use std::process::exit;
 
     #[cfg(feature = "cli")]
-    exit(executa::cli::cli(std::env::args().collect()));
+    exit(executa::cli::cli(std::env::args().collect()).await);
 
     #[cfg(all(feature = "serve", not(feature = "cli")))]
     exit(match executa::serve::serve(None, None, None) {
