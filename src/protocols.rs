@@ -34,17 +34,17 @@ mod tests {
     #[test]
     fn from_str() {
         for item in vec!["stdio", "STDIO"] {
-            assert_eq!(Protocol::from_str(item), Ok(Protocol::Stdio));
+            assert_eq!(Protocol::from_str(item).unwrap(), Protocol::Stdio);
         }
         for item in vec!["http", "HTTP"] {
-            assert_eq!(Protocol::from_str(item), Ok(Protocol::Http));
+            assert_eq!(Protocol::from_str(item).unwrap(), Protocol::Http);
         }
         for item in vec!["ws", "WS"] {
-            assert_eq!(Protocol::from_str(item), Ok(Protocol::Ws));
+            assert_eq!(Protocol::from_str(item).unwrap(), Protocol::Ws);
         }
-        assert_eq!(
-            Protocol::from_str("foo"),
-            bail!("Invalid protocol identifier: foo")
-        )
+        match Protocol::from_str("foo") {
+            Ok(_) => panic!("Should fail"),
+            Err(error) => assert_eq!(format!("{}", error), "Invalid protocol identifier: foo"),
+        }
     }
 }
