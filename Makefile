@@ -1,7 +1,19 @@
-all: lint format cover build docs
+all: format lint cover audit build docs
 
-setup:
+setup: setup-ts setup-rust
+	
+setup-ts:
 	npm install
+
+setup-rust:
+	rustup component add clippy
+	cargo install \
+		cargo-audit --features=fix
+	cargo install \
+		cargo-edit \
+		cargo-tarpaulin \
+		cargo-udeps \
+		cargo-watch
 	cargo fetch
 
 format:
@@ -22,6 +34,13 @@ cover:
 
 watch:
 	cargo watch -x 'run -- serve --protocol=ws'
+
+audit-ts:
+	npm audit fix
+
+audit-rust:
+	cargo +nightly udeps
+	cargo audit
 
 build:
 	npm run build
