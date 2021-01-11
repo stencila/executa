@@ -4,6 +4,7 @@ use crate::protocols::Protocol;
 use crate::rpc::{Error, Request, Response};
 use anyhow::{bail, Result};
 use futures::{FutureExt, StreamExt};
+use strum::VariantNames;
 
 #[cfg(feature = "cli")]
 pub mod cli {
@@ -13,7 +14,7 @@ pub mod cli {
     #[structopt(about = "Serve an executor using HTTP, WebSockets, or Standard I/O")]
     pub struct Args {
         /// Transport protocol to use (defaults to `stdio`)
-        #[structopt(long, env = "EXECUTA_PROTOCOL", case_insensitive = true)]
+        #[structopt(long, env = "EXECUTA_PROTOCOL", possible_values = Protocol::VARIANTS, case_insensitive = true)]
         protocol: Option<Protocol>,
 
         /// Address to listen on (HTTP and Websockets only, defaults to "127.0.0.1")

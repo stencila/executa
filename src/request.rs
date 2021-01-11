@@ -3,7 +3,7 @@ use crate::nodes::Node;
 use crate::rpc::Response;
 use anyhow::{anyhow, bail, Context, Result};
 use regex::Regex;
-use std::str::FromStr;
+use strum::VariantNames;
 
 #[cfg(feature = "cli")]
 pub mod cli {
@@ -20,7 +20,8 @@ pub mod cli {
         url: String,
 
         /// Method name
-        method: String,
+        #[structopt(possible_values = Method::VARIANTS, case_insensitive = true)]
+        method: Method,
 
         /// Method parameters
         #[structopt(raw(true))]
@@ -33,8 +34,6 @@ pub mod cli {
             method,
             params,
         } = args;
-
-        let method = Method::from_str(&method)?;
 
         let mut object = serde_json::json!({});
         for param in params {
