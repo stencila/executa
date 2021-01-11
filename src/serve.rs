@@ -73,10 +73,21 @@ pub async fn serve(
 
             let ws = warp::path::end().and(warp::ws()).map(ws_handler);
 
+            let cors = warp::cors()
+                .allow_any_origin()
+                .allow_headers(vec![
+                    "Content-Type",
+                    "Referer",
+                    "Origin",
+                    "Access-Control-Allow-Origin",
+                ])
+                .allow_methods(&[warp::http::Method::GET, warp::http::Method::POST])
+                .max_age(24 * 60 * 60);
+
             let routes = post
                 .or(post_wrap)
                 .or(ws)
-                .with(warp::cors().allow_any_origin())
+                .with(cors)
                 .recover(rejection_handler);
 
             warp::serve(routes).run((address, port)).await;
