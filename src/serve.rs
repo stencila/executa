@@ -33,15 +33,18 @@ pub mod cli {
             port,
         } = args;
 
-        super::serve(protocol, address, port).await
+        let (join_handle, ..) = super::serve(protocol, address, port)?;
+        join_handle.await?;
+
+        Ok(Node::Null)
     }
 }
 
-pub async fn serve(
+pub fn serve(
     protocol: Option<Protocol>,
     address: Option<String>,
     port: Option<u16>,
-) -> Result<Node> {
+) -> Result<(tokio::task::JoinHandle<()>, tokio::sync::oneshot::Sender<()>)> {
     let protocol = protocol.unwrap_or(if cfg!(feature = "serve-stdio") {
         Protocol::Stdio
     } else if cfg!(feature = "serve-http") {
@@ -90,9 +93,17 @@ pub async fn serve(
                 .with(cors)
                 .recover(rejection_handler);
 
-            warp::serve(routes).run((address, port)).await;
+            use tokio::sync::oneshot;
+            let (sender, reciever) = oneshot::channel::<()>();
 
-            Ok(Node::Null)
+            let (_, server) =
+                warp::serve(routes).bind_with_graceful_shutdown((address, port), async {
+                    reciever.await.ok();
+                });
+
+            let join_handle = tokio::task::spawn(server);
+
+            Ok((join_handle, sender))
         }
     }
 }

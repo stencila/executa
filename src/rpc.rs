@@ -32,7 +32,7 @@ impl Request {
 /// A JSON-RPC 2.0 response
 ///
 /// @see {@link https://www.jsonrpc.org/specification#response_object}
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Response {
     pub jsonrpc: String,
 
@@ -47,7 +47,7 @@ pub struct Response {
 }
 
 impl Response {
-    pub fn new(id: Option<u64>, result: Option<Node>, error: Option<anyhow::Error>) -> Response {
+    pub fn new(id: Option<u64>, result: Option<Node>, error: Option<anyhow::Error>) -> Self {
         Response {
             id,
             result,
@@ -74,7 +74,7 @@ impl Default for Response {
 /// A JSON-RPC 2.0 error
 ///
 /// @see {@link https://www.jsonrpc.org/specification#error_object}
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Error {
     pub code: i16,
     pub message: String,

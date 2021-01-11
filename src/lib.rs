@@ -12,11 +12,11 @@ pub mod serve;
 #[cfg(any(feature = "request", feature = "serve"))]
 pub mod delegate;
 #[cfg(any(feature = "request", feature = "serve"))]
-mod methods;
+pub mod methods;
 #[cfg(any(feature = "request", feature = "serve"))]
-mod protocols;
+pub mod protocols;
 #[cfg(any(feature = "request", feature = "serve"))]
-mod rpc;
+pub mod rpc;
 
 // Methods
 
@@ -27,4 +27,4 @@ pub mod validate;
 
 // Utilities
 
-mod nodes;
+pub mod nodes;
