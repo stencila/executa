@@ -73,7 +73,7 @@
     "@stencila/logga": "^3.0.1",
     "@stencila/schema": "^0.47.2",
     "@types/ws": "^7.4.0",
-    "ajv": "^6.12.6",
+    "ajv": "^7.0.0",
     "chalk": "^4.1.0",
     "cli-highlight": "^2.1.9",
     "cross-fetch": "^3.0.6",
