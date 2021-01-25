@@ -64,7 +64,7 @@ export class WebSocketClient extends Client {
    *
    * Used to determine whether to try to reconnect.
    */
-  private stopped = false
+  private isStopped = false
 
   /**
    * Is this client attempting to reestablish a connection
@@ -139,7 +139,7 @@ export class WebSocketClient extends Client {
       )
 
       this.socket.onopen = () => {
-        this.stopped = false
+        this.isStopped = false
         resolve()
       }
 
@@ -149,7 +149,7 @@ export class WebSocketClient extends Client {
       this.socket.onclose = (event: CloseEvent) => {
         // Try to reconnect if not explicitly closed or if
         // authentication failed
-        if (this.stopped === true) return resolve()
+        if (this.isStopped) return resolve()
 
         const { code, reason } = event
         if (code === 4001) {
@@ -223,7 +223,7 @@ export class WebSocketClient extends Client {
    * Stop the connection by closing the WebSocket.
    */
   public stop(): Promise<void> {
-    this.stopped = true
+    this.isStopped = true
     if (this.socket !== undefined) this.socket.close()
     return Promise.resolve()
   }
