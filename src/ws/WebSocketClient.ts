@@ -64,7 +64,12 @@ export class WebSocketClient extends Client {
    *
    * Used to determine whether to try to reconnect.
    */
-  private stopped = false
+  private isStopped = false
+
+  /**
+   * Is this client attempting to reestablish a connection
+   */
+  public isRetrying: boolean | undefined
 
   /**
    * Construct a `WebSocketClient`.
@@ -80,6 +85,45 @@ export class WebSocketClient extends Client {
     this.options = { ...defaultWebSocketClientOptions, ...options }
   }
 
+  private retryConnect = (
+    resolve: (a: void | PromiseLike<void>) => void,
+    reject: (a: Error) => void
+  ): Promise<void> => {
+    // Terminate early if already attempting to reconnect
+    if (this.isRetrying === true) {
+      return Promise.resolve()
+    }
+
+    if (this.options.logging) {
+      log.info(`Connection closed, trying to reconnect`)
+    }
+
+    this.isRetrying = true
+    return retry(() => this.start(), {
+      retries: this.options.retries,
+      randomize: true,
+      maxTimeout: 5000,
+      onFailedAttempt: (error) => {
+        if (this.options.logging) {
+          log.info(
+            `Connection attempt ${error.attemptNumber} failed. ${error.retriesLeft} retries left.`
+          )
+        }
+      },
+    })
+      .then(resolve)
+      .catch(() => {
+        reject(
+          new Error(
+            `Failed to reconnect after ${this.options.retries} attempt(s)`
+          )
+        )
+      })
+      .finally(() => {
+        this.isRetrying = false
+      })
+  }
+
   /**
    * Start the connection.
    *
@@ -92,34 +136,57 @@ export class WebSocketClient extends Client {
       address,
       options: { retries, logging },
     } = this
-    const socket = (this.socket = new WebSocket(
-      address.url(),
-      generateProtocol(id, address.jwt)
-    ))
-    socket.onmessage = (event: MessageEvent) =>
-      this.receive(event.data.toString())
-    socket.onclose = (event: CloseEvent) => {
-      // Try to reconnect if not explicitly closed or if
-      // authentication failed
-      if (this.stopped === true) return
-      const { code, reason } = event
-      if (code === 4001) {
-        if (logging) log.error(`Failed to authenticate with server: ${reason}`)
-        return
+    return new Promise((resolve, reject) => {
+      this.socket = new WebSocket(
+        address.url(),
+        generateProtocol(id, address.jwt)
+      )
+
+      this.socket.onopen = () => {
+        this.isStopped = false
+        resolve()
       }
-      if (retries > 0) {
-        if (logging) log.info(`Connection closed, trying to reconnect`)
-        retry(() => this.start(), {
-          retries,
-          randomize: true,
-        }).catch((error) => log.error(error))
+
+      this.socket.onmessage = (event: MessageEvent) =>
+        this.receive(event.data.toString())
+
+      this.socket.onclose = (event: CloseEvent) => {
+        // Try to reconnect if not explicitly closed or if
+        // authentication failed
+        if (this.isStopped) return resolve()
+
+        const { code, reason } = event
+        if (code === 4001) {
+          const error = `Failed to authenticate with server: ${reason}`
+          if (logging) {
+            log.error(error)
+          }
+
+          reject(new Error(error))
+        }
+
+        if (retries > 0 && this.isRetrying === undefined) {
+          // Configured to reconnect, but the process hasn't been started yet
+          return this.retryConnect(resolve, reject)
+        } else if (this.isRetrying === true) {
+          // Configured to reconnect, and the process is already in progress
+          return undefined
+        } else {
+          // Not configured to reconnect, or the reconnect process failed
+          reject(new Error('Connection closed.'))
+        }
       }
-    }
-    socket.onerror = (error: ErrorEvent) => {
-      if (logging) log.error(error.message)
-    }
-    this.stopped = false
-    return Promise.resolve()
+
+      this.socket.onerror = (error: ErrorEvent) => {
+        if (logging) log.error(error.message)
+
+        if (retries > 0 && this.isRetrying === undefined) {
+          return this.retryConnect(resolve, reject)
+        } else {
+          reject(new Error(error.message))
+        }
+      }
+    })
   }
 
   /**
@@ -160,7 +227,7 @@ export class WebSocketClient extends Client {
    * Stop the connection by closing the WebSocket.
    */
   public stop(): Promise<void> {
-    this.stopped = true
+    this.isStopped = true
     if (this.socket !== undefined) this.socket.close()
     return Promise.resolve()
   }

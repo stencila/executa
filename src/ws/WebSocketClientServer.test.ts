@@ -14,40 +14,47 @@ import { Worker } from '../base/Worker'
 // unnecessary failures.
 const delayMilliseconds = process.env.CI !== undefined ? 100 : 25
 
-test('WebSocketClient and WebSocketServer', async () => {
-  let serverLogs: LogData[] = []
+let server: WebSocketServer
+let serverLogs: LogData[] = []
+let clientLogs: LogData[] = []
+
+// @ts-ignore that connections is private
+const serverConnections = () => Object.values(server.connections).length
+
+beforeEach(() => {
+  server = new WebSocketServer()
+  const executor = new EchoExecutor()
+
+  serverLogs = []
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:server') {
       serverLogs = [...serverLogs, logData]
     }
   })
 
-  let clientLogs: LogData[] = []
+  clientLogs = []
   addHandler((logData: LogData) => {
     if (logData.tag === 'executa:ws:client') {
       clientLogs = [...clientLogs, logData]
     }
   })
 
-  const server = new WebSocketServer()
-  const executor = new EchoExecutor()
-  await server.start(executor)
+  return server.start(executor)
+})
 
-  // @ts-ignore that connections is private
-  const serverConnections = () => Object.values(server.connections).length
+afterEach(() => server.stop())
 
-  {
-    // Well behaved client
+describe('WebSocketClient and WebSocketServer', () => {
+  test('Well behaved client', async () => {
     const client = new WebSocketClient(server.address)
     await testClient(client)
     await client.stop()
-  }
 
-  await delay(delayMilliseconds)
-  expect(serverConnections()).toBe(0)
+    await delay(delayMilliseconds)
+    expect(serverConnections()).toBe(0)
+  })
 
-  {
-    // JWT with session limits to be used for begin() method
+  test('JWT with session limits to be used for begin() method', async () => {
     const sessionRequests = schema.softwareSession({
       environment: schema.softwareEnvironment({ name: 'some-environment' }),
       cpuRequest: 4,
@@ -60,6 +67,7 @@ test('WebSocketClient and WebSocketServer', async () => {
         memoryLimit: 2,
       }),
     }
+
     // Sign with the server's secret
     const jwt = JWT.sign(claims, server.jwtSecret)
     const client = new WebSocketClient({ ...server.address, jwt })
@@ -71,26 +79,23 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(userClient).toHaveProperty('id')
 
     await client.stop()
-  }
 
-  await delay(delayMilliseconds)
-  expect(serverConnections()).toBe(0)
+    await delay(delayMilliseconds)
+    expect(serverConnections()).toBe(0)
+  })
 
-  {
-    // Client with malformed JWT
-    clientLogs = []
+  test('Client with malformed JWT', async () => {
     const client = new WebSocketClient({ ...server.address, jwt: 'what?' })
     await client.start()
     await delay(delayMilliseconds)
+
     expect(serverConnections()).toBe(0)
-    expect(clientLogs.length).toBe(1)
+    expect(clientLogs.length).toBeGreaterThanOrEqual(1)
     expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
-  }
+  })
 
-  {
-    // Client with invalid JWT
-    clientLogs = []
+  test('Client with invalid JWT', async () => {
     const client = new WebSocketClient({
       ...server.address,
       jwt: JWT.sign({}, 'not-the-right-secret'),
@@ -98,13 +103,12 @@ test('WebSocketClient and WebSocketServer', async () => {
     await client.start()
     await delay(delayMilliseconds)
     expect(serverConnections()).toBe(0)
-    expect(clientLogs.length).toBe(1)
+    expect(clientLogs.length).toBeGreaterThanOrEqual(1)
     expect(clientLogs[0].message).toMatch(/Failed to authenticate with server/)
     await client.stop()
-  }
+  })
 
-  {
-    // Clients reconnect after disconnection
+  test('Clients reconnect after disconnection', async () => {
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
@@ -117,8 +121,6 @@ test('WebSocketClient and WebSocketServer', async () => {
     await delay(delayMilliseconds)
     expect(serverConnections()).toBe(3)
 
-    clientLogs = []
-
     await server.stop()
     expect(serverConnections()).toBe(0)
 
@@ -126,7 +128,7 @@ test('WebSocketClient and WebSocketServer', async () => {
     await delay(delayMilliseconds)
 
     expect(serverConnections()).toBe(3)
-    expect(clientLogs.length).toBe(3)
+    expect(clientLogs.length).toBeGreaterThanOrEqual(3)
     expect(clientLogs[0].message).toMatch(
       /Connection closed, trying to reconnect/
     )
@@ -137,10 +139,9 @@ test('WebSocketClient and WebSocketServer', async () => {
 
     await delay(delayMilliseconds)
     expect(serverConnections()).toBe(0)
-  }
+  })
 
-  {
-    // Sending notifications to several clients
+  test('Sending notifications to several clients', async () => {
     const client1 = new WebSocketClient(server.address)
     const client2 = new WebSocketClient(server.address)
     const client3 = new WebSocketClient(server.address)
@@ -197,20 +198,14 @@ test('WebSocketClient and WebSocketServer', async () => {
     expect(client1.notifications.length).toBe(2)
     expect(client2.notifications.length).toBe(2)
     expect(client3.notifications.length).toBe(2)
-  }
-
-  await server.stop()
+  })
 })
 
 test('Many messages of increasing sizes', async () => {
   // A regression test for https://github.com/stencila/executa/issues/141/
   jest.setTimeout(60 * 1000)
 
-  const server = new WebSocketServer()
   const client = new WebSocketClient(server.address)
-
-  const executor = new Worker()
-  await server.start(executor)
 
   const maxExponent = 25
   const maxReplicate = 10
@@ -228,5 +223,4 @@ test('Many messages of increasing sizes', async () => {
   expect(replicate).toBe(maxReplicate)
 
   await client.stop()
-  await server.stop()
 })
