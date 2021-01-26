@@ -67,6 +67,7 @@ describe('WebSocketClient and WebSocketServer', () => {
         memoryLimit: 2,
       }),
     }
+
     // Sign with the server's secret
     const jwt = JWT.sign(claims, server.jwtSecret)
     const client = new WebSocketClient({ ...server.address, jwt })
@@ -127,7 +128,7 @@ describe('WebSocketClient and WebSocketServer', () => {
     await delay(delayMilliseconds)
 
     expect(serverConnections()).toBe(3)
-    expect(clientLogs.length).toBe(3)
+    expect(clientLogs.length).toBeGreaterThanOrEqual(3)
     expect(clientLogs[0].message).toMatch(
       /Connection closed, trying to reconnect/
     )

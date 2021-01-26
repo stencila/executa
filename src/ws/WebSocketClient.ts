@@ -94,6 +94,10 @@ export class WebSocketClient extends Client {
       return Promise.resolve()
     }
 
+    if (this.options.logging) {
+      log.info(`Connection closed, trying to reconnect`)
+    }
+
     this.isRetrying = true
     return retry(() => this.start(), {
       retries: this.options.retries,
