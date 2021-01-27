@@ -1,0 +1,765 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>HttpServer | @stencila/executa</title>
+	<meta name="description" content="Documentation for @stencila/executa">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.json" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">@stencila/executa</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../modules.html">@stencila/executa</a>
+				</li>
+				<li>
+					<a href="../modules/http_httpserver.html">http/HttpServer</a>
+				</li>
+				<li>
+					<a href="http_httpserver.httpserver.html">HttpServer</a>
+				</li>
+			</ul>
+			<h1>Class HttpServer</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A <code>Server</code> for the HTTP transport.</p>
+					</div>
+					<p>This server class performs JSON-RPC over HTTP.</p>
+					<p>For the <code>POST /</code> route, the request body should be
+						a JSON-RPC request. The response body will be
+					a JSON-RPC response.</p>
+					<p>For the <code>POST /&lt;method&gt;</code> routes, the request body should
+						correspond to the <code>params</code> property of a JSON-RPC request.
+						The response body corresponds to the <code>result</code> property of
+						a JSON-RPC response for <code>200 OK</code> responses and the <code>error</code>
+					property otherwise.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="tcp_tcpserver.tcpserver.html" class="tsd-signature-type" data-tsd-kind="Class">TcpServer</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">HttpServer</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><a href="http_httpserver.httpserver.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="http_httpserver.httpserver.html#address" class="tsd-kind-icon">address</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><a href="http_httpserver.httpserver.html#app" class="tsd-kind-icon">app</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#connections" class="tsd-kind-icon">connections</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#executor" class="tsd-kind-icon">executor</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="http_httpserver.httpserver.html#jwtsecret" class="tsd-kind-icon">jwt<wbr>Secret</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#server" class="tsd-kind-icon">server</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="http_httpserver.httpserver.html#addresses" class="tsd-kind-icon">addresses</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="http_httpserver.httpserver.html#buildapp" class="tsd-kind-icon">build<wbr>App</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="http_httpserver.httpserver.html#errorhandler" class="tsd-kind-icon">error<wbr>Handler</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="http_httpserver.httpserver.html#listeningaddress" class="tsd-kind-icon">listening<wbr>Address</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="http_httpserver.httpserver.html#notfoundhandler" class="tsd-kind-icon">not<wbr>Found<wbr>Handler</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="http_httpserver.httpserver.html#notify" class="tsd-kind-icon">notify</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#onconnected" class="tsd-kind-icon">on<wbr>Connected</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#ondisconnected" class="tsd-kind-icon">on<wbr>Disconnected</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><a href="http_httpserver.httpserver.html#onrequest" class="tsd-kind-icon">on<wbr>Request</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="http_httpserver.httpserver.html#receive" class="tsd-kind-icon">receive</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="http_httpserver.httpserver.html#start" class="tsd-kind-icon">start</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="http_httpserver.httpserver.html#stop" class="tsd-kind-icon">stop</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Http<wbr>Server<span class="tsd-signature-symbol">(</span>address<span class="tsd-signature-symbol">?: </span><a href="../modules/base_transports.html#httpaddressinitializer" class="tsd-signature-type" data-tsd-kind="Type alias">HttpAddressInitializer</a>, jwtSecret<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="http_httpserver.httpserver.html" class="tsd-signature-type" data-tsd-kind="Class">HttpServer</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#constructor">constructor</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L62">src/http/HttpServer.ts:62</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>address: <a href="../modules/base_transports.html#httpaddressinitializer" class="tsd-signature-type" data-tsd-kind="Type alias">HttpAddressInitializer</a><span class="tsd-signature-symbol"> = ...</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> jwtSecret: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="http_httpserver.httpserver.html" class="tsd-signature-type" data-tsd-kind="Class">HttpServer</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="address" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> address</h3>
+					<div class="tsd-signature tsd-kind-icon">address<span class="tsd-signature-symbol">:</span> <a href="base_transports.tcpaddress.html" class="tsd-signature-type" data-tsd-kind="Class">TcpAddress</a><span class="tsd-signature-symbol"> | </span><a href="base_transports.httpaddress.html" class="tsd-signature-type" data-tsd-kind="Class">HttpAddress</a><span class="tsd-signature-symbol"> | </span><a href="base_transports.websocketaddress.html" class="tsd-signature-type" data-tsd-kind="Class">WebSocketAddress</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#address">address</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L81">src/tcp/TcpServer.ts:81</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The address of this server.</p>
+						</div>
+						<p>Can be a <code>TcpAddress</code>, or one of the address types
+						derived from it.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+					<a name="app" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> <span class="tsd-flag ts-flagOptional">Optional</span> app</h3>
+					<div class="tsd-signature tsd-kind-icon">app<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">FastifyInstance</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">FastifyLoggerInstance</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L53">src/http/HttpServer.ts:53</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The Fastify application.</p>
+						</div>
+						<p>Used by derived classes to add routes.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="connections" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> connections</h3>
+					<div class="tsd-signature tsd-kind-icon">connections<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = ...</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#connections">connections</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L85">src/tcp/TcpServer.ts:85</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-index-signature">
+								<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../interfaces/base_connection.connection.html" class="tsd-signature-type" data-tsd-kind="Interface">Connection</a></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="executor" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> <span class="tsd-flag ts-flagOptional">Optional</span> executor</h3>
+					<div class="tsd-signature tsd-kind-icon">executor<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><a href="base_executor.executor.html" class="tsd-signature-type" data-tsd-kind="Class">Executor</a></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#executor">executor</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/base/Server.ts#L25">src/base/Server.ts:25</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The executor that this server dispatches to.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="jwtsecret" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagReadonly">Readonly</span> jwt<wbr>Secret</h3>
+					<div class="tsd-signature tsd-kind-icon">jwt<wbr>Secret<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L62">src/http/HttpServer.ts:62</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The secret used to decode JWT tokens.</p>
+						</div>
+						<p>If this is not provided to the constructor
+							then a random secret will be generated and
+						logged for use in generating tokens.</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="server" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> <span class="tsd-flag ts-flagOptional">Optional</span> server</h3>
+					<div class="tsd-signature tsd-kind-icon">server<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Server</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#server">server</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L83">src/tcp/TcpServer.ts:83</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="addresses" class="tsd-anchor"></a>
+					<h3>addresses</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">addresses<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/base_transports.addresses.html" class="tsd-signature-type" data-tsd-kind="Interface">Addresses</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#addresses">addresses</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L81">src/http/HttpServer.ts:81</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>override</dt>
+									<dd><p>Overrides <a href="tcp_tcpserver.tcpserver.html#addresses">TcpServer.addresses</a>
+										to provide a HTTP entry.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/base_transports.addresses.html" class="tsd-signature-type" data-tsd-kind="Interface">Addresses</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="buildapp" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> build<wbr>App</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">build<wbr>App<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">FastifyInstance</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">FastifyLoggerInstance</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L93">src/http/HttpServer.ts:93</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Build the Fastify app.</p>
+								</div>
+								<p>Derived classes may want to override this method
+								to extend the set of endpoints etc.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">FastifyInstance</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">FastifyLoggerInstance</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="errorhandler" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> error<wbr>Handler</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">error<wbr>Handler<span class="tsd-signature-symbol">(</span>error<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyError</span>, request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span>, reply<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L252">src/http/HttpServer.ts:252</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Custom error handler to return a JSON-RPC response
+									with an <code>error</code> property.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>error: <span class="tsd-signature-type">FastifyError</span></h5>
+								</li>
+								<li>
+									<h5>request: <span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>reply: <span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="listeningaddress" class="tsd-anchor"></a>
+					<h3>listening<wbr>Address</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">listening<wbr>Address<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#listeningaddress">listeningAddress</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L110">src/tcp/TcpServer.ts:110</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Generate the IP address and port number that this server should
+									use for listening.</p>
+								</div>
+								<p>Translates <code>this.address</code>, which is an &quot;advertised&quot; address
+									into a &quot;listening&quot; address. Assumes that this process is not
+									running as a privileged user so overrides any use, implied or
+								otherwise, of a privileged port.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="notfoundhandler" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> not<wbr>Found<wbr>Handler</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">not<wbr>Found<wbr>Handler<span class="tsd-signature-symbol">(</span>request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span>, reply<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L234">src/http/HttpServer.ts:234</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Custom 404 handler which returns a JSON-RPC error
+										(not wrapped in a JSON-RPC response) intended as a reply
+									to wrong RESTful-like routes e.g. <code>/exec</code> instead of <code>/execute</code></p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>request: <span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>reply: <span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="notify" class="tsd-anchor"></a>
+					<h3>notify</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">notify<span class="tsd-signature-symbol">(</span>level<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, message<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, node<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Entity</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span>, clients<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#notify">notify</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L165">src/tcp/TcpServer.ts:165</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>override</dt>
+									<dd><p>Override of <a href="base_server.server.html#notify">Server.notify</a> that notifies clients
+											via this server&#39;s stored <code>Connection</code> instances. If the <code>clients</code>
+										argument is not supplied then notifies all clients.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>level: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>message: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> node: <span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">Entity</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{}</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> clients: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="onconnected" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> on<wbr>Connected</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">on<wbr>Connected<span class="tsd-signature-symbol">(</span>connection<span class="tsd-signature-symbol">: </span><a href="../interfaces/base_connection.connection.html" class="tsd-signature-type" data-tsd-kind="Interface">Connection</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#onconnected">onConnected</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L125">src/tcp/TcpServer.ts:125</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>connection: <a href="../interfaces/base_connection.connection.html" class="tsd-signature-type" data-tsd-kind="Interface">Connection</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="ondisconnected" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> on<wbr>Disconnected</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">on<wbr>Disconnected<span class="tsd-signature-symbol">(</span>connection<span class="tsd-signature-symbol">: </span><a href="../interfaces/base_connection.connection.html" class="tsd-signature-type" data-tsd-kind="Interface">Connection</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#ondisconnected">onDisconnected</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/tcp/TcpServer.ts#L130">src/tcp/TcpServer.ts:130</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>connection: <a href="../interfaces/base_connection.connection.html" class="tsd-signature-type" data-tsd-kind="Interface">Connection</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+					<a name="onrequest" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> on<wbr>Request</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">on<wbr>Request<span class="tsd-signature-symbol">(</span>request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span>, reply<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L198">src/http/HttpServer.ts:198</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Hook that performs JWT verification on each request</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>request: <span class="tsd-signature-type">FastifyRequest</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>reply: <span class="tsd-signature-type">FastifyReply</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Server</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">ServerResponse</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">RouteGenericInterface</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">unknown</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="receive" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> receive</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">receive<span class="tsd-signature-symbol">(</span>request<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="base_jsonrpcrequest.jsonrpcrequest.html" class="tsd-signature-type" data-tsd-kind="Class">JsonRpcRequest</a>, claims<span class="tsd-signature-symbol">?: </span><a href="../interfaces/base_executor.claims.html" class="tsd-signature-type" data-tsd-kind="Interface">Claims</a>, stringify<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="base_jsonrpcresponse.jsonrpcresponse.html" class="tsd-signature-type" data-tsd-kind="Class">JsonRpcResponse</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#receive">receive</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/base/Server.ts#L70">src/base/Server.ts:70</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Receive a request or notification</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>request: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="base_jsonrpcrequest.jsonrpcrequest.html" class="tsd-signature-type" data-tsd-kind="Class">JsonRpcRequest</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A JSON-RPC request from a client</p>
+									</div>
+								</li>
+								<li>
+									<h5>claims: <a href="../interfaces/base_executor.claims.html" class="tsd-signature-type" data-tsd-kind="Interface">Claims</a><span class="tsd-signature-symbol"> = ...</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>An object representing the claims for the request,
+										usually a from a JWT payload</p>
+									</div>
+								</li>
+								<li>
+									<h5>stringify: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>Should the response be stringified?</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol"> | </span><a href="base_jsonrpcresponse.jsonrpcresponse.html" class="tsd-signature-type" data-tsd-kind="Class">JsonRpcResponse</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>If receiving a request then a JSON-RPC response as an
+								object or string (default).
+							If receiving a notification then nothing is returned.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="start" class="tsd-anchor"></a>
+					<h3>start</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">start<span class="tsd-signature-symbol">(</span>executor<span class="tsd-signature-symbol">: </span><a href="base_executor.executor.html" class="tsd-signature-type" data-tsd-kind="Class">Executor</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#start">start</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L268">src/http/HttpServer.ts:268</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>executor: <a href="base_executor.executor.html" class="tsd-signature-type" data-tsd-kind="Class">Executor</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="stop" class="tsd-anchor"></a>
+					<h3>stop</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">stop<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="tcp_tcpserver.tcpserver.html">TcpServer</a>.<a href="tcp_tcpserver.tcpserver.html#stop">stop</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/stencila/executa/blob/53ec0a6/src/http/HttpServer.ts#L286">src/http/HttpServer.ts:286</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<dl class="tsd-comment-tags">
+									<dt>override</dt>
+									<dd><p>Overrides <a href="tcp_tcpserver.tcpserver.html#stop">TcpServer.stop</a> to close
+										Fastify app.</p>
+									</dd>
+								</dl>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/http_httpserver.html">http/<wbr>Http<wbr>Server</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="http_httpserver.httpserver.html" class="tsd-kind-icon">Http<wbr>Server</a>
+						<ul>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited">
+								<a href="http_httpserver.httpserver.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="http_httpserver.httpserver.html#address" class="tsd-kind-icon">address</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#app" class="tsd-kind-icon">app</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#connections" class="tsd-kind-icon">connections</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#executor" class="tsd-kind-icon">executor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="http_httpserver.httpserver.html#jwtsecret" class="tsd-kind-icon">jwt<wbr>Secret</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#server" class="tsd-kind-icon">server</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="http_httpserver.httpserver.html#addresses" class="tsd-kind-icon">addresses</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#buildapp" class="tsd-kind-icon">build<wbr>App</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#errorhandler" class="tsd-kind-icon">error<wbr>Handler</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="http_httpserver.httpserver.html#listeningaddress" class="tsd-kind-icon">listening<wbr>Address</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#notfoundhandler" class="tsd-kind-icon">not<wbr>Found<wbr>Handler</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="http_httpserver.httpserver.html#notify" class="tsd-kind-icon">notify</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#onconnected" class="tsd-kind-icon">on<wbr>Connected</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#ondisconnected" class="tsd-kind-icon">on<wbr>Disconnected</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#onrequest" class="tsd-kind-icon">on<wbr>Request</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="http_httpserver.httpserver.html#receive" class="tsd-kind-icon">receive</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="http_httpserver.httpserver.html#start" class="tsd-kind-icon">start</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="http_httpserver.httpserver.html#stop" class="tsd-kind-icon">stop</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+</body>
+</html>
