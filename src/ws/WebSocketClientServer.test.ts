@@ -12,7 +12,7 @@ import { Worker } from '../base/Worker'
 // During these tests it is necessary to wait for servers to start
 // and messages to get passed etc. Wait longer on CI to avoid
 // unnecessary failures.
-const delayMilliseconds = process.env.CI !== undefined ? 100 : 25
+const delayMilliseconds = process.env.CI !== undefined ? 250 : 25
 
 let server: WebSocketServer
 let serverLogs: LogData[] = []
