@@ -1,3 +1,12 @@
+## [1.15.7](https://github.com/stencila/executa/compare/v1.15.6...v1.15.7) (2021-01-27)
+
+
+### Bug Fixes
+
+* **dependencies:** update dependency @stencila/logga to v4 ([958bdb6](https://github.com/stencila/executa/commit/958bdb6d56ad634192c54cbba75262667381c4ed))
+* **dependencies:** update dependency @stencila/schema to v1 ([0307b8f](https://github.com/stencila/executa/commit/0307b8fcf2ca95606629eaf51e4c8e529d4d2481))
+* **WS:** Fix WebSocket reconnect logic ([85999f7](https://github.com/stencila/executa/commit/85999f754b15ff03b094b3c686906b3d04a78b49))
+
 ## [1.15.6](https://github.com/stencila/executa/compare/v1.15.5...v1.15.6) (2020-12-23)
 
 
