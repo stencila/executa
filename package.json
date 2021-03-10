@@ -40,7 +40,7 @@
     "@babel/preset-typescript": "7.13.0",
     "@rollup/plugin-alias": "3.1.2",
     "@rollup/plugin-replace": "2.4.1",
-    "@stencila/dev-config": "1.4.131",
+    "@stencila/dev-config": "2.0.7",
     "@types/jest": "26.0.20",
     "@types/jmespath": "0.15.0",
     "@types/json-schema": "7.0.7",
