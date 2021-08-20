@@ -71,9 +71,7 @@ export function generate<Family extends string>(code: Family): Id<Family> {
  *
  * Extracts the parts from the identifier: `family`, `time` and `rand`.
  */
-export function parse(
-  id: string
-):
+export function parse(id: string):
   | {
       family: string
       time: Date

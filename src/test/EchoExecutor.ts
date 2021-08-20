@@ -11,6 +11,6 @@ export class EchoExecutor extends Worker {
   begin<Type extends schema.Node>(node: Type, claims?: Claims): Promise<Type> {
     // This intentionally breaks contract to return the same node
     // type as received
-    return Promise.resolve(({ node, claims } as unknown) as Type)
+    return Promise.resolve({ node, claims } as unknown as Type)
   }
 }

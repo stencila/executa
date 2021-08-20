@@ -143,18 +143,19 @@ export class PipeClient extends StreamClient {
     if (pipes.length === 0) return Promise.resolve([])
 
     log.debug(`Found pipes: ${pipes.join(', ')}`)
-    return pipes.reduce(async (prev: Promise<PipeClient[]>, incoming): Promise<
-      PipeClient[]
-    > => {
-      const address = incoming.replace(/\.in$/, '')
-      const client = new PipeClient(address)
-      try {
-        await client.manifest()
-        return [...(await prev), client]
-      } catch (error) {
-        log.warn(`Unable to connect to server, ignoring: ${incoming}`)
-        return prev
-      }
-    }, Promise.resolve([]))
+    return pipes.reduce(
+      async (prev: Promise<PipeClient[]>, incoming): Promise<PipeClient[]> => {
+        const address = incoming.replace(/\.in$/, '')
+        const client = new PipeClient(address)
+        try {
+          await client.manifest()
+          return [...(await prev), client]
+        } catch (error) {
+          log.warn(`Unable to connect to server, ignoring: ${incoming}`)
+          return prev
+        }
+      },
+      Promise.resolve([])
+    )
   }
 }
