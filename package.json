@@ -81,7 +81,7 @@
     "fastify": "^3.9.2",
     "fastify-cors": "^5.1.0",
     "fastify-jwt": "^2.2.0",
-    "fastify-static": "^3.3.0",
+    "fastify-static": "^4.2.4",
     "globby": "^11.0.1",
     "historic-readline": "^1.0.8",
     "isomorphic-ws": "^4.0.1",
