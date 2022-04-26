@@ -85,7 +85,7 @@
     "globby": "^11.0.1",
     "historic-readline": "^1.0.8",
     "isomorphic-ws": "^4.0.1",
-    "jmespath": "^0.15.0",
+    "jmespath": "^0.16.0",
     "length-prefixed-stream": "^2.0.0",
     "mkdirp": "^1.0.4",
     "nanoid": "^3.1.20",
