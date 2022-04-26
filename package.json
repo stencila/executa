@@ -39,7 +39,7 @@
   "devDependencies": {
     "@babel/preset-typescript": "7.16.7",
     "@rollup/plugin-alias": "3.1.9",
-    "@rollup/plugin-replace": "2.4.2",
+    "@rollup/plugin-replace": "4.0.0",
     "@stencila/dev-config": "2.0.27",
     "@types/jest": "26.0.24",
     "@types/jmespath": "0.15.0",
