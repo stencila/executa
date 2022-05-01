@@ -72,7 +72,7 @@
     "@stencila/configa": "^0.4.8",
     "@stencila/logga": "^4.0.0",
     "@stencila/schema": "^1.0.0",
-    "@types/ws": "^7.4.0",
+    "@types/ws": "^8.0.0",
     "ajv": "^6.12.6",
     "chalk": "^4.1.0",
     "cli-highlight": "^2.1.9",
@@ -92,7 +92,7 @@
     "ora": "^5.1.0",
     "p-retry": "^4.2.0",
     "split2": "^3.2.2",
-    "ws": "^7.4.1"
+    "ws": "^8.0.0"
   },
   "prettier": "@stencila/dev-config/prettier-config.json",
   "commitlint": {
