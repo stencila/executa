@@ -78,7 +78,7 @@
     "cli-highlight": "^2.1.9",
     "cross-fetch": "^3.0.6",
     "external-ip": "^2.3.1",
-    "fastify": "^3.9.2",
+    "fastify": "^5.0.0",
     "fastify-cors": "^5.1.0",
     "fastify-jwt": "^2.2.0",
     "fastify-static": "^3.3.0",
